@@ -173,7 +173,8 @@ static bool is_theme_color(
             || pixel == theme->sprite_color
             || pixel == theme->flag_color
             || pixel == theme->warning_background_color
-            || pixel == theme->warning_text_color;
+            || pixel == theme->warning_text_color
+            || pixel == theme->warning_strike_color;
 }
 
 static void test_pixel_fonts_render_only_theme_colors(void) {
@@ -438,6 +439,11 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
                     255,
                     255,
                     255);
+    theme.warning_strike_color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    0,
+                    0);
 
     wifi_warning.wifi_connected = false;
     disconnected.wifi_connected = false;
@@ -471,19 +477,19 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
             matrix_framebuffer_get(
                     &connected_frame,
                     132,
-                    1)
+                    0)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &wifi_frame,
                     123,
-                    1)
+                    0)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
                     113,
-                    1)
+                    0)
             == theme.flag_color);
 
     /*
@@ -494,33 +500,46 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
             matrix_framebuffer_get(
                     &wifi_frame,
                     151,
-                    1)
+                    0)
             == theme.warning_background_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
                     141,
-                    1)
+                    0)
             == theme.warning_background_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
                     151,
-                    1)
+                    0)
             == theme.warning_background_color);
 
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    143,
-                    2)
+                    144,
+                    1)
             == theme.warning_text_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
                     155,
-                    2)
+                    1)
             == theme.warning_text_color);
+
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
+                    142,
+                    1)
+            == theme.warning_strike_color);
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
+                    152,
+                    1)
+            == theme.warning_strike_color);
 }
 
 static void test_runner_and_warmup_animate_in_their_status_columns(void) {
