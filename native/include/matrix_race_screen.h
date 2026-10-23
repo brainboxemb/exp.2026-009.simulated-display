@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 
-#define MATRIX_RACE_LEFT_ROW_COUNT 4u
+#define MATRIX_RACE_LEFT_ROW_COUNT 5u
 #define MATRIX_RACE_RIGHT_ROW_COUNT 2u
 
 typedef enum {
