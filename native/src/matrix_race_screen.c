@@ -19,6 +19,12 @@
 #define HEADER_COUNTER_X 121
 #define HEADER_COUNTER_WIDTH 38
 
+#define FINISH_FLAG_X 123
+#define FINISH_FLAG_Y 2
+#define FINISH_FLAG_WIDTH 8u
+#define FINISH_FLAG_HEIGHT 7u
+#define FINISH_FLAG_FRAME_COUNT 4u
+
 #define LEFT_SPRITE_X 1
 #define LEFT_NUMBER_X 12
 #define LEFT_NUMBER_WIDTH 21
@@ -36,6 +42,87 @@
 static lv_display_t *display;
 static MatrixFramebuffer *active_framebuffer;
 static bool lvgl_initialized;
+
+/*
+ * Small checkered finish flag shown next to the finished-team counter.
+ * There is deliberately no pole: only the cloth is visible. The transparent
+ * checker cells show the screen background; four shapes give the trailing
+ * edge a restrained waving motion.
+ */
+static const uint8_t FINISH_FLAG[
+        FINISH_FLAG_FRAME_COUNT][FINISH_FLAG_HEIGHT] = {
+    {
+        0xaa,
+        0x55,
+        0xaa,
+        0x55,
+        0xaa,
+        0x54,
+        0xa8
+    },
+    {
+        0x54,
+        0xaa,
+        0x55,
+        0xaa,
+        0x55,
+        0xa8,
+        0x50
+    },
+    {
+        0xa8,
+        0x54,
+        0xaa,
+        0x55,
+        0xaa,
+        0x50,
+        0xa0
+    },
+    {
+        0x54,
+        0xa8,
+        0x54,
+        0xaa,
+        0x55,
+        0xa0,
+        0x40
+    }
+};
+
+static void draw_finish_flag(
+        MatrixFramebuffer *framebuffer,
+        uint8_t frame,
+        MatrixPixel color) {
+    const uint8_t *rows =
+            FINISH_FLAG[
+                    frame
+                    % FINISH_FLAG_FRAME_COUNT];
+
+    for (uint16_t row = 0;
+            row < FINISH_FLAG_HEIGHT;
+            row++) {
+        for (uint16_t column = 0;
+                column < FINISH_FLAG_WIDTH;
+                column++) {
+            const uint8_t mask =
+                    (uint8_t)(
+                            1u
+                            << (FINISH_FLAG_WIDTH
+                                    - 1u
+                                    - column));
+
+            if ((rows[row] & mask) == 0) {
+                continue;
+            }
+
+            matrix_framebuffer_set(
+                    framebuffer,
+                    (uint16_t)(FINISH_FLAG_X + column),
+                    (uint16_t)(FINISH_FLAG_Y + row),
+                    color);
+        }
+    }
+}
 
 static lv_color_t lv_color_from_pixel(MatrixPixel pixel) {
     const uint8_t red =
@@ -326,6 +413,11 @@ bool matrix_race_screen_render(
 
     lv_obj_invalidate(screen);
     lv_refr_now(display);
+
+    draw_finish_flag(
+            framebuffer,
+            (uint8_t)(animation_frame / 2u),
+            theme->sprite_color);
 
     matrix_sprite_draw(
             framebuffer,
