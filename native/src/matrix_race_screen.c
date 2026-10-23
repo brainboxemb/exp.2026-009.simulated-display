@@ -92,7 +92,7 @@ static const uint16_t FINISH_FLAG[
         0x0cc,
         0x0c3
     }
-}
+};
 
 static void draw_finish_flag(
         MatrixFramebuffer *framebuffer,
