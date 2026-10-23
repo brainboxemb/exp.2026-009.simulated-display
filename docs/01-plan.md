@@ -24,7 +24,15 @@ Verify split/combined input buffers, invalid slash commands, clipping, cursor wr
 
 ## Stage 3 — HUB75 PoP
 
-Implement a 160×64 RGB logical framebuffer and a five-panel JavaFX view. Design synchronized data input; evaluate a small C renderer against LVGL on a representative layout. Investigate an Arduino-free ESP-IDF HUB75 driver and panel mapping.
+- [x] split native code into explicit `legacy-display` and `matrix-display` libraries;
+- [x] add a 160×64 RGB565 logical framebuffer with C tests;
+- [ ] add a matrix-native host process and RGB JavaFX view;
+- [ ] design the synchronized application-data input model;
+- [ ] implement the matrix interpreter / renderer;
+- [ ] evaluate a small C renderer against LVGL on a representative layout;
+- [ ] investigate an Arduino-free ESP-IDF HUB75 driver and panel mapping.
+
+The five-panel physical topology belongs at the hardware adapter boundary and is not encoded in the logical 160×64 framebuffer.
 
 ## Stage 4 — ESP32 qualification
 

@@ -1,13 +1,32 @@
 # Initial architecture and design decisions
 
+## Native library boundaries
+
+The two displays are intentionally separate C libraries because they have different pixel models and different input semantics:
+
+```text
+legacy-display
+  90x35
+  bit-packed monochrome
+  legacy serial/slash protocol
+  custom characters / sprites / digit bitmaps
+
+matrix-display
+  160x64
+  RGB565 logical framebuffer
+  synchronized application data interpreter (next step)
+  no physical HUB75 panel topology
+```
+
+The libraries should only share a third component when genuinely generic code appears. The framebuffer is deliberately **not** shared: forcing monochrome bit-packing and RGB565 into one abstraction would make both APIs less explicit.
+
 ## Ownership boundaries
 
-- **Serial LCD parser (C):** consumes arbitrary byte chunks and maintains command state across calls.
-- **LCD renderer (C):** owns the custom character map, sprite appearances, large digit bitmaps and text cursor.
-- **Framebuffer (C):** owns logical monochrome pixels; the current 90×35 representation is bit-packed.
-- **Host runtime (C):** adapts framed stdin requests to serial chunks and emits complete logical frames.
-- **JavaFX 21:** starts the host process, supplies development controls and paints returned pixels. It owns no font/protocol behavior.
-- **HUB75 interpreter (future C):** will consume synchronized application data through a separate model rather than pretending HUB75 uses the serial LCD protocol.
+- **legacy-display (C):** owns the 90×35 serial parser, custom character map, sprites, large digit bitmaps and bit-packed monochrome framebuffer.
+- **matrix-display (C):** owns the 160×64 RGB565 logical framebuffer and will own the synchronized-data interpreter.
+- **Host runtime (C):** adapts desktop process framing to one display library and emits logical frames.
+- **JavaFX 21:** starts native host processes, supplies development controls and paints returned logical pixels. It owns no display protocol or font behavior.
+- **HUB75 hardware adapter (future):** maps the 160×64 logical framebuffer to five physical panels, scan order and multiplexing.
 - **ESP32 / ESP-IDF (future):** platform adapter / hardware driver only. A narrow C bridge may hide a C++ HUB75 driver if needed.
 
 ## Process boundary
@@ -50,8 +69,14 @@ Chosen for the first slice:
 - C-owned legacy custom character map for codes 31..255 plus `SpriteMap1`;
 - Java 21 / JavaFX 21 / Maven for NetBeans.
 
+Chosen for the matrix foundation:
+
+- logical geometry is 160×64;
+- framebuffer format is RGB565 (`uint16_t`, 20,480 bytes);
+- physical five-panel layout is outside the framebuffer API.
+
 Still open:
 
-- HUB75 pixel format (RGB565 is the first candidate);
+- synchronized application-data message model;
 - LVGL versus a small native renderer for the synchronized HUB75 application;
 - ESP32 variant, HUB75 driver, scan pattern, brightness and memory strategy.

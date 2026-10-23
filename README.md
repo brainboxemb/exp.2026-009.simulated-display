@@ -39,7 +39,14 @@ JavaFX red LED matrix
 
 JavaFX does not interpret display commands or rasterize characters. It launches the native process, sends raw serial chunks and paints the pixels returned by C.
 
-The portable C core has no Java, JavaFX, libuv, ESP-IDF or Arduino dependency.
+The native side now has two explicit libraries:
+
+- `legacy-display`: 90×35 bit-packed monochrome plus legacy protocol/renderer;
+- `matrix-display`: 160×64 RGB565 logical framebuffer foundation.
+
+The matrix framebuffer is intentionally independent of the five-panel physical HUB75 topology. Panel order, scan pattern and multiplexing belong in the later hardware adapter.
+
+Neither native library depends on Java, JavaFX, libuv, ESP-IDF or Arduino.
 
 ## Build and run
 
