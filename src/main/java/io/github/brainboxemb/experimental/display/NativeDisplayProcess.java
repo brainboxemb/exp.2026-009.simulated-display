@@ -72,7 +72,7 @@ final class NativeDisplayProcess implements AutoCloseable {
                 Executors.newSingleThreadScheduledExecutor(
                         runnable ->
                                 Thread.ofPlatform()
-                                        .name("display-animation-clock")
+                                        .name("display-general-timer-clock")
                                         .daemon(true)
                                         .unstarted(runnable));
 
@@ -112,7 +112,7 @@ final class NativeDisplayProcess implements AutoCloseable {
         }
 
         try {
-            sendAnimationTick();
+            sendGeneralTimerTick();
         } catch (IOException exception) {
             if (process.isAlive()) {
                 errorConsumer.accept(
