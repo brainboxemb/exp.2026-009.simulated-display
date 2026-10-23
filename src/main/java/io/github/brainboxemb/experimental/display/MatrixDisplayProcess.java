@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 final class MatrixDisplayProcess implements AutoCloseable {
 
     private static final byte[] MAGIC = {'S', 'D', 'F', '2'};
-    private static final int REQUEST_TEST_PATTERN = 0;
+    private static final int REQUEST_DEMO_SCREEN = 0;
     private static final int REQUEST_CLEAR = 1;
     private static final int MAX_PIXELS = 1_000_000;
 
@@ -60,7 +60,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
                 });
     }
 
-    synchronized void requestTestPattern()
+    synchronized void requestDemoScreen()
             throws IOException {
         sendRequest(REQUEST_TEST_PATTERN);
     }

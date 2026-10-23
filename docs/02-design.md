@@ -50,7 +50,9 @@ This keeps the native code executable and testable by itself, avoids a Java/nati
 
 At 90×35, an unpacked output frame is only 3150 bytes. Full frames are therefore preferable to premature dirty-rectangle complexity in the first slice.
 
-The 160×64 matrix PoP uses a second desktop host. It emits `SDF2` frames containing big-endian RGB565 pixels. Its current Clear/Test Pattern requests are host-only qualification controls; they are deliberately not presented as the future synchronized application-data protocol.
+The 160×64 matrix PoP uses a second desktop host. It emits `SDF2` frames containing big-endian RGB565 pixels. The current Clear/Demo Screen requests are host-only qualification controls; they are deliberately not presented as the future synchronized application-data protocol.
+
+LVGL v9.6.0 is internal to `matrix-display`. Public screen data and theme structures do not expose LVGL types. The first screen uses a semantic `MatrixTheme`: background and line colors are independent, while header, row-number, row-time, large-value and footer text styles each select their own color, font family and font size.
 
 ## Experimental invariants
 
@@ -60,7 +62,7 @@ The 160×64 matrix PoP uses a second desktop host. It emits `SDF2` frames contai
 4. The 90×35 LED simulation uses red pixels on black and deliberately follows the target display geometry.
 5. HUB75 physical panel order belongs at the hardware/output boundary, not in the 160×64 logical application framebuffer.
 6. No Arduino dependency in the application core.
-7. Add libuv or LVGL only when a measured/representative requirement justifies them.
+7. LVGL is used only by the 160×64 matrix renderer; the legacy 90×35 path remains independent.
 
 ## Qualified vs open decisions
 
@@ -80,5 +82,4 @@ Chosen for the matrix foundation:
 Still open:
 
 - synchronized application-data message model;
-- LVGL versus a small native renderer for the synchronized HUB75 application;
 - ESP32 variant, HUB75 driver, scan pattern, brightness and memory strategy.

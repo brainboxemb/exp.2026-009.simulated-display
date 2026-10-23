@@ -36,15 +36,15 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new Label(
                         "Starting native matrix display...");
 
-        Button testPattern =
-                new Button("Test pattern");
+        Button demoScreen =
+                new Button("Demo screen");
         Button clear =
                 new Button("Clear");
 
         HBox controls =
                 new HBox(
                         8,
-                        testPattern,
+                        demoScreen,
                         clear,
                         status);
         controls.setPadding(
@@ -69,15 +69,15 @@ final class MatrixDisplayWindow implements AutoCloseable {
                                                     + frame.width()
                                                     + "×"
                                                     + frame.height()
-                                                    + " RGB565");
+                                                    + " RGB565 / LVGL");
                                 }),
                         error -> Platform.runLater(
                                 () -> status.setText(
                                         "Matrix native error: "
                                                 + error)));
 
-        testPattern.setOnAction(
-                event -> sendTestPattern());
+        demoScreen.setOnAction(
+                event -> sendDemoScreen());
         clear.setOnAction(
                 event -> clear());
         stage.setOnHidden(
@@ -102,9 +102,9 @@ final class MatrixDisplayWindow implements AutoCloseable {
         process.close();
     }
 
-    private void sendTestPattern() {
+    private void sendDemoScreen() {
         try {
-            process.requestTestPattern();
+            process.requestDemoScreen();
         } catch (IOException exception) {
             status.setText(
                     "Matrix send failed: "

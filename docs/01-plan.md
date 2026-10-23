@@ -26,10 +26,11 @@ Verify split/combined input buffers, invalid slash commands, clipping, cursor wr
 
 - [x] split native code into explicit `legacy-display` and `matrix-display` libraries;
 - [x] add a 160×64 RGB565 logical framebuffer with C tests;
-- [x] add a matrix-native host process and RGB JavaFX view with a C-generated test pattern;
+- [x] add a matrix-native host process and RGB JavaFX view;
+- [x] integrate LVGL v9.6.0 for matrix text/layout rendering;
+- [x] render the first 160×64 race screen with configurable colors and font family/size;
 - [ ] design the synchronized application-data input model;
-- [ ] implement the matrix interpreter / renderer;
-- [ ] evaluate a small C renderer against LVGL on a representative layout;
+- [ ] implement the synchronized matrix-data interpreter;
 - [ ] investigate an Arduino-free ESP-IDF HUB75 driver and panel mapping.
 
 The five-panel physical topology belongs at the hardware adapter boundary and is not encoded in the logical 160×64 framebuffer.

@@ -42,9 +42,11 @@ JavaFX does not interpret display commands or rasterize characters. It launches 
 The native side now has two explicit libraries and two desktop host processes:
 
 - `legacy-display`: 90×35 bit-packed monochrome plus legacy protocol/renderer;
-- `matrix-display`: 160×64 RGB565 logical framebuffer foundation;
+- `matrix-display`: 160×64 RGB565 framebuffer plus LVGL-based screen rendering;
 - `display-host`: legacy 90×35 serial display host;
-- `matrix-display-host`: RGB565 matrix host used by the JavaFX matrix window.
+- `matrix-display-host`: RGB565/LVGL matrix host used by the JavaFX matrix window.
+
+The matrix demo now renders the first race-screen layout in C/LVGL rather than a color-bar test. Colors and font family/size are supplied through `MatrixTheme`. The first registry supports UNSCII 8/16 and Montserrat 8/10/12/14/16/18/20.
 
 The matrix framebuffer is intentionally independent of the five-panel physical HUB75 topology. Panel order, scan pattern and multiplexing belong in the later hardware adapter.
 
@@ -120,4 +122,4 @@ The C parser currently understands:
 
 `CharMap1`, `SpriteMap1` and `Bitmap_0..Bitmap_9` were imported from the supplied legacy data. `Bitmap_Batavieren` and the other unrelated legacy bitmaps were deliberately excluded.
 
-See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [protocol](docs/03-protocol.md) and [development setup](docs/04-development.md).
+See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [protocol](docs/03-protocol.md), [development setup](docs/04-development.md) and [matrix display design](docs/05-matrix-display.md).
