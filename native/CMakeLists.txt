@@ -74,6 +74,13 @@ list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
 list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
     "/src/osal/lv_(cmsis_rtos2|freertos|linux|mqx|pthread|rtthread|sdl2|windows)\\.c$")
 
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/stdlib/(builtin|micropython|rtthread|uefi)/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/logging/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/indev/lv_(gridnav|indev_gesture)\\.c$")
+
 set_property(
     TARGET lvgl
     PROPERTY SOURCES "${LVGL_MATRIX_SOURCES}")
