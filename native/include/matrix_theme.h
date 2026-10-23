@@ -27,6 +27,7 @@ typedef struct {
     MatrixPixel flag_color;
     MatrixPixel warning_background_color;
     MatrixPixel warning_text_color;
+    MatrixPixel warning_strike_color;
     MatrixTextStyle header;
     MatrixTextStyle row_number;
     MatrixTextStyle row_time;
