@@ -16,7 +16,7 @@
 #define HEADER_LOCATION_WIDTH 38
 #define HEADER_CLOCK_X 40
 #define HEADER_CLOCK_WIDTH 80
-#define FINISH_FLAG_Y 0
+#define FINISH_FLAG_Y 1
 #define FINISH_FLAG_WIDTH 7u
 #define FINISH_FLAG_HEIGHT 7u
 
@@ -76,27 +76,26 @@ static const uint8_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
 };
 
 /*
- * Registration server unavailable: two linked loops with the same diagonal
- * strike-through. The icon is intentionally a connection/link symbol rather
- * than a letter or server pictogram.
+ * Registration server unavailable: two open, staggered link shapes. Keeping
+ * the loops open avoids the small raster reading as the digit 8.
  */
 static const uint8_t WARNING_LINK[WARNING_GLYPH_HEIGHT] = {
+    0x38,
+    0x44,
+    0x40,
     0x1c,
-    0x22,
-    0x63,
-    0x3e,
-    0x63,
-    0x22,
-    0x1c
+    0x02,
+    0x11,
+    0x0e
 };
 
 static const uint8_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
-    0x40,
-    0x20,
-    0x10,
-    0x08,
-    0x04,
-    0x02,
+    0x60,
+    0x30,
+    0x18,
+    0x0c,
+    0x06,
+    0x03,
     0x01
 };
 
