@@ -49,6 +49,23 @@ final class SerialBytesTest {
     }
 
     @Test
+    void spriteVelocityUsesLegacyNvCommand() {
+        assertArrayEquals(
+                new byte[]{'/', 'N', 'V', '2'},
+                SerialBytes.spriteVelocity(2));
+    }
+
+    @Test
+    void spriteVelocityRejectsOutsideOneToNine() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> SerialBytes.spriteVelocity(0));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> SerialBytes.spriteVelocity(10));
+    }
+
+    @Test
     void protocolTextSupportsRawSpriteBytes() {
         assertArrayEquals(
                 new byte[]{

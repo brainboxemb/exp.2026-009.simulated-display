@@ -99,6 +99,33 @@ public final class SimulatedDisplayFxApplication extends Application {
         sprite.setOnAction(
                 event -> send(SerialBytes.sprite()));
 
+        TextField spriteVelocity =
+                new TextField("2");
+        spriteVelocity.setPrefColumnCount(2);
+
+        Button setSpriteVelocity =
+                new Button("Set");
+        setSpriteVelocity.setOnAction(event -> {
+            try {
+                int velocity =
+                        Integer.parseInt(
+                                spriteVelocity.getText());
+                send(
+                        SerialBytes.spriteVelocity(
+                                velocity));
+            } catch (IllegalArgumentException exception) {
+                status.setText(
+                        "Sprite velocity must be 1..9");
+            }
+        });
+
+        HBox spriteControls =
+                new HBox(
+                        8,
+                        new Label("Sprite velocity:"),
+                        spriteVelocity,
+                        setSpriteVelocity);
+
         HBox textControls =
                 new HBox(
                         8,
@@ -141,6 +168,7 @@ public final class SimulatedDisplayFxApplication extends Application {
                 new VBox(
                         8,
                         textControls,
+                        spriteControls,
                         protocolControls,
                         status);
         controls.setPadding(

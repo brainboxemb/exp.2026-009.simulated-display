@@ -19,12 +19,16 @@ final class NativeDisplayProcess implements AutoCloseable {
 
     private static final byte[] MAGIC = {'S', 'D', 'F', '1'};
     private static final int MAX_FRAME_PIXELS = 1_000_000;
-    private static final int ANIMATION_TICK_REQUEST = -1;
-    private static final long ANIMATION_TICK_MILLIS = 200;
+    private static final int GENERAL_TIMER_TICK_REQUEST = -1;
+    /*
+     * Timer1 normal mode at 921.6 kHz:
+     * 65536 counts / 921600 Hz = 71.111... ms.
+     */
+    private static final long GENERAL_TIMER_TICK_NANOS = 71_111_111L;
 
     private final Process process;
     private final DataOutputStream serialInput;
-    private final ScheduledExecutorService animationClock;
+    private final ScheduledExecutorService generalTimerClock;
 
     NativeDisplayProcess(
             Consumer<DisplayFrame> frameConsumer,
@@ -64,7 +68,7 @@ final class NativeDisplayProcess implements AutoCloseable {
                     }
                 });
 
-        animationClock =
+        generalTimerClock =
                 Executors.newSingleThreadScheduledExecutor(
                         runnable ->
                                 Thread.ofPlatform()
@@ -72,11 +76,11 @@ final class NativeDisplayProcess implements AutoCloseable {
                                         .daemon(true)
                                         .unstarted(runnable));
 
-        animationClock.scheduleAtFixedRate(
+        generalTimerClock.scheduleAtFixedRate(
                 () -> tick(errorConsumer),
-                ANIMATION_TICK_MILLIS,
-                ANIMATION_TICK_MILLIS,
-                TimeUnit.MILLISECONDS);
+                GENERAL_TIMER_TICK_NANOS,
+                GENERAL_TIMER_TICK_NANOS,
+                TimeUnit.NANOSECONDS);
     }
 
     synchronized void send(byte[] serialBytes) throws IOException {
@@ -87,7 +91,7 @@ final class NativeDisplayProcess implements AutoCloseable {
 
     @Override
     public void close() {
-        animationClock.shutdownNow();
+        generalTimerClock.shutdownNow();
 
         try {
             serialInput.close();
@@ -97,8 +101,8 @@ final class NativeDisplayProcess implements AutoCloseable {
         process.destroy();
     }
 
-    private synchronized void sendAnimationTick() throws IOException {
-        serialInput.writeInt(ANIMATION_TICK_REQUEST);
+    private synchronized void sendGeneralTimerTick() throws IOException {
+        serialInput.writeInt(GENERAL_TIMER_TICK_REQUEST);
         serialInput.flush();
     }
 
@@ -112,7 +116,7 @@ final class NativeDisplayProcess implements AutoCloseable {
         } catch (IOException exception) {
             if (process.isAlive()) {
                 errorConsumer.accept(
-                        "Animation clock: "
+                        "General timer clock: "
                                 + exception.getMessage());
             }
         }

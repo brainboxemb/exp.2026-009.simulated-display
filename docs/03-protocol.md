@@ -11,6 +11,7 @@ Ordinary character bytes are rendered through the C-owned custom character map. 
 | `/C?` | Clear framebuffer and reset cursor to `(0,0)`; the third byte is required and ignored |
 | `/Lyyxx` | Set cursor position with decimal `yy=00..34` and `xx=00..89` |
 | `/B0`..`/B9` | Draw one imported 13×18 digit bitmap at the current cursor position |
+| `/NVv` | Set sprite velocity, `v=1..9`; interval becomes `2*v` general-timer ticks |
 | `FE FE` | Place a sprite marker using the imported `SpriteMap1` data |
 | `CR` | Move to the next 8-pixel text row |
 | `BS` | Erase the previous rendered character cell and restore its cursor position |
@@ -75,7 +76,13 @@ The current simulator recognizes `FE FE` across input chunk boundaries and place
 
 The legacy display stores sprite metadata in bit 7. That bit is **not a visible eighth pixel row**. The simulator therefore renders only bits 0..6.
 
-After placement, a runtime animation tick calls the C core to update every existing sprite in place and advance the shared six-frame `SpriteMap1` sequence. The desktop PoP currently supplies one tick every **200 ms**. The supplied `Sprite.asm` shows relative velocity control (`/NVv`) but does not include the timer timebase needed to reproduce its exact millisecond rate, so 200 ms is an explicit simulator choice rather than a claim about the original hardware timing.
+After placement, the C core updates every existing sprite in place and advances the shared six-frame `SpriteMap1` sequence.
+
+The legacy `/NVv` command is implemented for `v=1..9`. As in the supplied firmware, the stored interval is `2*v` general-timer ticks. The firmware initialization sets `4<<1`, so the native display core starts at **v=4**.
+
+The old desktop control sheet starts its editable **Sprite velocity** field at **2**. JavaFX mirrors that visible start value, but it does not send `/NV2` automatically; the firmware-default v=4 remains active until **Set** is pressed.
+
+The supplied Timer1 initialization gives a Timer1 clock of 921.6 kHz in normal mode with prescaler 8. If the general timer advances once per 16-bit Timer1 overflow, one base tick is `65536 / 921600 = 71.111... ms`. The desktop runtime currently uses that **71.111 ms** base. This Timer1-overflow mapping should still be verified against the original ISR when that source is available.
 
 ## JavaFX protocol input
 
@@ -101,7 +108,7 @@ Java to native:
 uint32 big-endian byte_count
 byte[byte_count] serial_chunk
 
-byte_count = FFFFFFFF means: host-runtime animation tick (no serial payload)
+byte_count = FFFFFFFF means: host-runtime general-timer tick (no serial payload)
 ```
 
 Native to Java:

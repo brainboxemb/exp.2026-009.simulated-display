@@ -35,6 +35,20 @@ final class SerialBytes {
         return new byte[]{(byte) 0xfe, (byte) 0xfe};
     }
 
+    static byte[] spriteVelocity(int velocity) {
+        if (velocity < 1 || velocity > 9) {
+            throw new IllegalArgumentException(
+                    "sprite velocity must be 1..9");
+        }
+
+        return new byte[]{
+            '/',
+            'N',
+            'V',
+            (byte) ('0' + velocity)
+        };
+    }
+
     static byte[] parseProtocolText(String text) {
         ByteArrayOutputStream output =
                 new ByteArrayOutputStream();
