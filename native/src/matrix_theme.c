@@ -19,6 +19,7 @@ MatrixTheme matrix_theme_default_create(void) {
         .flag_color = white,
         .warning_background_color = blue,
         .warning_text_color = white,
+        .warning_strike_color = red,
         .header = {
             .font = {MATRIX_FONT_VBZ, 9},
             .color = red
