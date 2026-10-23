@@ -646,9 +646,9 @@ bool matrix_race_screen_render(
             36
         };
         static const int32_t overflow_right_row_y[] = {
-            13,
-            30,
-            47
+            14,
+            31,
+            48
         };
         const size_t visible_right_rows =
                 ready_overflow
@@ -776,9 +776,7 @@ bool matrix_race_screen_render(
                 MATRIX_SPRITE_WARMUP,
                 (uint8_t)(animation_frame / 2u),
                 MIXED_RIGHT_SPRITE_X,
-                ready_overflow
-                        ? 13u
-                        : 14u,
+                14u,
                 theme->sprite_color);
     }
 
