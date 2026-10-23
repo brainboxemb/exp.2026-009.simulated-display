@@ -46,6 +46,12 @@ Examples:
 
 All four characters must be decimal digits. Both coordinates are validated as one command. Invalid input leaves the cursor unchanged.
 
+## Command-letter note
+
+In the legacy dispatcher, **`B` selects predefined bitmap** and **`G` selects graph burst**. The old `Instruction.asm` contains a stale comment inside `GRAPHBURST` that says `/Bxxbbb`; that comment does not reflect the dispatcher mapping.
+
+Graph burst is not implemented in this PoP yet.
+
 ## Large digit bitmap
 
 ```text
