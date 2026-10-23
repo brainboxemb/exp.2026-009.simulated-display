@@ -9,7 +9,7 @@
 
 #define HEADER_LINE_Y 11
 #define HEADER_TEXT_Y -1
-#define MAIN_COLUMN_X 90
+#define MAIN_COLUMN_X 81
 #define FOOTER_LINE_Y 52
 
 #define HEADER_LOCATION_X 1
