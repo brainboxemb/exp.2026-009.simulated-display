@@ -296,6 +296,89 @@ static void test_vbz_9_and_10_render_as_distinct_pixel_fonts(void) {
 }
 
 
+
+static bool row_contains_color(
+        const MatrixFramebuffer *framebuffer,
+        uint16_t y,
+        MatrixPixel color,
+        uint16_t x_limit) {
+    for (uint16_t x = 0;
+            x < x_limit;
+            x++) {
+        if (matrix_framebuffer_get(
+                framebuffer,
+                x,
+                y)
+                == color) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static void test_vbz_header_and_footer_use_vertical_edges(void) {
+    MatrixFramebuffer framebuffer;
+    MatrixTheme theme =
+            matrix_theme_default_create();
+
+    const MatrixPixel header_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    255,
+                    0);
+    const MatrixPixel footer_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    0,
+                    255);
+
+    theme.header.font.family = MATRIX_FONT_VBZ;
+    theme.header.font.size = 9;
+    theme.footer.font.family = MATRIX_FONT_VBZ;
+    theme.footer.font.size = 9;
+    theme.header.color = header_color;
+    theme.footer.color = footer_color;
+
+    assert(
+            matrix_race_screen_render(
+                    &framebuffer,
+                    &SAMPLE,
+                    &theme));
+
+    assert(
+            row_contains_color(
+                    &framebuffer,
+                    0,
+                    header_color,
+                    MATRIX_DISPLAY_WIDTH));
+
+    assert(
+            !row_contains_color(
+                    &framebuffer,
+                    53,
+                    footer_color,
+                    90));
+    assert(
+            !row_contains_color(
+                    &framebuffer,
+                    54,
+                    footer_color,
+                    90));
+    assert(
+            row_contains_color(
+                    &framebuffer,
+                    55,
+                    footer_color,
+                    90));
+    assert(
+            row_contains_color(
+                    &framebuffer,
+                    63,
+                    footer_color,
+                    90));
+}
+
 static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
     lv_font_glyph_dsc_t glyph = {0};
 
@@ -369,6 +452,7 @@ int main(void) {
     test_pixel_fonts_render_only_theme_colors();
     test_vbz_metrics_match_source_font();
     test_vbz_zero_bitmap_matches_source_rows();
+    test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_vbz_9_and_10_render_as_distinct_pixel_fonts();
     test_unsupported_font_size_is_rejected();
