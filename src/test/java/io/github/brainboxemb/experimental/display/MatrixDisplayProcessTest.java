@@ -83,6 +83,34 @@ final class MatrixDisplayProcessTest {
             assertEquals(255, themed.green(0, 11));
             assertEquals(0, themed.blue(0, 11));
 
+            process.layout(0);
+
+            MatrixDisplayFrame registrations =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+
+            assertNotNull(
+                    registrations,
+                    "matrix host did not render registrations layout");
+            assertEquals(0, registrations.red(81, 51));
+            assertEquals(0, registrations.green(81, 51));
+            assertEquals(0, registrations.blue(81, 51));
+
+            process.layout(1);
+
+            MatrixDisplayFrame mixed =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+
+            assertNotNull(
+                    mixed,
+                    "matrix host did not restore mixed layout");
+            assertEquals(0, mixed.red(81, 51));
+            assertEquals(255, mixed.green(81, 51));
+            assertEquals(0, mixed.blue(81, 51));
+
             process.connectionStatus(
                     false,
                     false,
@@ -136,7 +164,7 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     restored,
                     "matrix host did not restore demo screen");
-            assertEquals(255, restored.green(90, 30));
+            assertEquals(255, restored.green(81, 30));
         }
     }
 }
