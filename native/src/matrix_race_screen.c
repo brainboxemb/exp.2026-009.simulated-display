@@ -8,7 +8,7 @@
 
 #define HEADER_LINE_Y 11
 #define MAIN_COLUMN_X 90
-#define FOOTER_LINE_Y 50
+#define FOOTER_LINE_Y 52
 
 #define HEADER_LOCATION_X 1
 #define HEADER_LOCATION_WIDTH 38
@@ -126,7 +126,7 @@ static void create_line(
             0);
 }
 
-static void create_label(
+static lv_obj_t *create_label(
         lv_obj_t *screen,
         const char *text,
         int32_t x,
@@ -152,6 +152,8 @@ static void create_label(
     lv_label_set_text(
             label,
             text != NULL ? text : "");
+
+    return label;
 }
 
 bool matrix_race_screen_render(
@@ -298,32 +300,24 @@ bool matrix_race_screen_render(
                 large_value_font);
     }
 
-    static const int32_t footer_x[] = {
-        0,
-        22,
-        45,
-        67
-    };
-    static const int32_t footer_width[] = {
-        22,
-        23,
-        22,
-        23
-    };
+    lv_obj_t *footer =
+            create_label(
+                    screen,
+                    data->footer,
+                    1,
+                    FOOTER_Y,
+                    MAIN_COLUMN_X - 2,
+                    LV_TEXT_ALIGN_LEFT,
+                    &theme->footer,
+                    footer_font);
 
-    for (size_t index = 0;
-            index < MATRIX_RACE_FOOTER_COUNT;
-            index++) {
-        create_label(
-                screen,
-                data->footer[index],
-                footer_x[index],
-                FOOTER_Y,
-                footer_width[index],
-                LV_TEXT_ALIGN_CENTER,
-                &theme->footer,
-                footer_font);
-    }
+    lv_obj_set_style_text_letter_space(
+            footer,
+            -1,
+            0);
+    lv_label_set_long_mode(
+            footer,
+            LV_LABEL_LONG_CLIP);
 
     lv_obj_invalidate(screen);
     lv_refr_now(display);
