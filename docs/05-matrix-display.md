@@ -83,8 +83,9 @@ legacy running motion is the current priority.
 The first ready-runner row starts immediately after the divider: x=81 is the
 separator itself and x=82 is the first usable pixel on the right. The first 10
 pixels there are reserved for the warmup sprite. With the 14px large numeric
-font, the first three-digit value starts immediately after that sprite at x=92
-in a 30-pixel field; the second value also has a 30-pixel field. Its body and legs stay fixed while the arms move
+font, the warmup sprite ends at x=91. Pixels x=92..93 remain empty, then the
+first three-digit ready-team number uses a 30-pixel field from x=94 and is
+right-aligned. The second value also has a 30-pixel field. Its body and legs stay fixed while the arms move
 through the stretch cycle; the warmup animation advances at half the runner
 rate.
 
