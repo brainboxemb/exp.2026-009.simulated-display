@@ -428,6 +428,10 @@ static void test_finish_flag_animates_before_counter(void) {
                     &theme,
                     2));
 
+    /*
+     * The first checker block stays fixed. A trailing-edge pixel changes
+     * between wave frames without moving the flag as a whole.
+     */
     assert(
             matrix_framebuffer_get(
                     &frame0,
@@ -436,23 +440,23 @@ static void test_finish_flag_animates_before_counter(void) {
             == theme.sprite_color);
     assert(
             matrix_framebuffer_get(
-                    &frame0,
-                    124,
+                    &frame2,
+                    123,
                     2)
-            != theme.sprite_color);
+            == theme.sprite_color);
 
     assert(
             matrix_framebuffer_get(
-                    &frame2,
-                    123,
+                    &frame0,
+                    132,
                     2)
-            != theme.sprite_color);
+            == theme.sprite_color);
     assert(
             matrix_framebuffer_get(
                     &frame2,
-                    124,
+                    132,
                     2)
-            == theme.sprite_color);
+            != theme.sprite_color);
 }
 
 static void test_runner_and_warmup_animate_in_their_status_columns(void) {
