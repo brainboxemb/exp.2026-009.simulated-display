@@ -147,7 +147,7 @@ static bool read_theme(MatrixTheme *theme) {
         return false;
     }
 
-    if (family > MATRIX_FONT_UNSCII) {
+    if (family > MATRIX_FONT_VBZ) {
         return false;
     }
 

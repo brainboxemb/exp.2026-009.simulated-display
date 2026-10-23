@@ -204,8 +204,9 @@ final class MatrixDisplayWindow implements AutoCloseable {
     }
 
     private void configureFontControls() {
-        fontFamily.getItems().add(
-                "UNSCII");
+        fontFamily.getItems().addAll(
+                "UNSCII",
+                "VBZ");
         fontFamily.setValue("UNSCII");
 
         refreshFontSizes();
@@ -215,10 +216,15 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
     private void refreshFontSizes() {
         List<Integer> sizes =
-                List.of(
-                        8,
-                        10,
-                        16);
+                "VBZ".equals(
+                        fontFamily.getValue())
+                        ? List.of(
+                                9,
+                                10)
+                        : List.of(
+                                8,
+                                10,
+                                16);
 
         setSizes(
                 headerSize,
@@ -267,7 +273,10 @@ final class MatrixDisplayWindow implements AutoCloseable {
                             rgb565(rowColor.getValue()),
                             rgb565(largeColor.getValue()),
                             rgb565(footerColor.getValue()),
-                            0,
+                            "VBZ".equals(
+                                    fontFamily.getValue())
+                                    ? 1
+                                    : 0,
                             headerSize.getValue(),
                             rowSize.getValue(),
                             largeSize.getValue(),

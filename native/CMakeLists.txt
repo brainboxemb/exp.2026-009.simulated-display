@@ -96,6 +96,7 @@ target_include_directories(legacy-display PUBLIC include)
 add_library(matrix-display
     src/matrix_framebuffer.c
     src/matrix_pixel_font.c
+    src/matrix_vbz_font.c
     src/matrix_font.c
     src/matrix_theme.c
     src/matrix_race_screen.c

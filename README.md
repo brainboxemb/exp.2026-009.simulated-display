@@ -123,3 +123,16 @@ The C parser currently understands:
 `CharMap1`, `SpriteMap1` and `Bitmap_0..Bitmap_9` were imported from the supplied legacy data. `Bitmap_Batavieren` and the other unrelated legacy bitmaps were deliberately excluded.
 
 See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [protocol](docs/03-protocol.md), [development setup](docs/04-development.md) and [matrix display design](docs/05-matrix-display.md).
+
+
+# Third-party font attribution
+
+The optional VBZ pixel font in `native/src/matrix_vbz_font.c` is adapted from
+`vbzfont` in `sschueller/vbz-fahrgastinformation`.
+
+Copyright (c) 2022 Stefan Schüller
+
+The source project is licensed under the MIT License. The bitmap shapes and
+glyph metrics are used under that license; the LVGL adapter and the derived
+10-pixel nearest-neighbor variant are part of this project.
+
