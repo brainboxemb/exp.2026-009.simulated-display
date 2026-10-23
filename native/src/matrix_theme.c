@@ -11,6 +11,8 @@ MatrixTheme matrix_theme_default_create(void) {
             matrix_pixel_rgb565_create(255, 255, 255);
     const MatrixPixel blue =
             matrix_pixel_rgb565_create(0, 96, 255);
+    const MatrixPixel green =
+            matrix_pixel_rgb565_create(0, 160, 72);
 
     MatrixTheme theme = {
         .background_color = dark_gray,
@@ -20,6 +22,8 @@ MatrixTheme matrix_theme_default_create(void) {
         .warning_background_color = blue,
         .warning_text_color = white,
         .warning_strike_color = red,
+        .sync_background_color = green,
+        .sync_icon_color = white,
         .header = {
             .font = {MATRIX_FONT_VBZ, 9},
             .color = red
