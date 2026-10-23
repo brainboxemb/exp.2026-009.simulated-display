@@ -2,53 +2,100 @@
 
 #include <stddef.h>
 
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+} MatrixSpritePoint;
+
+typedef struct {
+    MatrixSpritePoint forward_elbow;
+    MatrixSpritePoint forward_hand;
+    MatrixSpritePoint backward_elbow;
+    MatrixSpritePoint backward_hand;
+    MatrixSpritePoint forward_knee;
+    MatrixSpritePoint forward_foot;
+    MatrixSpritePoint backward_knee;
+    MatrixSpritePoint backward_foot;
+} MatrixRunnerPose;
+
 /*
- * Six native 10x12 running poses.
+ * Native 10x12 running cycle designed from the running motion itself.
  *
- * The legacy SpriteMap1 sequence defines the gait phases, but these frames are
- * redrawn for the larger matrix resolution instead of scaling the 7x7 bitmap.
- * Every pose keeps a separate 3x3 head, one-pixel neck and stable torso.
- * Only arms and legs change between phases. Limbs remain one-pixel strokes;
- * crossing legs may overlap rather than becoming a thick two-pixel bar.
+ * The body is fixed:
+ * - 3x3 head;
+ * - one-pixel neck;
+ * - one-pixel torso;
+ * - one shoulder joint and one hip joint.
+ *
+ * Only the limbs move. Each arm and leg is a one-pixel polyline with one
+ * intermediate joint. The six poses form contact, recoil and passing phases,
+ * followed by the opposite-side equivalents. Arms move contralaterally to
+ * the legs.
  */
-static const uint16_t RUNNER[
-        MATRIX_SPRITE_FRAME_COUNT][MATRIX_SPRITE_HEIGHT] = {
+static const MatrixRunnerPose RUNNER_POSES[
+        MATRIX_SPRITE_FRAME_COUNT] = {
     {
-        0x038, 0x038, 0x038, 0x010,
-        0x070, 0x0b8, 0x134, 0x030,
-        0x048, 0x084, 0x102, 0x201
+        .forward_elbow = {7, 5},
+        .forward_hand = {8, 4},
+        .backward_elbow = {4, 5},
+        .backward_hand = {2, 5},
+        .forward_knee = {7, 8},
+        .forward_foot = {9, 10},
+        .backward_knee = {4, 8},
+        .backward_foot = {2, 9}
     },
     {
-        0x038, 0x038, 0x038, 0x010,
-        0x070, 0x0b8, 0x078, 0x030,
-        0x048, 0x044, 0x024, 0x022
+        .forward_elbow = {7, 5},
+        .forward_hand = {8, 6},
+        .backward_elbow = {4, 5},
+        .backward_hand = {3, 6},
+        .forward_knee = {7, 8},
+        .forward_foot = {8, 10},
+        .backward_knee = {4, 8},
+        .backward_foot = {3, 10}
     },
     {
-        0x038, 0x038, 0x038, 0x010,
-        0x078, 0x0b4, 0x030, 0x030,
-        0x030, 0x028, 0x044, 0x082
+        .forward_elbow = {6, 5},
+        .forward_hand = {7, 7},
+        .backward_elbow = {4, 5},
+        .backward_hand = {3, 6},
+        .forward_knee = {7, 7},
+        .forward_foot = {6, 9},
+        .backward_knee = {5, 8},
+        .backward_foot = {4, 10}
     },
     {
-        0x038, 0x038, 0x038, 0x010,
-        0x038, 0x074, 0x0b2, 0x030,
-        0x048, 0x084, 0x102, 0x201
+        .forward_elbow = {3, 5},
+        .forward_hand = {2, 4},
+        .backward_elbow = {6, 5},
+        .backward_hand = {8, 5},
+        .forward_knee = {3, 8},
+        .forward_foot = {1, 10},
+        .backward_knee = {6, 8},
+        .backward_foot = {8, 9}
     },
     {
-        0x038, 0x038, 0x038, 0x010,
-        0x038, 0x074, 0x078, 0x030,
-        0x048, 0x088, 0x090, 0x110
+        .forward_elbow = {3, 5},
+        .forward_hand = {2, 6},
+        .backward_elbow = {6, 5},
+        .backward_hand = {7, 6},
+        .forward_knee = {3, 8},
+        .forward_foot = {2, 10},
+        .backward_knee = {6, 8},
+        .backward_foot = {7, 10}
     },
     {
-        0x038, 0x038, 0x038, 0x010,
-        0x078, 0x0b4, 0x030, 0x030,
-        0x030, 0x050, 0x088, 0x104
+        .forward_elbow = {4, 5},
+        .forward_hand = {3, 7},
+        .backward_elbow = {6, 5},
+        .backward_hand = {7, 6},
+        .forward_knee = {3, 7},
+        .forward_foot = {4, 9},
+        .backward_knee = {5, 8},
+        .backward_foot = {6, 10}
     }
 };
 
-/*
- * Warmup keeps head, torso and legs fixed. Only the arm position changes:
- * down -> diagonal -> horizontal -> raised -> overhead -> horizontal.
- */
 static const uint16_t WARMUP[
         MATRIX_SPRITE_FRAME_COUNT][MATRIX_SPRITE_HEIGHT] = {
     {
@@ -83,45 +130,198 @@ static const uint16_t WARMUP[
     }
 };
 
-static const uint16_t *sprite_rows(
-        MatrixSpriteKind kind,
-        uint8_t frame) {
-    const uint8_t index =
-            (uint8_t)(
-                    frame
-                    % MATRIX_SPRITE_FRAME_COUNT);
 
-    switch (kind) {
-        case MATRIX_SPRITE_RUNNER:
-            return RUNNER[index];
+static void draw_pixel(
+        MatrixFramebuffer *framebuffer,
+        uint16_t x,
+        uint16_t y,
+        MatrixSpritePoint point,
+        MatrixPixel color) {
+    matrix_framebuffer_set(
+            framebuffer,
+            (uint16_t)(x + point.x),
+            (uint16_t)(y + point.y),
+            color);
+}
 
-        case MATRIX_SPRITE_WARMUP:
-            return WARMUP[index];
+static void draw_line(
+        MatrixFramebuffer *framebuffer,
+        uint16_t origin_x,
+        uint16_t origin_y,
+        MatrixSpritePoint from,
+        MatrixSpritePoint to,
+        MatrixPixel color) {
+    int x0 = (int)from.x;
+    int y0 = (int)from.y;
+    const int x1 = (int)to.x;
+    const int y1 = (int)to.y;
+    const int dx =
+            x1 >= x0
+                    ? x1 - x0
+                    : x0 - x1;
+    const int sx =
+            x0 < x1
+                    ? 1
+                    : -1;
+    const int dy =
+            y1 >= y0
+                    ? y0 - y1
+                    : y1 - y0;
+    const int sy =
+            y0 < y1
+                    ? 1
+                    : -1;
+    int error = dx + dy;
 
-        default:
-            return NULL;
+    for (;;) {
+        MatrixSpritePoint point = {
+            (uint8_t)x0,
+            (uint8_t)y0
+        };
+
+        draw_pixel(
+                framebuffer,
+                origin_x,
+                origin_y,
+                point,
+                color);
+
+        if (x0 == x1
+                && y0 == y1) {
+            break;
+        }
+
+        const int doubled_error =
+                2 * error;
+
+        if (doubled_error >= dy) {
+            error += dy;
+            x0 += sx;
+        }
+
+        if (doubled_error <= dx) {
+            error += dx;
+            y0 += sy;
+        }
     }
 }
 
-void matrix_sprite_draw(
+static void draw_runner(
         MatrixFramebuffer *framebuffer,
-        MatrixSpriteKind kind,
         uint8_t frame,
         uint16_t x,
         uint16_t y,
         MatrixPixel color) {
-    if (framebuffer == NULL) {
-        return;
+    const MatrixRunnerPose *pose =
+            &RUNNER_POSES[
+                    frame
+                    % MATRIX_SPRITE_FRAME_COUNT];
+
+    for (uint8_t head_y = 0;
+            head_y < 3u;
+            head_y++) {
+        for (uint8_t head_x = 5;
+                head_x < 8u;
+                head_x++) {
+            draw_pixel(
+                    framebuffer,
+                    x,
+                    y,
+                    (MatrixSpritePoint){
+                        head_x,
+                        head_y
+                    },
+                    color);
+        }
     }
 
+    draw_pixel(
+            framebuffer,
+            x,
+            y,
+            (MatrixSpritePoint){6, 3},
+            color);
+
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            (MatrixSpritePoint){5, 4},
+            (MatrixSpritePoint){5, 6},
+            color);
+
+    const MatrixSpritePoint shoulder = {5, 4};
+    const MatrixSpritePoint hip = {5, 6};
+
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            shoulder,
+            pose->forward_elbow,
+            color);
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            pose->forward_elbow,
+            pose->forward_hand,
+            color);
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            shoulder,
+            pose->backward_elbow,
+            color);
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            pose->backward_elbow,
+            pose->backward_hand,
+            color);
+
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            hip,
+            pose->forward_knee,
+            color);
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            pose->forward_knee,
+            pose->forward_foot,
+            color);
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            hip,
+            pose->backward_knee,
+            color);
+    draw_line(
+            framebuffer,
+            x,
+            y,
+            pose->backward_knee,
+            pose->backward_foot,
+            color);
+}
+
+static void draw_warmup(
+        MatrixFramebuffer *framebuffer,
+        uint8_t frame,
+        uint16_t x,
+        uint16_t y,
+        MatrixPixel color) {
     const uint16_t *rows =
-            sprite_rows(
-                    kind,
-                    frame);
-
-    if (rows == NULL) {
-        return;
-    }
+            WARMUP[
+                    frame
+                    % MATRIX_SPRITE_FRAME_COUNT];
 
     for (uint16_t row = 0;
             row < MATRIX_SPRITE_HEIGHT;
@@ -146,5 +346,40 @@ void matrix_sprite_draw(
                     (uint16_t)(y + row),
                     color);
         }
+    }
+}
+
+void matrix_sprite_draw(
+        MatrixFramebuffer *framebuffer,
+        MatrixSpriteKind kind,
+        uint8_t frame,
+        uint16_t x,
+        uint16_t y,
+        MatrixPixel color) {
+    if (framebuffer == NULL) {
+        return;
+    }
+
+    switch (kind) {
+        case MATRIX_SPRITE_RUNNER:
+            draw_runner(
+                    framebuffer,
+                    frame,
+                    x,
+                    y,
+                    color);
+            break;
+
+        case MATRIX_SPRITE_WARMUP:
+            draw_warmup(
+                    framebuffer,
+                    frame,
+                    x,
+                    y,
+                    color);
+            break;
+
+        default:
+            break;
     }
 }
