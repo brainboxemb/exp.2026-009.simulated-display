@@ -463,26 +463,26 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
                     0));
 
     /*
-     * No warning: flag starts at x=131.
-     * One warning: flag and counter shift 6 pixels left.
-     * Two warnings: they shift 12 pixels left.
+     * No warning: flag starts at x=132.
+     * One warning reserves 5 pixels on the right, moving flag/counter left.
+     * Two warnings reserve 11 pixels including their one-pixel separator.
      */
     assert(
             matrix_framebuffer_get(
                     &connected_frame,
-                    131,
+                    132,
                     2)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &wifi_frame,
-                    125,
+                    127,
                     2)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    119,
+                    121,
                     2)
             == theme.flag_color);
 
