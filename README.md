@@ -98,4 +98,4 @@ The C parser currently understands:
 
 Demo, reverse mode, splash, backlight and baud are recognized at the stream-framing level but are not simulated yet.
 
-See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md) and [protocol slice](docs/03-protocol.md).
+See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [protocol slice](docs/03-protocol.md) and [development setup](docs/04-development.md).

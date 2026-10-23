@@ -14,7 +14,7 @@ Current implementation on PR #2:
 - [x] Java 21 / JavaFX 21 Maven viewer with red LED rendering;
 - [x] text controls and raw hexadecimal serial-byte injection;
 - [x] deterministic C unit tests and local host-protocol smoke test;
-- [ ] GitHub Linux/Windows CI qualification;
+- [x] GitHub Linux/Windows CI qualification on exact head `58a624579c7c6649b9e45d74f478f95a22228338`;
 - [ ] human NetBeans/JavaFX visual review on Windows.
 
 ## Stage 2 — LCD qualification
