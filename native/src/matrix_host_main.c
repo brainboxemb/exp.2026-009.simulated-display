@@ -14,6 +14,7 @@
 #define MATRIX_HOST_REQUEST_DEMO_SCREEN 0u
 #define MATRIX_HOST_REQUEST_CLEAR 1u
 #define MATRIX_HOST_REQUEST_THEME 2u
+#define MATRIX_HOST_REQUEST_ANIMATION_TICK 3u
 
 static const MatrixRaceScreenData DEMO_SCREEN = {
     .location = "WP-99",
@@ -113,11 +114,13 @@ static void write_frame(
 
 static bool draw_demo_screen(
         MatrixFramebuffer *framebuffer,
-        const MatrixTheme *theme) {
+        const MatrixTheme *theme,
+        uint8_t animation_frame) {
     return matrix_race_screen_render(
             framebuffer,
             &DEMO_SCREEN,
-            theme);
+            theme,
+            animation_frame);
 }
 
 static bool read_theme(MatrixTheme *theme) {
@@ -193,10 +196,13 @@ int main(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
             matrix_theme_default_create();
+    uint8_t animation_frame = 0;
+    bool demo_visible = true;
 
     if (!draw_demo_screen(
             &framebuffer,
-            &theme)) {
+            &theme,
+            animation_frame)) {
         return 6;
     }
 
@@ -211,26 +217,56 @@ int main(void) {
 
         switch (request) {
             case MATRIX_HOST_REQUEST_DEMO_SCREEN:
+                demo_visible = true;
                 if (!draw_demo_screen(
                         &framebuffer,
-                        &theme)) {
+                        &theme,
+                        animation_frame)) {
                     return 6;
                 }
                 write_frame(&framebuffer);
                 break;
 
             case MATRIX_HOST_REQUEST_CLEAR:
+                demo_visible = false;
                 matrix_framebuffer_clear(&framebuffer);
                 write_frame(&framebuffer);
                 break;
 
             case MATRIX_HOST_REQUEST_THEME:
-                if (!read_theme(&theme)
-                        || !draw_demo_screen(
-                                &framebuffer,
-                                &theme)) {
+                if (!read_theme(&theme)) {
                     return 6;
                 }
+
+                if (demo_visible) {
+                    if (!draw_demo_screen(
+                            &framebuffer,
+                            &theme,
+                            animation_frame)) {
+                        return 6;
+                    }
+                } else {
+                    matrix_framebuffer_clear(&framebuffer);
+                }
+
+                write_frame(&framebuffer);
+                break;
+
+            case MATRIX_HOST_REQUEST_ANIMATION_TICK:
+                if (!demo_visible) {
+                    break;
+                }
+
+                animation_frame =
+                        (uint8_t)((animation_frame + 1u) % 6u);
+
+                if (!draw_demo_screen(
+                        &framebuffer,
+                        &theme,
+                        animation_frame)) {
+                    return 6;
+                }
+
                 write_frame(&framebuffer);
                 break;
 
