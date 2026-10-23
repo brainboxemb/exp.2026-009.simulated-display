@@ -88,9 +88,9 @@ final class MatrixDisplayProcess implements AutoCloseable {
 
     synchronized void layout(int layout)
             throws IOException {
-        if (layout < 0 || layout > 2) {
+        if (layout < 0 || layout > 3) {
             throw new IllegalArgumentException(
-                    "layout must be 0..2");
+                    "layout must be 0..3");
         }
 
         input.writeInt(REQUEST_LAYOUT);
