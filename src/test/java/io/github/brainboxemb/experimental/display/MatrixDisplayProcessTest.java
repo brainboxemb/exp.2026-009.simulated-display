@@ -141,9 +141,9 @@ final class MatrixDisplayProcessTest {
             assertEquals(0, readyOverflow.red(0, 52));
             assertEquals(255, readyOverflow.green(0, 52));
             assertEquals(0, readyOverflow.blue(0, 52));
-            assertEquals(0, readyOverflow.red(100, 52));
-            assertEquals(0, readyOverflow.green(100, 52));
-            assertEquals(0, readyOverflow.blue(100, 52));
+            assertEquals(0, readyOverflow.red(159, 52));
+            assertEquals(0, readyOverflow.green(159, 52));
+            assertEquals(0, readyOverflow.blue(159, 52));
             assertEquals(0, readyOverflow.red(81, 53));
             assertEquals(255, readyOverflow.green(81, 53));
             assertEquals(0, readyOverflow.blue(81, 53));
