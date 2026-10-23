@@ -79,7 +79,9 @@ legacy running motion is the current priority.
 
 The first ready-runner row starts immediately after the divider: x=81 is the
 separator itself and x=82 is the first usable pixel on the right. The first 10
-pixels there are reserved for the warmup sprite. Its body and legs stay fixed while the arms move
+pixels there are reserved for the warmup sprite. With the 14px large numeric
+font, the first three-digit value starts immediately after that sprite at x=92
+in a 30-pixel field; the second value also has a 30-pixel field. Its body and legs stay fixed while the arms move
 through the stretch cycle; the warmup animation advances at half the runner
 rate.
 
@@ -140,11 +142,11 @@ The font registry currently exposes two 1-bpp families:
 | Family | Sizes | Notes |
 | --- | --- | --- |
 | `MATRIX_FONT_UNSCII` | 8, 10, 16 | LVGL UNSCII 8/16 plus local 10px variant |
-| `MATRIX_FONT_VBZ` | 9; 12 for `large_value` | Original VBZ 9px glyphs plus a dedicated 12px numeric font for large values |
+| `MATRIX_FONT_VBZ` | 9; 12/14 for `large_value` | Original VBZ 9px glyphs plus dedicated 12px and 14px numeric fonts for large values |
 
-The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. Large numeric values can use a separate hand-drawn 12px bitmap font; it is intentionally numeric-only rather than a mechanically stretched general-purpose VBZ font.
+The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. Large numeric values can use separate hand-drawn 12px or 14px bitmap fonts; both are intentionally numeric-only rather than mechanically stretched general-purpose VBZ fonts.
 
-The JavaFX simulator exposes both families for comparison. VBZ is the default: 9px for header, rows and footer, with the dedicated 12px numeric font for large values.
+The JavaFX simulator exposes both families for comparison. VBZ is the default: 9px for header, rows and footer, with the dedicated 14px numeric font for large values. The 12px numeric variant remains selectable for comparison.
 
 ## Physical HUB75 output
 
