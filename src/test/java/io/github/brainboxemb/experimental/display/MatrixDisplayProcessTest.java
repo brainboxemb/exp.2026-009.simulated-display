@@ -32,9 +32,9 @@ final class MatrixDisplayProcessTest {
             assertEquals(160, frame.width());
             assertEquals(64, frame.height());
 
-            assertEquals(255, frame.red(0, 10));
-            assertEquals(0, frame.green(0, 10));
-            assertEquals(0, frame.blue(0, 10));
+            assertEquals(255, frame.red(0, 11));
+            assertEquals(0, frame.green(0, 11));
+            assertEquals(0, frame.blue(0, 11));
 
             process.applyTheme(
                     new MatrixDisplayThemeConfig(
@@ -58,9 +58,9 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     themed,
                     "matrix host did not emit themed frame");
-            assertEquals(0, themed.red(0, 10));
-            assertEquals(255, themed.green(0, 10));
-            assertEquals(0, themed.blue(0, 10));
+            assertEquals(0, themed.red(0, 11));
+            assertEquals(255, themed.green(0, 11));
+            assertEquals(0, themed.blue(0, 11));
 
             process.clear();
 
@@ -72,9 +72,9 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     cleared,
                     "matrix host did not emit cleared frame");
-            assertEquals(0, cleared.red(0, 10));
-            assertEquals(0, cleared.green(0, 10));
-            assertEquals(0, cleared.blue(0, 10));
+            assertEquals(0, cleared.red(0, 11));
+            assertEquals(0, cleared.green(0, 11));
+            assertEquals(0, cleared.blue(0, 11));
 
             process.requestDemoScreen();
 
