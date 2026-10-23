@@ -20,7 +20,7 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 
 The current demo screen follows the supplied layout reference:
 
-- header with location, clock, animated finish flag and counter;
+- header with location, clock, static finish flag, counter and conditional connection warnings;
 - three passed-runner rows on the left;
 - two large-value rows on the right;
 - a 10×12 runner sprite at the far left of the first passed-runner row;
@@ -32,9 +32,16 @@ The current demo screen follows the supplied layout reference:
 The current values are demo data in `matrix_host_main.c`. They will later come from the synchronized application-data model.
 
 The finished-team counter in the upper-right header is preceded by a small
-10×8 checkered finish-flag cloth. It deliberately has no pole. Four native frames keep the 2×2 checker pattern readable while moving only
-the trailing part of the cloth, producing a restrained wave
-at half the runner animation rate. The flag uses `sprite_color`.
+static 7×7 finish flag drawn as literal 1×1 checker pixels. It deliberately has
+no pole and has its own `flag_color`, independent of the runner/warmup
+`sprite_color`.
+
+Two optional 5×8 warning blocks can appear to the right of the counter. `W`
+means WiFi is unavailable and `S` means the local registration server is
+unavailable. A warning is not rendered while its connection is healthy. The
+visible warning group owns the right edge of the header; the counter and flag
+shift left only by the space needed for the active blocks. Two simultaneous
+warnings have a one-pixel separator between them.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
 sprite, so its number starts at x=12. The runner uses the original six-frame
@@ -69,7 +76,11 @@ Each text role has its own `MatrixTextStyle`:
 - `large_value`;
 - `footer`.
 
-A style contains both a color and a font specification. The theme separately owns `background_color`, `line_color` and `sprite_color`. Runner and warmup sprites share `sprite_color` and are independent of all text colors.
+A style contains both a color and a font specification. The theme separately owns
+`background_color`, `line_color`, `sprite_color`, `flag_color`,
+`warning_background_color` and `warning_text_color`. Runner and warmup
+sprites share `sprite_color`. The finish flag and warning blocks are therefore
+independently configurable; warning defaults are blue with white glyphs.
 
 Example:
 
