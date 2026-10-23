@@ -10,19 +10,17 @@ Current implementation on PR #2:
 - [x] native legacy custom character map (codes 31..255) with proportional advances;
 - [x] six-frame legacy `SpriteMap1` support via `FE FE`;
 - [x] chunk-independent serial command state machine;
-- [x] clear, X/Y, pixel, line, circle, box and erase-block commands;
+- [x] readable `/C?`, `/Lyyxx` and `/B0..9` slash commands;
 - [x] native host process with explicit framed stdin/stdout protocol;
 - [x] Java 21 / JavaFX 21 Maven viewer with red LED rendering;
-- [x] text controls and raw hexadecimal serial-byte injection;
+- [x] readable protocol text input plus raw `\\xNN` byte escapes when needed;
 - [x] deterministic C unit tests and local host-protocol smoke test;
 - [x] GitHub Linux/Windows CI qualification on exact head `58a624579c7c6649b9e45d74f478f95a22228338`;
 - [ ] human NetBeans/JavaFX visual review on Windows.
 
 ## Stage 2 — LCD qualification
 
-Verify split/combined input buffers, invalid commands, clipping, cursor wrapping, clear, drawing primitives and backspace. Compare exact command bytes and relevant behavior with the SparkFun documentation and original firmware. Record deliberate 90×35 geometry differences rather than hiding them.
-
-Decide whether reverse mode, backlight and baud need visible simulator semantics or only protocol acceptance.
+Verify split/combined input buffers, invalid slash commands, clipping, cursor wrapping, clear, bitmap placement, sprite markers and backspace. Compare behavior with the supplied legacy firmware/data and record deliberate 90×35 adaptations rather than hiding them.
 
 ## Stage 3 — HUB75 PoP
 
