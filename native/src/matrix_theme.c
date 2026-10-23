@@ -11,24 +11,25 @@ MatrixTheme matrix_theme_default_create(void) {
     MatrixTheme theme = {
         .background_color = dark_gray,
         .line_color = gray,
+        .sprite_color = red,
         .header = {
-            .font = {MATRIX_FONT_UNSCII, 10},
+            .font = {MATRIX_FONT_VBZ, 9},
             .color = red
         },
         .row_number = {
-            .font = {MATRIX_FONT_UNSCII, 10},
+            .font = {MATRIX_FONT_VBZ, 9},
             .color = red
         },
         .row_time = {
-            .font = {MATRIX_FONT_UNSCII, 10},
+            .font = {MATRIX_FONT_VBZ, 9},
             .color = red
         },
         .large_value = {
-            .font = {MATRIX_FONT_UNSCII, 16},
+            .font = {MATRIX_FONT_VBZ, 12},
             .color = red
         },
         .footer = {
-            .font = {MATRIX_FONT_UNSCII, 10},
+            .font = {MATRIX_FONT_VBZ, 9},
             .color = red
         }
     };
