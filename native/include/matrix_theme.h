@@ -23,6 +23,7 @@ typedef struct {
 typedef struct {
     MatrixPixel background_color;
     MatrixPixel line_color;
+    MatrixPixel sprite_color;
     MatrixTextStyle header;
     MatrixTextStyle row_number;
     MatrixTextStyle row_time;
