@@ -129,6 +129,7 @@ if(BUILD_TESTING)
     add_test(NAME matrix-framebuffer COMMAND test-matrix-framebuffer)
 
     add_executable(test-matrix-race-screen tests/test_matrix_race_screen.c)
+    target_include_directories(test-matrix-race-screen PRIVATE src)
     target_link_libraries(test-matrix-race-screen PRIVATE matrix-display)
     add_test(NAME matrix-race-screen COMMAND test-matrix-race-screen)
 endif()

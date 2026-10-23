@@ -1,4 +1,5 @@
 #include "matrix_race_screen.h"
+#include "matrix_vbz_font.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -161,6 +162,33 @@ static void test_pixel_fonts_render_only_theme_colors(void) {
     }
 }
 
+static void test_vbz_metrics_match_source_font(void) {
+    lv_font_glyph_dsc_t digit = {0};
+    lv_font_glyph_dsc_t colon = {0};
+
+    assert(
+            matrix_font_vbz_9.get_glyph_dsc(
+                    &matrix_font_vbz_9,
+                    &digit,
+                    '0',
+                    0));
+    assert(digit.box_w == 16);
+    assert(digit.box_h == 9);
+    assert(digit.adv_w == 7);
+    assert(digit.ofs_x == 1);
+
+    assert(
+            matrix_font_vbz_9.get_glyph_dsc(
+                    &matrix_font_vbz_9,
+                    &colon,
+                    ':',
+                    0));
+    assert(colon.box_w == 16);
+    assert(colon.box_h == 6);
+    assert(colon.adv_w == 3);
+    assert(colon.ofs_x == 1);
+}
+
 static void test_vbz_9_and_10_render_as_distinct_pixel_fonts(void) {
     MatrixFramebuffer frame9;
     MatrixFramebuffer frame10;
@@ -232,6 +260,7 @@ int main(void) {
     test_vbz_9_and_10_render();
     test_independent_line_and_text_colors_render();
     test_pixel_fonts_render_only_theme_colors();
+    test_vbz_metrics_match_source_font();
     test_vbz_9_and_10_render_as_distinct_pixel_fonts();
     test_unsupported_font_size_is_rejected();
 
