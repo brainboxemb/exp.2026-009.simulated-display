@@ -81,7 +81,7 @@ static void test_vbz_9_and_numeric_12_render(void) {
 
     theme.header.font.family =
             MATRIX_FONT_VBZ;
-    theme.header.font.size = 9;
+    theme.header.font.size = 10;
     theme.row_number.font.family =
             MATRIX_FONT_VBZ;
     theme.row_number.font.size = 9;
@@ -143,7 +143,8 @@ static bool is_theme_color(
             || pixel == theme->row_number.color
             || pixel == theme->row_time.color
             || pixel == theme->large_value.color
-            || pixel == theme->footer.color;
+            || pixel == theme->footer.color
+            || pixel == theme->sprite_color;
 }
 
 static void test_pixel_fonts_render_only_theme_colors(void) {
@@ -401,8 +402,7 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
                     0,
                     255);
 
-    theme.row_number.color = runner_color;
-    theme.large_value.color = warmup_color;
+    theme.sprite_color = runner_color;
 
     assert(
             matrix_race_screen_render(
@@ -432,7 +432,7 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
                     &frame0,
                     96,
                     14)
-            == warmup_color);
+            == runner_color);
 
     /*
      * Frame 2 changes both animations without moving either body to another
@@ -456,13 +456,13 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
                     &frame0,
                     94,
                     18)
-            != warmup_color);
+            != runner_color);
     assert(
             matrix_framebuffer_get(
                     &frame2,
                     94,
                     18)
-            == warmup_color);
+            == runner_color);
 }
 
 static void test_unsupported_font_size_is_rejected(void) {
