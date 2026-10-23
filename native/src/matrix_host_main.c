@@ -13,19 +13,20 @@
 
 #define MATRIX_HOST_REQUEST_DEMO_SCREEN 0u
 #define MATRIX_HOST_REQUEST_CLEAR 1u
+#define MATRIX_HOST_REQUEST_THEME 2u
 
 static const MatrixRaceScreenData DEMO_SCREEN = {
-    .location = "WP-50",
-    .clock = "02:05:67",
-    .counter = "200",
+    .location = "WP-99",
+    .clock = "99:99:99",
+    .counter = "999",
     .left_rows = {
-        {"1", "99:99:99"},
-        {"520", "99:99:99"},
-        {"65", "99:99:99"}
+        {"999", "99:99"},
+        {"999", "99:99"},
+        {"999", "99:99"}
     },
     .right_rows = {
-        {"527", "527"},
-        {"527", "527"}
+        {"999", "999"},
+        {"999", "999"}
     },
     .footer = {"520", "234", "346", "12"}
 };
@@ -40,6 +41,32 @@ static void write_u32_be(uint32_t value) {
     fputc((value >> 16) & 0xff, stdout);
     fputc((value >> 8) & 0xff, stdout);
     fputc(value & 0xff, stdout);
+}
+
+static bool read_u8(uint8_t *value) {
+    const int byte = fgetc(stdin);
+
+    if (byte == EOF) {
+        return false;
+    }
+
+    *value = (uint8_t)byte;
+    return true;
+}
+
+static bool read_u16_be(uint16_t *value) {
+    uint8_t high = 0;
+    uint8_t low = 0;
+
+    if (!read_u8(&high)
+            || !read_u8(&low)) {
+        return false;
+    }
+
+    *value =
+            ((uint16_t)high << 8)
+            | (uint16_t)low;
+    return true;
 }
 
 static bool read_u32_be(uint32_t *value) {
@@ -85,14 +112,68 @@ static void write_frame(
 }
 
 static bool draw_demo_screen(
-        MatrixFramebuffer *framebuffer) {
-    MatrixTheme theme =
-            matrix_theme_default_create();
-
+        MatrixFramebuffer *framebuffer,
+        const MatrixTheme *theme) {
     return matrix_race_screen_render(
             framebuffer,
             &DEMO_SCREEN,
-            &theme);
+            theme);
+}
+
+static bool read_theme(MatrixTheme *theme) {
+    uint16_t line_color = 0;
+    uint16_t header_color = 0;
+    uint16_t row_color = 0;
+    uint16_t large_color = 0;
+    uint16_t footer_color = 0;
+    uint8_t family = 0;
+    uint8_t header_size = 0;
+    uint8_t row_size = 0;
+    uint8_t large_size = 0;
+    uint8_t footer_size = 0;
+
+    if (!read_u16_be(&line_color)
+            || !read_u16_be(&header_color)
+            || !read_u16_be(&row_color)
+            || !read_u16_be(&large_color)
+            || !read_u16_be(&footer_color)
+            || !read_u8(&family)
+            || !read_u8(&header_size)
+            || !read_u8(&row_size)
+            || !read_u8(&large_size)
+            || !read_u8(&footer_size)) {
+        return false;
+    }
+
+    if (family > MATRIX_FONT_UNSCII) {
+        return false;
+    }
+
+    theme->line_color = line_color;
+    theme->header.color = header_color;
+    theme->row_number.color = row_color;
+    theme->row_time.color = row_color;
+    theme->large_value.color = large_color;
+    theme->footer.color = footer_color;
+
+    theme->header.font.family =
+            (MatrixFontFamily)family;
+    theme->row_number.font.family =
+            (MatrixFontFamily)family;
+    theme->row_time.font.family =
+            (MatrixFontFamily)family;
+    theme->large_value.font.family =
+            (MatrixFontFamily)family;
+    theme->footer.font.family =
+            (MatrixFontFamily)family;
+
+    theme->header.font.size = header_size;
+    theme->row_number.font.size = row_size;
+    theme->row_time.font.size = row_size;
+    theme->large_value.font.size = large_size;
+    theme->footer.font.size = footer_size;
+
+    return true;
 }
 
 int main(void) {
@@ -107,8 +188,12 @@ int main(void) {
 #endif
 
     MatrixFramebuffer framebuffer;
+    MatrixTheme theme =
+            matrix_theme_default_create();
 
-    if (!draw_demo_screen(&framebuffer)) {
+    if (!draw_demo_screen(
+            &framebuffer,
+            &theme)) {
         return 6;
     }
 
@@ -123,7 +208,9 @@ int main(void) {
 
         switch (request) {
             case MATRIX_HOST_REQUEST_DEMO_SCREEN:
-                if (!draw_demo_screen(&framebuffer)) {
+                if (!draw_demo_screen(
+                        &framebuffer,
+                        &theme)) {
                     return 6;
                 }
                 write_frame(&framebuffer);
@@ -131,6 +218,16 @@ int main(void) {
 
             case MATRIX_HOST_REQUEST_CLEAR:
                 matrix_framebuffer_clear(&framebuffer);
+                write_frame(&framebuffer);
+                break;
+
+            case MATRIX_HOST_REQUEST_THEME:
+                if (!read_theme(&theme)
+                        || !draw_demo_screen(
+                                &framebuffer,
+                                &theme)) {
+                    return 6;
+                }
                 write_frame(&framebuffer);
                 break;
 

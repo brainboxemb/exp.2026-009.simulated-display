@@ -4,17 +4,17 @@
 #include <stdio.h>
 
 static const MatrixRaceScreenData SAMPLE = {
-    .location = "WP-50",
-    .clock = "02:05:67",
-    .counter = "200",
+    .location = "WP-99",
+    .clock = "99:99:99",
+    .counter = "999",
     .left_rows = {
-        {"1", "99:99:99"},
-        {"520", "99:99:99"},
-        {"65", "99:99:99"}
+        {"999", "99:99"},
+        {"999", "99:99"},
+        {"999", "99:99"}
     },
     .right_rows = {
-        {"527", "527"},
-        {"527", "527"}
+        {"999", "999"},
+        {"999", "999"}
     },
     .footer = {"520", "234", "346", "12"}
 };
@@ -42,6 +42,12 @@ static void test_default_screen_renders_lines(void) {
                     90,
                     30)
             == theme.line_color);
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    0,
+                    54)
+            == theme.line_color);
 }
 
 static void test_font_family_and_size_are_configurable(void) {
@@ -63,6 +69,36 @@ static void test_font_family_and_size_are_configurable(void) {
                     &theme));
 }
 
+static void test_independent_line_and_text_colors_render(void) {
+    MatrixFramebuffer framebuffer;
+    MatrixTheme theme =
+            matrix_theme_default_create();
+
+    theme.line_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    255,
+                    0);
+    theme.header.color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    255,
+                    255);
+
+    assert(
+            matrix_race_screen_render(
+                    &framebuffer,
+                    &SAMPLE,
+                    &theme));
+
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    0,
+                    10)
+            == theme.line_color);
+}
+
 static void test_unsupported_font_size_is_rejected(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
@@ -80,6 +116,7 @@ static void test_unsupported_font_size_is_rejected(void) {
 int main(void) {
     test_default_screen_renders_lines();
     test_font_family_and_size_are_configurable();
+    test_independent_line_and_text_colors_render();
     test_unsupported_font_size_is_rejected();
 
     puts("matrix_race_screen tests passed");

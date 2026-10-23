@@ -7,8 +7,27 @@
 #include <stdint.h>
 
 #define HEADER_LINE_Y 10
-#define COLUMN_LINE_X 90
-#define FOOTER_LINE_Y 53
+#define MAIN_COLUMN_X 90
+#define FOOTER_LINE_Y 54
+
+#define HEADER_LOCATION_X 1
+#define HEADER_LOCATION_WIDTH 38
+#define HEADER_CLOCK_X 40
+#define HEADER_CLOCK_WIDTH 80
+#define HEADER_COUNTER_X 121
+#define HEADER_COUNTER_WIDTH 38
+
+#define LEFT_NUMBER_X 1
+#define LEFT_NUMBER_WIDTH 28
+#define LEFT_TIME_X 33
+#define LEFT_TIME_WIDTH 55
+
+#define RIGHT_X 92
+#define RIGHT_LEFT_WIDTH 32
+#define RIGHT_RIGHT_X 126
+#define RIGHT_RIGHT_WIDTH 33
+
+#define FOOTER_Y 56
 
 static lv_display_t *display;
 static MatrixFramebuffer *active_framebuffer;
@@ -179,7 +198,7 @@ bool matrix_race_screen_render(
             theme->line_color);
     create_line(
             screen,
-            COLUMN_LINE_X,
+            MAIN_COLUMN_X,
             HEADER_LINE_Y,
             1,
             MATRIX_DISPLAY_HEIGHT - HEADER_LINE_Y,
@@ -188,30 +207,43 @@ bool matrix_race_screen_render(
             screen,
             0,
             FOOTER_LINE_Y,
-            COLUMN_LINE_X,
+            MAIN_COLUMN_X,
             1,
             theme->line_color);
 
     create_label(
-            screen, data->location,
-            4, 1, 35,
+            screen,
+            data->location,
+            HEADER_LOCATION_X,
+            1,
+            HEADER_LOCATION_WIDTH,
             LV_TEXT_ALIGN_LEFT,
             &theme->header,
             header_font);
     create_label(
-            screen, data->clock,
-            46, 1, 68,
+            screen,
+            data->clock,
+            HEADER_CLOCK_X,
+            1,
+            HEADER_CLOCK_WIDTH,
             LV_TEXT_ALIGN_CENTER,
             &theme->header,
             header_font);
     create_label(
-            screen, data->counter,
-            132, 1, 24,
+            screen,
+            data->counter,
+            HEADER_COUNTER_X,
+            1,
+            HEADER_COUNTER_WIDTH,
             LV_TEXT_ALIGN_RIGHT,
             &theme->header,
             header_font);
 
-    static const int32_t left_row_y[] = {14, 25, 36};
+    static const int32_t left_row_y[] = {
+        14,
+        27,
+        40
+    };
 
     for (size_t index = 0;
             index < MATRIX_RACE_LEFT_ROW_COUNT;
@@ -219,24 +251,28 @@ bool matrix_race_screen_render(
         create_label(
                 screen,
                 data->left_rows[index].number,
-                3,
+                LEFT_NUMBER_X,
                 left_row_y[index],
-                29,
+                LEFT_NUMBER_WIDTH,
                 LV_TEXT_ALIGN_RIGHT,
                 &theme->row_number,
                 row_number_font);
+
         create_label(
                 screen,
                 data->left_rows[index].time,
-                35,
+                LEFT_TIME_X,
                 left_row_y[index],
-                52,
-                LV_TEXT_ALIGN_LEFT,
+                LEFT_TIME_WIDTH,
+                LV_TEXT_ALIGN_RIGHT,
                 &theme->row_time,
                 row_time_font);
     }
 
-    static const int32_t right_row_y[] = {15, 35};
+    static const int32_t right_row_y[] = {
+        14,
+        35
+    };
 
     for (size_t index = 0;
             index < MATRIX_RACE_RIGHT_ROW_COUNT;
@@ -244,24 +280,36 @@ bool matrix_race_screen_render(
         create_label(
                 screen,
                 data->right_rows[index].left,
-                94,
+                RIGHT_X,
                 right_row_y[index],
-                30,
+                RIGHT_LEFT_WIDTH,
                 LV_TEXT_ALIGN_CENTER,
                 &theme->large_value,
                 large_value_font);
+
         create_label(
                 screen,
                 data->right_rows[index].right,
-                128,
+                RIGHT_RIGHT_X,
                 right_row_y[index],
-                30,
+                RIGHT_RIGHT_WIDTH,
                 LV_TEXT_ALIGN_CENTER,
                 &theme->large_value,
                 large_value_font);
     }
 
-    static const int32_t footer_x[] = {3, 25, 47, 69};
+    static const int32_t footer_x[] = {
+        0,
+        22,
+        45,
+        67
+    };
+    static const int32_t footer_width[] = {
+        22,
+        23,
+        22,
+        23
+    };
 
     for (size_t index = 0;
             index < MATRIX_RACE_FOOTER_COUNT;
@@ -270,8 +318,8 @@ bool matrix_race_screen_render(
                 screen,
                 data->footer[index],
                 footer_x[index],
-                55,
-                19,
+                FOOTER_Y,
+                footer_width[index],
                 LV_TEXT_ALIGN_CENTER,
                 &theme->footer,
                 footer_font);
