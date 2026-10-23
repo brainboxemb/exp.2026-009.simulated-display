@@ -108,9 +108,9 @@ final class MatrixDisplayProcessTest {
             assertEquals(0, statuses.red(149, 0));
             assertEquals(255, statuses.green(149, 0));
             assertEquals(0, statuses.blue(149, 0));
-            assertEquals(255, statuses.red(152, 1));
-            assertEquals(255, statuses.green(152, 1));
-            assertEquals(255, statuses.blue(152, 1));
+            assertEquals(255, statuses.red(150, 1));
+            assertEquals(255, statuses.green(150, 1));
+            assertEquals(255, statuses.blue(150, 1));
 
             process.clear();
 
