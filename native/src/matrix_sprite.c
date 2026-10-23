@@ -21,6 +21,45 @@ static const uint8_t RUNNER[
 };
 
 /*
+ * SpriteMap1 has no room for readable arms at 7x7. At 10x12 we retain the
+ * original gait and add one-pixel arm strokes around the scaled torso.
+ * The arm swing reverses through the six legacy gait phases.
+ */
+static const uint16_t RUNNER_ARMS[
+        MATRIX_SPRITE_FRAME_COUNT][MATRIX_SPRITE_HEIGHT] = {
+    {
+        0x000, 0x000, 0x000, 0x000,
+        0x024, 0x04c, 0x080, 0x000,
+        0x000, 0x000, 0x000, 0x000
+    },
+    {
+        0x000, 0x000, 0x000, 0x000,
+        0x028, 0x044, 0x044, 0x000,
+        0x000, 0x000, 0x000, 0x000
+    },
+    {
+        0x000, 0x000, 0x000, 0x000,
+        0x088, 0x0c4, 0x002, 0x000,
+        0x000, 0x000, 0x000, 0x000
+    },
+    {
+        0x000, 0x000, 0x000, 0x000,
+        0x088, 0x0c4, 0x002, 0x000,
+        0x000, 0x000, 0x000, 0x000
+    },
+    {
+        0x000, 0x000, 0x000, 0x000,
+        0x028, 0x044, 0x044, 0x000,
+        0x000, 0x000, 0x000, 0x000
+    },
+    {
+        0x000, 0x000, 0x000, 0x000,
+        0x024, 0x04c, 0x080, 0x000,
+        0x000, 0x000, 0x000, 0x000
+    }
+};
+
+/*
  * Warmup keeps head, torso and legs fixed. Only the arm position changes:
  * down -> diagonal -> horizontal -> raised -> overhead -> horizontal.
  */
@@ -95,6 +134,36 @@ static void draw_runner(
                     framebuffer,
                     (uint16_t)(x + target_x),
                     (uint16_t)(y + target_y),
+                    color);
+        }
+    }
+
+    const uint16_t *arms =
+            RUNNER_ARMS[
+                    frame
+                    % MATRIX_SPRITE_FRAME_COUNT];
+
+    for (uint16_t row = 0;
+            row < MATRIX_SPRITE_HEIGHT;
+            row++) {
+        for (uint16_t column = 0;
+                column < MATRIX_SPRITE_WIDTH;
+                column++) {
+            const uint16_t mask =
+                    (uint16_t)(
+                            1u
+                            << (MATRIX_SPRITE_WIDTH
+                                    - 1u
+                                    - column));
+
+            if ((arms[row] & mask) == 0) {
+                continue;
+            }
+
+            matrix_framebuffer_set(
+                    framebuffer,
+                    (uint16_t)(x + column),
+                    (uint16_t)(y + row),
                     color);
         }
     }
