@@ -477,19 +477,19 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
             matrix_framebuffer_get(
                     &connected_frame,
                     132,
-                    0)
+                    1)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &wifi_frame,
                     123,
-                    0)
+                    1)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
                     113,
-                    0)
+                    1)
             == theme.flag_color);
 
     /*
@@ -537,7 +537,19 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
+                    143,
+                    1)
+            == theme.warning_strike_color);
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
                     152,
+                    1)
+            == theme.warning_strike_color);
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
+                    153,
                     1)
             == theme.warning_strike_color);
 }
