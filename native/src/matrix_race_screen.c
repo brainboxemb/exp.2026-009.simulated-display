@@ -16,13 +16,13 @@
 #define HEADER_LOCATION_WIDTH 38
 #define HEADER_CLOCK_X 40
 #define HEADER_CLOCK_WIDTH 80
-#define FINISH_FLAG_Y 1
+#define FINISH_FLAG_Y 0
 #define FINISH_FLAG_WIDTH 7u
 #define FINISH_FLAG_HEIGHT 7u
 
 #define HEADER_COUNTER_WIDTH 21u
 
-#define WARNING_Y 1
+#define WARNING_Y 0
 #define WARNING_WIDTH 9u
 #define WARNING_GAP 1u
 #define WARNING_HEIGHT 9u
@@ -66,13 +66,13 @@ static const uint8_t FINISH_FLAG[FINISH_FLAG_HEIGHT] = {
  * diagonal strike-through.
  */
 static const uint8_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
-    0x3f,
-    0x02,
-    0x1c,
+    0x7f,
+    0x7f,
+    0x00,
+    0x3e,
+    0x3e,
     0x08,
-    0x18,
-    0x20,
-    0x40
+    0x08
 };
 
 /*
@@ -81,13 +81,23 @@ static const uint8_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
  * than a letter or server pictogram.
  */
 static const uint8_t WARNING_LINK[WARNING_GLYPH_HEIGHT] = {
-    0x0f,
-    0x13,
-    0x36,
     0x1c,
-    0x36,
-    0x64,
-    0x78
+    0x22,
+    0x63,
+    0x3e,
+    0x63,
+    0x22,
+    0x1c
+};
+
+static const uint8_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
+    0x40,
+    0x20,
+    0x10,
+    0x08,
+    0x04,
+    0x02,
+    0x01
 };
 
 static void draw_finish_flag(
@@ -152,15 +162,21 @@ static void draw_warning_block(
                                     - 1u
                                     - column));
 
-            if ((glyph[row] & mask) == 0) {
-                continue;
+            if ((glyph[row] & mask) != 0) {
+                matrix_framebuffer_set(
+                        framebuffer,
+                        (uint16_t)(x + 1u + column),
+                        (uint16_t)(WARNING_Y + 1u + row),
+                        theme->warning_text_color);
             }
 
-            matrix_framebuffer_set(
-                    framebuffer,
-                    (uint16_t)(x + 1u + column),
-                    (uint16_t)(WARNING_Y + 1u + row),
-                    theme->warning_text_color);
+            if ((WARNING_STRIKE[row] & mask) != 0) {
+                matrix_framebuffer_set(
+                        framebuffer,
+                        (uint16_t)(x + 1u + column),
+                        (uint16_t)(WARNING_Y + 1u + row),
+                        theme->warning_strike_color);
+            }
         }
     }
 }
