@@ -333,7 +333,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private void configureLayoutControl() {
         layoutMode.getItems().addAll(
                 "Registraties",
-                "Registraties (>4)",
+                "Registraties (>3)",
                 "Registraties + klaarstaan",
                 "Registraties + klaarstaan (>4 klaar)");
         layoutMode.setValue(
@@ -553,7 +553,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
             process.layout(
                     switch (layoutMode.getValue()) {
                         case "Registraties" -> 0;
-                        case "Registraties (>4)" -> 1;
+                        case "Registraties (>3)" -> 1;
                         case "Registraties + klaarstaan" -> 2;
                         case "Registraties + klaarstaan (>4 klaar)" -> 3;
                         default -> throw new IllegalStateException(
