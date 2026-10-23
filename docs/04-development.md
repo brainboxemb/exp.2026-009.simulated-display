@@ -99,6 +99,14 @@ The Java simulator accepts both locations.
 
 After the native build is green, start the JavaFX application from NetBeans with **Run Project**.
 
+The configured main class is `SimulatedDisplayApplication`. This is deliberately a **plain Java launcher** which calls `Application.launch(SimulatedDisplayFxApplication.class, args)`. Do not configure NetBeans to run the JavaFX `Application` subclass directly: doing so through Maven `exec` can produce:
+
+```text
+Error: JavaFX runtime components are missing, and are required to run this application
+```
+
+If NetBeans previously remembered a different main class, use **Clean and Build**, reload the Maven project, and select `io.github.brainboxemb.experimental.display.SimulatedDisplayApplication` as the main class.
+
 Or from a terminal:
 
 ```powershell
