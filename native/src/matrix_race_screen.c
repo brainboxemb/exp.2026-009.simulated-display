@@ -21,7 +21,7 @@
 
 #define LEFT_SPRITE_X 1
 #define LEFT_NUMBER_X 12
-#define LEFT_NUMBER_WIDTH 17
+#define LEFT_NUMBER_WIDTH 21
 #define LEFT_TIME_X 33
 #define LEFT_TIME_WIDTH 55
 
