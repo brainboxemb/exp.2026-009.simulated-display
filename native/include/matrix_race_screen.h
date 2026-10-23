@@ -9,6 +9,12 @@
 #define MATRIX_RACE_LEFT_ROW_COUNT 3u
 #define MATRIX_RACE_RIGHT_ROW_COUNT 2u
 
+typedef enum {
+    MATRIX_RACE_LAYOUT_REGISTRATIONS,
+    MATRIX_RACE_LAYOUT_MIXED,
+    MATRIX_RACE_LAYOUT_MIXED_COMPACT_FOOTER
+} MatrixRaceLayout;
+
 typedef struct {
     const char *number;
     const char *time;
@@ -23,6 +29,7 @@ typedef struct {
     const char *location;
     const char *clock;
     const char *counter;
+    MatrixRaceLayout layout;
     bool wifi_connected;
     bool registration_server_connected;
     bool synchronizing;
