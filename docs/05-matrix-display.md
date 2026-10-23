@@ -32,7 +32,9 @@ The current demo screen supports four preview layouts:
   and up to four ready teams on the right. The footer remains full width;
 - `Registraties + klaarstaan (>4 klaar)`: the right side extends into the
   footer area for additional ready teams. The footer remains only on the left
-  and is therefore 81 pixels wide.
+  and is therefore 81 pixels wide. The three right-side rows keep the first
+  row at y=14 and use y=31 and y=48 for the extra rows, consuming the free
+  pixels at the bottom instead of shifting the whole group upward.
 
 The two mixed layouts show the runner and warmup sprites. Registration-only
 layouts have no middle divider and no sprites. All layouts keep the header with
