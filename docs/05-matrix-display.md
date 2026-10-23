@@ -31,6 +31,8 @@ The current demo screen follows the supplied layout reference:
 
 The current values are demo data in `matrix_host_main.c`. They will later come from the synchronized application-data model.
 
+The main vertical divider is at x=81. This keeps the 160-pixel display visually centered while assigning the one-pixel separator itself to the middle boundary. Layout coordinates for mixed-mode content are derived from this divider instead of from the previous x=90 split.
+
 The finished-team counter in the upper-right header is preceded by a small
 static 7×7 finish flag drawn as literal 1×1 checker pixels. It deliberately has
 no pole and has its own `flag_color`, independent of the runner/warmup
