@@ -10,10 +10,13 @@ const lv_font_t *matrix_font_resolve(
             switch (font.size) {
                 case 8:
                     return &lv_font_unscii_8;
+
                 case 10:
                     return &matrix_font_unscii_10;
+
                 case 16:
                     return &lv_font_unscii_16;
+
                 default:
                     return NULL;
             }
@@ -22,8 +25,10 @@ const lv_font_t *matrix_font_resolve(
             switch (font.size) {
                 case 9:
                     return &matrix_font_vbz_9;
+
                 case 10:
                     return &matrix_font_vbz_10;
+
                 default:
                     return NULL;
             }

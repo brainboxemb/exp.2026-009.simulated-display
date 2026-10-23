@@ -215,9 +215,12 @@ final class MatrixDisplayWindow implements AutoCloseable {
     }
 
     private void refreshFontSizes() {
-        List<Integer> sizes =
+        boolean vbz =
                 "VBZ".equals(
-                        fontFamily.getValue())
+                        fontFamily.getValue());
+
+        List<Integer> sizes =
+                vbz
                         ? List.of(
                                 9,
                                 10)
@@ -229,19 +232,19 @@ final class MatrixDisplayWindow implements AutoCloseable {
         setSizes(
                 headerSize,
                 sizes,
-                10);
+                vbz ? 9 : 10);
         setSizes(
                 rowSize,
                 sizes,
-                10);
+                vbz ? 9 : 10);
         setSizes(
                 largeSize,
                 sizes,
-                16);
+                vbz ? 10 : 16);
         setSizes(
                 footerSize,
                 sizes,
-                10);
+                vbz ? 9 : 10);
     }
 
     private static void setSizes(
