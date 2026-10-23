@@ -34,9 +34,14 @@ const lv_font_t *matrix_font_resolve(
 
 const lv_font_t *matrix_large_font_resolve(
         MatrixFontSpec font) {
-    if (font.family == MATRIX_FONT_VBZ
-            && font.size == 12) {
-        return &matrix_font_numeric_12;
+    if (font.family == MATRIX_FONT_VBZ) {
+        if (font.size == 12) {
+            return &matrix_font_numeric_12;
+        }
+
+        if (font.size == 14) {
+            return &matrix_font_numeric_14;
+        }
     }
 
     return matrix_font_resolve(font);
