@@ -2,6 +2,9 @@ package io.github.brainboxemb.experimental.display;
 
 import java.io.IOException;
 import java.util.List;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -17,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.util.Duration;
 
 final class MatrixDisplayWindow implements AutoCloseable {
 
@@ -27,6 +31,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final RgbMatrixView view;
     private final Label status;
     private final MatrixDisplayProcess process;
+    private final Timeline spriteAnimation;
 
     private final ColorPicker backgroundColor =
             new ColorPicker(Color.web("#333333"));
@@ -143,6 +148,15 @@ final class MatrixDisplayWindow implements AutoCloseable {
         stage.setOnHidden(
                 event -> close());
 
+        spriteAnimation =
+                new Timeline(
+                        new KeyFrame(
+                                Duration.millis(160),
+                                event -> animateSprites()));
+        spriteAnimation.setCycleCount(
+                Animation.INDEFINITE);
+        spriteAnimation.play();
+
         /*
          * Keep the visible controls and the native renderer in sync from
          * the first frame onward.
@@ -165,6 +179,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
     @Override
     public void close() {
+        spriteAnimation.stop();
         process.close();
     }
 
@@ -326,6 +341,17 @@ final class MatrixDisplayWindow implements AutoCloseable {
         return ((red >> 3) << 11)
                 | ((green >> 2) << 5)
                 | (blue >> 3);
+    }
+
+    private void animateSprites() {
+        try {
+            process.animationTick();
+        } catch (IOException exception) {
+            spriteAnimation.stop();
+            status.setText(
+                    "Matrix animation failed: "
+                            + exception.getMessage());
+        }
     }
 
     private void sendDemoScreen() {
