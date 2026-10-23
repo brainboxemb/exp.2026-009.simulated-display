@@ -111,6 +111,25 @@ final class MatrixDisplayProcessTest {
             assertEquals(255, mixed.green(81, 51));
             assertEquals(0, mixed.blue(81, 51));
 
+            process.layout(2);
+
+            MatrixDisplayFrame compactMixed =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+
+            assertNotNull(
+                    compactMixed,
+                    "matrix host did not render compact mixed layout");
+            assertEquals(0, compactMixed.red(0, 54));
+            assertEquals(255, compactMixed.green(0, 54));
+            assertEquals(0, compactMixed.blue(0, 54));
+
+            process.layout(1);
+            frames.poll(
+                    5,
+                    TimeUnit.SECONDS);
+
             process.connectionStatus(
                     false,
                     false,
