@@ -14,8 +14,7 @@
 #define MATRIX_HOST_REQUEST_DEMO_SCREEN 0u
 #define MATRIX_HOST_REQUEST_CLEAR 1u
 #define MATRIX_HOST_REQUEST_THEME 2u
-#define MATRIX_HOST_REQUEST_ANIMATION_TICK 3u
-#define MATRIX_HOST_REQUEST_ANIMATION_FRAME 4u
+#define MATRIX_HOST_REQUEST_ANIMATION_FRAME 3u
 
 static const MatrixRaceScreenData DEMO_SCREEN = {
     .location = "WP-99",
@@ -251,24 +250,6 @@ int main(void) {
                     }
                 } else {
                     matrix_framebuffer_clear(&framebuffer);
-                }
-
-                write_frame(&framebuffer);
-                break;
-
-            case MATRIX_HOST_REQUEST_ANIMATION_TICK:
-                if (!demo_visible) {
-                    break;
-                }
-
-                animation_frame =
-                        (uint8_t)((animation_frame + 1u) % 12u);
-
-                if (!draw_demo_screen(
-                        &framebuffer,
-                        &theme,
-                        animation_frame)) {
-                    return 6;
                 }
 
                 write_frame(&framebuffer);
