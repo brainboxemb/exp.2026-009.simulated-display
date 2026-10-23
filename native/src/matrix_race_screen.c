@@ -539,6 +539,11 @@ bool matrix_race_screen_render(
 
     if (registrations_only) {
         static const int32_t registration_row_y[] = {
+            13,
+            26,
+            39
+        };
+        static const int32_t overflow_registration_row_y[] = {
             12,
             22,
             32,
@@ -556,7 +561,9 @@ bool matrix_race_screen_render(
             const MatrixRaceLeftRow *row =
                     &data->left_rows[index];
             const int32_t y =
-                    registration_row_y[index];
+                    registration_overflow
+                            ? overflow_registration_row_y[index]
+                            : registration_row_y[index];
 
             create_label(
                     screen,
