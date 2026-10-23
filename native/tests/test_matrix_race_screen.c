@@ -351,19 +351,19 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
                     &framebuffer,
                     54,
                     footer_color,
-                    90));
+                    81));
     assert(
             row_contains_color(
                     &framebuffer,
                     55,
                     footer_color,
-                    90));
+                    81));
     assert(
             row_contains_color(
                     &framebuffer,
                     63,
                     footer_color,
-                    90));
+                    81));
 }
 
 static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
