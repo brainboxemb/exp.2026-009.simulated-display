@@ -59,6 +59,9 @@ final class MatrixDisplayProcessTest {
                             0xffff,
                             0xffff,
                             0xf800,
+                            0x07e0,
+                            0x001f,
+                            0xffff,
                             0,
                             10,
                             10,
@@ -76,6 +79,25 @@ final class MatrixDisplayProcessTest {
             assertEquals(0, themed.red(0, 11));
             assertEquals(255, themed.green(0, 11));
             assertEquals(0, themed.blue(0, 11));
+
+            process.connectionStatus(
+                    false,
+                    false);
+
+            MatrixDisplayFrame warnings =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+
+            assertNotNull(
+                    warnings,
+                    "matrix host did not render connection warnings");
+            assertEquals(0, warnings.red(149, 2));
+            assertEquals(0, warnings.green(149, 2));
+            assertEquals(255, warnings.blue(149, 2));
+            assertEquals(0, warnings.red(119, 2));
+            assertEquals(255, warnings.green(119, 2));
+            assertEquals(0, warnings.blue(119, 2));
 
             process.clear();
 
