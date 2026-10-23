@@ -93,15 +93,15 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     warnings,
                     "matrix host did not render connection warnings");
-            assertEquals(0, warnings.red(141, 0));
-            assertEquals(0, warnings.green(141, 0));
-            assertEquals(255, warnings.blue(141, 0));
-            assertEquals(0, warnings.red(113, 1));
-            assertEquals(255, warnings.green(113, 1));
-            assertEquals(0, warnings.blue(113, 1));
-            assertEquals(255, warnings.red(142, 1));
-            assertEquals(0, warnings.green(142, 1));
-            assertEquals(0, warnings.blue(142, 1));
+            assertEquals(0, warnings.red(137, 10));
+            assertEquals(0, warnings.green(137, 10));
+            assertEquals(255, warnings.blue(137, 10));
+            assertEquals(0, warnings.red(109, 1));
+            assertEquals(255, warnings.green(109, 1));
+            assertEquals(0, warnings.blue(109, 1));
+            assertEquals(255, warnings.red(137, 0));
+            assertEquals(0, warnings.green(137, 0));
+            assertEquals(0, warnings.blue(137, 0));
 
             process.clear();
 
