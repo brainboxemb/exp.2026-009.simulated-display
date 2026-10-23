@@ -7,7 +7,8 @@ Status: active. Implementation issue: [#1](https://github.com/brainboxemb/exp.20
 Current implementation on PR #2:
 
 - [x] 90×35 bit-packed monochrome C framebuffer;
-- [x] native 5×7 printable ASCII font in 6×8 cells;
+- [x] native legacy custom character map (codes 31..255) with proportional advances;
+- [x] six-frame legacy `SpriteMap1` support via `FE FE`;
 - [x] chunk-independent serial command state machine;
 - [x] clear, X/Y, pixel, line, circle, box and erase-block commands;
 - [x] native host process with explicit framed stdin/stdout protocol;

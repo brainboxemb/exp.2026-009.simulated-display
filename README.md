@@ -12,7 +12,7 @@ Status: **active — first 90×35 LCD/LED vertical slice implemented on PR #2; q
 
 | Mode | Pixels | Output | Interpretation |
 | --- | --- | --- | --- |
-| Serial LED | 90 × 35 | Red monochrome LEDs | SparkFun Graphic Serial LCD-style byte stream; C-owned 5×7 text rendering |
+| Serial LED | 90 × 35 | Red monochrome LEDs | SparkFun Graphic Serial LCD-style byte stream; C-owned custom character rendering |
 | HUB75 | 160 × 64 (five panels) | RGB LEDs | Synchronized application data with a separate native C interpreter |
 
 The SparkFun command set is a protocol reference. The simulated hardware is intentionally a red LED matrix rather than a physical SparkFun LCD.
@@ -26,7 +26,7 @@ serial bytes
 native C streaming parser
     |
     v
-5x7 text + graphics renderer
+custom character + sprite + graphics renderer
     |
     v
 90x35 bit-packed framebuffer
@@ -87,7 +87,9 @@ which sends SparkFun-style **set pixel (10,5)**.
 
 The C parser currently understands:
 
-- printable ASCII, carriage return and backspace;
+- legacy custom character codes 31..255, carriage return and backspace;
+- proportional character advances from the original custom map;
+- `FE FE` sprite marker using the six imported `SpriteMap1` appearances;
 - clear;
 - set X / set Y;
 - set/reset pixel;

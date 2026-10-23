@@ -3,7 +3,7 @@
 ## Ownership boundaries
 
 - **Serial LCD parser (C):** consumes arbitrary byte chunks and maintains command state across calls.
-- **LCD renderer (C):** owns the 5×7 font, text cursor and graphic primitives.
+- **LCD renderer (C):** owns the custom character map, sprite appearances, text cursor and graphic primitives.
 - **Framebuffer (C):** owns logical monochrome pixels; the current 90×35 representation is bit-packed.
 - **Host runtime (C):** adapts framed stdin requests to serial chunks and emits complete logical frames.
 - **JavaFX 21:** starts the host process, supplies development controls and paints returned pixels. It owns no font/protocol behavior.
@@ -47,7 +47,7 @@ Chosen for the first slice:
 
 - local process transport instead of TCP/libuv;
 - full logical frames instead of dirty rectangles;
-- C-owned printable ASCII 5×7 font;
+- C-owned legacy custom character map for codes 31..255 plus `SpriteMap1`;
 - Java 21 / JavaFX 21 / Maven for NetBeans.
 
 Still open:

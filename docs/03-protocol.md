@@ -22,15 +22,30 @@ References:
 
 Known but deliberately not simulated yet: demo (`04`), reverse (`12`), splash (`13`), backlight (`02 value`) and baud (`07 value`). Parameter bytes are still consumed so subsequent stream parsing remains aligned.
 
-## Text
+## Custom character map
 
-Printable ASCII `0x20..0x7E` uses a native C 5×7 bitmap font in a 6×8 character cell. `\r` advances to the next 8-pixel line and `\b` erases the previous character cell.
+The simulator uses the legacy `CharMap1` supplied for this experiment rather than the temporary 5×7 font.
 
-The glyph artwork is experiment-owned and is not claimed to be byte-identical to SparkFun's font. Command framing and relevant behavior are the compatibility target.
+- character codes **31..255** are retained;
+- each entry stores its original proportional cursor advance plus eight bitmap columns;
+- bit 0 is the top pixel and all eight row bits are rendered;
+- carriage return advances to the next 8-pixel line;
+- backspace returns to the previous proportional character position;
+- `0x7C` remains the serial command prefix and therefore cannot be emitted as an ordinary character byte in this protocol.
+
+Only `CharMap1` and `SpriteMap1` were converted from the supplied legacy include file. `Bitmap_Batavieren` and all other `Bitmap_*` data were deliberately excluded.
+
+## Sprite marker
+
+Two consecutive bytes `FE FE` render a sprite at the current text cursor. The six imported `SpriteMap1` appearances are used in sequence and wrap after frame six. The sprite advances the cursor by the original `wSprite1 = 7` pixels.
+
+The marker detection is streaming: `FE FE` still works when the two bytes arrive in separate host chunks. A single `FE` followed by another byte falls back to legacy character 254 before the following byte is processed.
+
+Stepping to the next sprite appearance on every `FE FE` is the deterministic simulator behavior for this PoP.
 
 ## 90×35 geometry
 
-The reference SparkFun firmware targets 128×64 and 160×128 displays. This experiment intentionally targets **90×35**. Fifteen 6-pixel cells fit across a 90-pixel row, so X=84 is a valid final character position. This is a deliberate geometry adaptation.
+The reference SparkFun firmware targets 128×64 and 160×128 displays. This experiment intentionally targets **90×35**. Text wrapping follows each custom character's stored advance rather than assuming fixed 6-pixel cells.
 
 ## Host framing
 

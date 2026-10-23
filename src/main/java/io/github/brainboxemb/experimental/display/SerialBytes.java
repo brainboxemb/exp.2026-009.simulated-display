@@ -19,6 +19,10 @@ final class SerialBytes {
         return new byte[]{0x7c, 0x10, (byte) x, (byte) y, (byte) (on ? 1 : 0)};
     }
 
+    static byte[] sprite() {
+        return new byte[]{(byte) 0xfe, (byte) 0xfe};
+    }
+
     static byte[] parseHex(String text) {
         String normalized = text.trim().replace(',', ' ');
         if (normalized.isEmpty()) {

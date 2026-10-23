@@ -78,7 +78,18 @@ public final class SimulatedDisplayFxApplication extends Application {
             send(SerialBytes.pixel(WIDTH - 1, HEIGHT - 1, true));
         });
 
-        HBox textControls = new HBox(8, new Label("ASCII:"), text, sendText, home, clear, corners);
+        Button sprite = new Button("Sprite");
+        sprite.setOnAction(event -> send(SerialBytes.sprite()));
+
+        HBox textControls = new HBox(
+                8,
+                new Label("ASCII:"),
+                text,
+                sendText,
+                home,
+                clear,
+                corners,
+                sprite);
 
         TextField hex = new TextField("7C 10 0A 05 01");
         hex.setPrefColumnCount(25);
