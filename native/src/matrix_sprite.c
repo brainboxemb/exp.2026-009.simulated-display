@@ -2,108 +2,112 @@
 
 #include <stddef.h>
 
-static const uint16_t RUNNER[
-        MATRIX_SPRITE_FRAME_COUNT][MATRIX_SPRITE_HEIGHT] = {
-    {
-        0x030, 0x078, 0x078, 0x030,
-        0x0fc, 0x1b6, 0x030, 0x078,
-        0x0cc, 0x186, 0x300, 0x003
-    },
-    {
-        0x030, 0x078, 0x078, 0x030,
-        0x07c, 0x0ec, 0x1b0, 0x038,
-        0x06c, 0x0c6, 0x181, 0x300
-    },
-    {
-        0x030, 0x078, 0x078, 0x030,
-        0x0f8, 0x1b8, 0x330, 0x078,
-        0x0cc, 0x186, 0x006, 0x00c
-    },
-    {
-        0x030, 0x078, 0x078, 0x030,
-        0x0fc, 0x1b6, 0x030, 0x078,
-        0x0cc, 0x003, 0x300, 0x180
-    },
-    {
-        0x030, 0x078, 0x078, 0x030,
-        0x0f8, 0x0dc, 0x036, 0x070,
-        0x0d8, 0x18c, 0x206, 0x003
-    },
-    {
-        0x030, 0x078, 0x078, 0x030,
-        0x07c, 0x076, 0x033, 0x078,
-        0x0cc, 0x186, 0x180, 0x0c0
-    }
+#define RUNNER_SOURCE_WIDTH 7u
+#define RUNNER_SOURCE_HEIGHT 7u
+
+/*
+ * Original six-frame SpriteMap1 pattern from the legacy display, expressed as
+ * seven visible columns. The matrix renderer scales this source pattern to
+ * 10x12 with nearest-neighbour pixels so the gait stays recognizable.
+ */
+static const uint8_t RUNNER[
+        MATRIX_SPRITE_FRAME_COUNT][RUNNER_SOURCE_WIDTH] = {
+    {0x00, 0x00, 0x33, 0x2f, 0x70, 0x20, 0x00},
+    {0x20, 0x10, 0x13, 0x0f, 0x30, 0x40, 0x00},
+    {0x20, 0x10, 0x13, 0x0f, 0x10, 0x20, 0x20},
+    {0x00, 0x60, 0x13, 0x0f, 0x10, 0x20, 0x20},
+    {0x00, 0x00, 0x63, 0x1f, 0x30, 0x20, 0x00},
+    {0x00, 0x00, 0x03, 0x7f, 0x20, 0x20, 0x00}
 };
 
+/*
+ * Warmup keeps head, torso and legs fixed. Only the arm position changes:
+ * down -> diagonal -> horizontal -> raised -> overhead -> horizontal.
+ */
 static const uint16_t WARMUP[
         MATRIX_SPRITE_FRAME_COUNT][MATRIX_SPRITE_HEIGHT] = {
     {
         0x030, 0x078, 0x078, 0x030,
-        0x078, 0x0b4, 0x0b4, 0x030,
-        0x078, 0x048, 0x0cc, 0x0cc
+        0x030, 0x078, 0x0b4, 0x0b4,
+        0x030, 0x048, 0x084, 0x084
     },
     {
         0x030, 0x078, 0x078, 0x030,
-        0x3ff, 0x333, 0x030, 0x030,
-        0x078, 0x048, 0x0cc, 0x0cc
+        0x0b4, 0x078, 0x030, 0x030,
+        0x030, 0x048, 0x084, 0x084
     },
     {
-        0x186, 0x0cc, 0x078, 0x078,
-        0x030, 0x078, 0x030, 0x030,
-        0x078, 0x048, 0x0cc, 0x0cc
+        0x030, 0x078, 0x078, 0x030,
+        0x3ff, 0x078, 0x030, 0x030,
+        0x030, 0x048, 0x084, 0x084
     },
     {
-        0x0c0, 0x1e0, 0x1e0, 0x0c0,
-        0x1f0, 0x360, 0x060, 0x060,
-        0x0f0, 0x090, 0x198, 0x198
+        0x030, 0x078, 0x078, 0x0b4,
+        0x078, 0x030, 0x030, 0x030,
+        0x030, 0x048, 0x084, 0x084
     },
     {
-        0x186, 0x0cc, 0x078, 0x078,
-        0x030, 0x078, 0x030, 0x030,
-        0x078, 0x048, 0x0cc, 0x0cc
+        0x0cc, 0x0cc, 0x078, 0x078,
+        0x030, 0x030, 0x030, 0x030,
+        0x030, 0x048, 0x084, 0x084
     },
     {
-        0x00c, 0x01e, 0x01e, 0x00c,
-        0x03e, 0x01b, 0x018, 0x018,
-        0x03c, 0x024, 0x066, 0x066
+        0x030, 0x078, 0x078, 0x030,
+        0x3ff, 0x078, 0x030, 0x030,
+        0x030, 0x048, 0x084, 0x084
     }
 };
 
-static const uint16_t *sprite_rows(
-        MatrixSpriteKind kind,
-        uint8_t frame) {
-    const uint8_t index =
-            (uint8_t)(frame % MATRIX_SPRITE_FRAME_COUNT);
+static void draw_runner(
+        MatrixFramebuffer *framebuffer,
+        uint8_t frame,
+        uint16_t x,
+        uint16_t y,
+        MatrixPixel color) {
+    const uint8_t *columns =
+            RUNNER[frame % MATRIX_SPRITE_FRAME_COUNT];
 
-    switch (kind) {
-        case MATRIX_SPRITE_RUNNER:
-            return RUNNER[index];
+    for (uint16_t target_y = 0;
+            target_y < MATRIX_SPRITE_HEIGHT;
+            target_y++) {
+        const uint16_t source_y =
+                (uint16_t)(
+                        target_y
+                        * RUNNER_SOURCE_HEIGHT
+                        / MATRIX_SPRITE_HEIGHT);
 
-        case MATRIX_SPRITE_WARMUP:
-            return WARMUP[index];
+        for (uint16_t target_x = 0;
+                target_x < MATRIX_SPRITE_WIDTH;
+                target_x++) {
+            const uint16_t source_x =
+                    (uint16_t)(
+                            target_x
+                            * RUNNER_SOURCE_WIDTH
+                            / MATRIX_SPRITE_WIDTH);
 
-        default:
-            return NULL;
+            if ((columns[source_x]
+                    & (uint8_t)(1u << source_y))
+                    == 0) {
+                continue;
+            }
+
+            matrix_framebuffer_set(
+                    framebuffer,
+                    (uint16_t)(x + target_x),
+                    (uint16_t)(y + target_y),
+                    color);
+        }
     }
 }
 
-void matrix_sprite_draw(
+static void draw_warmup(
         MatrixFramebuffer *framebuffer,
-        MatrixSpriteKind kind,
         uint8_t frame,
         uint16_t x,
         uint16_t y,
         MatrixPixel color) {
     const uint16_t *rows =
-            sprite_rows(
-                    kind,
-                    frame);
-
-    if (framebuffer == NULL
-            || rows == NULL) {
-        return;
-    }
+            WARMUP[frame % MATRIX_SPRITE_FRAME_COUNT];
 
     for (uint16_t row = 0;
             row < MATRIX_SPRITE_HEIGHT;
@@ -128,5 +132,40 @@ void matrix_sprite_draw(
                     (uint16_t)(y + row),
                     color);
         }
+    }
+}
+
+void matrix_sprite_draw(
+        MatrixFramebuffer *framebuffer,
+        MatrixSpriteKind kind,
+        uint8_t frame,
+        uint16_t x,
+        uint16_t y,
+        MatrixPixel color) {
+    if (framebuffer == NULL) {
+        return;
+    }
+
+    switch (kind) {
+        case MATRIX_SPRITE_RUNNER:
+            draw_runner(
+                    framebuffer,
+                    frame,
+                    x,
+                    y,
+                    color);
+            break;
+
+        case MATRIX_SPRITE_WARMUP:
+            draw_warmup(
+                    framebuffer,
+                    frame,
+                    x,
+                    y,
+                    color);
+            break;
+
+        default:
+            break;
     }
 }
