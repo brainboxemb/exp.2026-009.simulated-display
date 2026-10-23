@@ -433,7 +433,7 @@ static void test_runner_lower_legs_stay_one_pixel_wide(void) {
                 0,
                 color);
 
-        for (uint16_t y = 8;
+        for (uint16_t y = 9;
                 y < MATRIX_SPRITE_HEIGHT;
                 y++) {
             bool previous_on = false;
@@ -455,9 +455,54 @@ static void test_runner_lower_legs_stay_one_pixel_wide(void) {
     }
 }
 
-static void test_runner_arm_swing_uses_extra_matrix_pixels(void) {
+static void test_runner_has_stable_three_by_three_head(void) {
+    const MatrixPixel color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    255,
+                    255);
+
+    for (uint8_t frame = 0;
+            frame < MATRIX_SPRITE_FRAME_COUNT;
+            frame++) {
+        MatrixFramebuffer framebuffer;
+        matrix_framebuffer_clear(&framebuffer);
+
+        matrix_sprite_draw(
+                &framebuffer,
+                MATRIX_SPRITE_RUNNER,
+                frame,
+                0,
+                0,
+                color);
+
+        for (uint16_t y = 0;
+                y < 3;
+                y++) {
+            for (uint16_t x = 4;
+                    x <= 6;
+                    x++) {
+                assert(
+                        matrix_framebuffer_get(
+                                &framebuffer,
+                                x,
+                                y)
+                        == color);
+            }
+        }
+
+        assert(
+                matrix_framebuffer_get(
+                        &framebuffer,
+                        5,
+                        3)
+                == color);
+    }
+}
+
+static void test_runner_arm_swing_follows_opposite_gait_phases(void) {
     MatrixFramebuffer frame0;
-    MatrixFramebuffer frame2;
+    MatrixFramebuffer frame3;
     const MatrixPixel color =
             matrix_pixel_rgb565_create(
                     255,
@@ -465,7 +510,7 @@ static void test_runner_arm_swing_uses_extra_matrix_pixels(void) {
                     255);
 
     matrix_framebuffer_clear(&frame0);
-    matrix_framebuffer_clear(&frame2);
+    matrix_framebuffer_clear(&frame3);
 
     matrix_sprite_draw(
             &frame0,
@@ -475,9 +520,9 @@ static void test_runner_arm_swing_uses_extra_matrix_pixels(void) {
             0,
             color);
     matrix_sprite_draw(
-            &frame2,
+            &frame3,
             MATRIX_SPRITE_RUNNER,
-            2,
+            3,
             0,
             0,
             color);
@@ -485,27 +530,27 @@ static void test_runner_arm_swing_uses_extra_matrix_pixels(void) {
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    3,
-                    5)
+                    1,
+                    6)
             == color);
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    6,
-                    5)
+                    8,
+                    6)
             != color);
 
     assert(
             matrix_framebuffer_get(
-                    &frame2,
-                    3,
-                    5)
+                    &frame3,
+                    1,
+                    6)
             != color);
     assert(
             matrix_framebuffer_get(
-                    &frame2,
-                    6,
-                    5)
+                    &frame3,
+                    8,
+                    6)
             == color);
 }
 
@@ -542,7 +587,7 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    4,
+                    5,
                     13)
             == runner_color);
     assert(
@@ -610,7 +655,8 @@ int main(void) {
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_runner_lower_legs_stay_one_pixel_wide();
-    test_runner_arm_swing_uses_extra_matrix_pixels();
+    test_runner_has_stable_three_by_three_head();
+    test_runner_arm_swing_follows_opposite_gait_phases();
     test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
 
