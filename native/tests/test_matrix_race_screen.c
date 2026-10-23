@@ -470,8 +470,8 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
 
     /*
      * No warning: flag starts at x=132.
-     * One warning reserves 9 pixels on the right, moving flag/counter left.
-     * Two warnings reserve 19 pixels including their one-pixel separator.
+     * One warning reserves 11 pixels on the right, moving flag/counter left.
+     * Two warnings reserve 23 pixels including their one-pixel separator.
      */
     assert(
             matrix_framebuffer_get(
