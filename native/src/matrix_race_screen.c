@@ -336,7 +336,7 @@ bool matrix_race_screen_render(
     matrix_sprite_draw(
             framebuffer,
             MATRIX_SPRITE_WARMUP,
-            animation_frame,
+            (uint8_t)(animation_frame / 2u),
             RIGHT_SPRITE_X,
             right_row_y[1],
             theme->large_value.color);
