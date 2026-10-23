@@ -32,8 +32,8 @@
 
 #define MIXED_LEFT_SPRITE_X 1
 #define MIXED_LEFT_NUMBER_X 12
-#define MIXED_LEFT_NUMBER_WIDTH 18
-#define MIXED_LEFT_TIME_X 31
+#define MIXED_LEFT_NUMBER_WIDTH 21
+#define MIXED_LEFT_TIME_X 33
 #define MIXED_LEFT_TIME_WIDTH 48
 
 #define MIXED_RIGHT_SPRITE_X 82
@@ -46,12 +46,12 @@
 #define REGISTRATION_NUMBER_WIDTH 28
 #define REGISTRATION_TIME_X 34
 #define REGISTRATION_TIME_WIDTH 43
-#define REGISTRATION_HUNDREDTH_SEPARATOR_X 80
-#define REGISTRATION_HUNDREDTH_X 85
+#define REGISTRATION_HUNDREDTH_SEPARATOR_X 78
+#define REGISTRATION_HUNDREDTH_X 81
 #define REGISTRATION_HUNDREDTH_WIDTH 20
-#define REGISTRATION_RANK_X 128
+#define REGISTRATION_RANK_X 120
 #define REGISTRATION_RANK_WIDTH 16
-#define REGISTRATION_RANK_SUFFIX_X 146
+#define REGISTRATION_RANK_SUFFIX_X 138
 #define REGISTRATION_RANK_SUFFIX_WIDTH 12
 
 #define FOOTER_Y 54
@@ -548,7 +548,7 @@ bool matrix_race_screen_render(
         const size_t visible_registration_rows =
                 registration_overflow
                         ? MATRIX_RACE_LEFT_ROW_COUNT
-                        : 4u;
+                        : 3u;
 
         for (size_t index = 0;
                 index < visible_registration_rows;
