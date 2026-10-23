@@ -119,7 +119,7 @@ int main(void) {
             break;
         }
 
-        if (size == HOST_REQUEST_ANIMATION_TICK) {
+        if (size == HOST_REQUEST_GENERAL_TIMER_TICK) {
             serial_lcd_general_timer_tick(&lcd);
             write_changed_frame(&lcd);
             continue;
