@@ -23,16 +23,9 @@ const lv_font_t *matrix_font_resolve(
             }
 
         case MATRIX_FONT_VBZ:
-            switch (font.size) {
-                case 9:
-                    return &matrix_font_vbz_9;
-
-                case 10:
-                    return &matrix_font_vbz_10;
-
-                default:
-                    return NULL;
-            }
+            return font.size == 9
+                    ? &matrix_font_vbz_9
+                    : NULL;
 
         default:
             return NULL;
