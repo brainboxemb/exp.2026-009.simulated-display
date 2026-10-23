@@ -130,6 +130,7 @@ static bool read_theme(MatrixTheme *theme) {
     uint16_t row_color = 0;
     uint16_t large_color = 0;
     uint16_t footer_color = 0;
+    uint16_t sprite_color = 0;
     uint8_t family = 0;
     uint8_t header_size = 0;
     uint8_t row_size = 0;
@@ -142,6 +143,7 @@ static bool read_theme(MatrixTheme *theme) {
             || !read_u16_be(&row_color)
             || !read_u16_be(&large_color)
             || !read_u16_be(&footer_color)
+            || !read_u16_be(&sprite_color)
             || !read_u8(&family)
             || !read_u8(&header_size)
             || !read_u8(&row_size)
@@ -161,6 +163,7 @@ static bool read_theme(MatrixTheme *theme) {
     theme->row_time.color = row_color;
     theme->large_value.color = large_color;
     theme->footer.color = footer_color;
+    theme->sprite_color = sprite_color;
 
     theme->header.font.family =
             (MatrixFontFamily)family;
