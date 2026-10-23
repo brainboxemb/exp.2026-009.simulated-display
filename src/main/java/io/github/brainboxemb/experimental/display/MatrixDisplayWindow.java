@@ -75,6 +75,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final CheckBox synchronizing =
             new CheckBox("Synchronizing");
 
+    private final ComboBox<String> layoutMode =
+            new ComboBox<>();
     private final ComboBox<String> fontFamily =
             new ComboBox<>();
     private final ComboBox<Integer> headerSize =
@@ -102,6 +104,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                         "Starting native matrix display...");
 
         configureFontControls();
+        configureLayoutControl();
 
         Button demoScreen =
                 new Button("Demo screen");
@@ -155,6 +158,12 @@ final class MatrixDisplayWindow implements AutoCloseable {
                         registrationServerConnected,
                         synchronizing);
 
+        HBox layoutControls =
+                new HBox(
+                        8,
+                        new Label("Layout:"),
+                        layoutMode);
+
         Button applyStyle =
                 new Button("Apply style");
         applyStyle.setOnAction(
@@ -168,6 +177,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new VBox(
                         8,
                         displayControls,
+                        layoutControls,
                         spriteControls,
                         connectionControls,
                         styleControls);
@@ -210,6 +220,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 event -> sendConnectionStatus());
         synchronizing.setOnAction(
                 event -> sendConnectionStatus());
+        layoutMode.setOnAction(
+                event -> sendLayout());
         stage.setOnHidden(
                 event -> close());
 
@@ -239,6 +251,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
          * the first frame onward.
          */
         applyStyle();
+        sendLayout();
         sendConnectionStatus();
     }
 
@@ -315,6 +328,15 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
         grid.add(applyStyle, 6, 5);
         return grid;
+    }
+
+    private void configureLayoutControl() {
+        layoutMode.getItems().addAll(
+                "Registraties",
+                "Registraties + klaarstaan",
+                "Registraties + klaarstaan (>4)");
+        layoutMode.setValue(
+                "Registraties + klaarstaan");
     }
 
     private void configureFontControls() {
@@ -520,6 +542,23 @@ final class MatrixDisplayWindow implements AutoCloseable {
         } catch (IOException exception) {
             status.setText(
                     "Matrix send failed: "
+                            + exception.getMessage());
+        }
+    }
+
+    private void sendLayout() {
+        try {
+            process.layout(
+                    switch (layoutMode.getValue()) {
+                        case "Registraties" -> 0;
+                        case "Registraties + klaarstaan" -> 1;
+                        case "Registraties + klaarstaan (>4)" -> 2;
+                        default -> throw new IllegalStateException(
+                                "Unknown matrix layout");
+                    });
+        } catch (IOException exception) {
+            status.setText(
+                    "Matrix layout failed: "
                             + exception.getMessage());
         }
     }
