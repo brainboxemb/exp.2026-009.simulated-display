@@ -18,8 +18,7 @@ static const MatrixRaceScreenData SAMPLE = {
         {"999", "99:99", "99", "1"},
         {"999", "99:99", "99", "2"},
         {"999", "99:99", "99", "3"},
-        {"999", "99:99", "99", "4"},
-        {"999", "99:99", "99", "5"}
+        {"999", "99:99", "99", "4"}
     },
     .right_rows = {
         {"999", "999"},
@@ -757,9 +756,8 @@ static void test_registration_layout_uses_full_width_without_sprites(void) {
             != theme.sprite_color);
 
     /*
-     * The normal registration preview shows three rows. The fourth row at
-     * y=42 is reserved for real data later and is not part of the default
-     * preview.
+     * The normal registration preview shows three rows. The fourth row only
+     * appears in registration-overflow mode after the footer disappears.
      */
     assert(
             !row_contains_color(
@@ -802,6 +800,17 @@ static void test_registration_overflow_removes_footer(void) {
                     0,
                     52)
             != theme.line_color);
+
+    /*
+     * Overflow means exactly one extra registration: the fourth row uses the
+     * former footer space while keeping the normal 13-pixel cadence.
+     */
+    assert(
+            row_contains_color(
+                    &framebuffer,
+                    55,
+                    theme.row_number.color,
+                    MATRIX_DISPLAY_WIDTH));
 
     for (size_t index = 0;
             index < MATRIX_DISPLAY_PIXEL_COUNT;
