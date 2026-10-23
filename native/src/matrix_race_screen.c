@@ -37,7 +37,7 @@
 #define MIXED_LEFT_TIME_WIDTH 48
 
 #define MIXED_RIGHT_SPRITE_X 82
-#define MIXED_RIGHT_VALUE_X 92
+#define MIXED_RIGHT_VALUE_X 94
 #define MIXED_RIGHT_VALUE_WIDTH 30
 #define MIXED_RIGHT_READY_X 128
 #define MIXED_RIGHT_READY_WIDTH 30
@@ -668,7 +668,7 @@ bool matrix_race_screen_render(
                     MIXED_RIGHT_VALUE_X,
                     y,
                     MIXED_RIGHT_VALUE_WIDTH,
-                    LV_TEXT_ALIGN_CENTER,
+                    LV_TEXT_ALIGN_RIGHT,
                     &theme->large_value,
                     large_value_font);
 
