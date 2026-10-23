@@ -39,13 +39,15 @@ no pole and has its own `flag_color`, independent of the runner/warmup
 Two optional 9×9 warning blocks can appear to the right of the counter. The
 WiFi warning uses two white horizontal signal bars, each two pixels high, plus
 a separate diagonal strike-through. The local registration-server warning uses
-a white link symbol with the same strike-through. A warning is not rendered
-while its connection is healthy. The strike-through has its own configurable
+two open, staggered white link shapes with the same strike-through. Keeping
+the link shapes open prevents the small raster from reading as the digit 8.
+A warning is not rendered while its connection is healthy. The strike-through
+is two pixels thick across most rows, has its own configurable
 `warning_strike_color` and defaults to red; the icon remains white on the
 blue warning background. The visible warning group owns the right edge of the
 header; the counter and flag shift left only by the space needed for the active
 blocks. Two simultaneous warnings have a one-pixel separator between them. The
-warning blocks and finish flag start at y=0.
+warning blocks start at y=0; the finish flag starts one pixel lower at y=1.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
 sprite, so its number starts at x=12. The runner uses the original six-frame
