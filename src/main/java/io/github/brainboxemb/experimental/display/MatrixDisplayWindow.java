@@ -26,12 +26,19 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
     private static final int WIDTH = 160;
     private static final int HEIGHT = 64;
+    private static final int ANIMATION_FRAME_COUNT = 12;
+    private static final int RUNNER_FRAME_COUNT = 6;
 
     private final Stage stage;
     private final RgbMatrixView view;
     private final Label status;
     private final MatrixDisplayProcess process;
     private final Timeline spriteAnimation;
+    private final Label spriteFrameStatus =
+            new Label();
+
+    private int animationFrame;
+    private boolean spriteAnimationRunning = true;
 
     private final ColorPicker backgroundColor =
             new ColorPicker(Color.web("#333333"));
@@ -82,6 +89,14 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new Button("Clear");
         ToggleButton scale2x =
                 new ToggleButton("2×");
+        Button previousSpriteFrame =
+                new Button("◀");
+        Button nextSpriteFrame =
+                new Button("▶");
+        Button runPauseSprites =
+                new Button("Pause");
+
+        updateSpriteFrameStatus();
 
         scale2x.setOnAction(
                 event -> {
@@ -100,6 +115,15 @@ final class MatrixDisplayWindow implements AutoCloseable {
                         scale2x,
                         status);
 
+        HBox spriteControls =
+                new HBox(
+                        8,
+                        new Label("Sprite frame:"),
+                        previousSpriteFrame,
+                        spriteFrameStatus,
+                        nextSpriteFrame,
+                        runPauseSprites);
+
         Button applyStyle =
                 new Button("Apply style");
         applyStyle.setOnAction(
@@ -113,6 +137,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new VBox(
                         8,
                         displayControls,
+                        spriteControls,
                         styleControls);
         controls.setPadding(
                 new Insets(12, 0, 0, 0));
@@ -158,6 +183,18 @@ final class MatrixDisplayWindow implements AutoCloseable {
         spriteAnimation.setCycleCount(
                 Animation.INDEFINITE);
         spriteAnimation.play();
+
+        previousSpriteFrame.setOnAction(
+                event -> stepSpriteFrame(
+                        -1,
+                        runPauseSprites));
+        nextSpriteFrame.setOnAction(
+                event -> stepSpriteFrame(
+                        1,
+                        runPauseSprites));
+        runPauseSprites.setOnAction(
+                event -> toggleSpriteAnimation(
+                        runPauseSprites));
 
         /*
          * Keep the visible controls and the native renderer in sync from
@@ -350,14 +387,68 @@ final class MatrixDisplayWindow implements AutoCloseable {
     }
 
     private void animateSprites() {
+        animationFrame =
+                (animationFrame + 1)
+                % ANIMATION_FRAME_COUNT;
+        updateSpriteFrameStatus();
+
         try {
-            process.animationTick();
+            process.animationFrame(
+                    animationFrame);
         } catch (IOException exception) {
             spriteAnimation.stop();
+            spriteAnimationRunning = false;
             status.setText(
                     "Matrix animation failed: "
                             + exception.getMessage());
         }
+    }
+
+    private void stepSpriteFrame(
+            int delta,
+            Button runPauseSprites) {
+        spriteAnimation.pause();
+        spriteAnimationRunning = false;
+        runPauseSprites.setText("Run");
+
+        animationFrame =
+                Math.floorMod(
+                        animationFrame + delta,
+                        ANIMATION_FRAME_COUNT);
+        updateSpriteFrameStatus();
+
+        try {
+            process.animationFrame(
+                    animationFrame);
+        } catch (IOException exception) {
+            status.setText(
+                    "Matrix animation failed: "
+                            + exception.getMessage());
+        }
+    }
+
+    private void toggleSpriteAnimation(
+            Button runPauseSprites) {
+        if (spriteAnimationRunning) {
+            spriteAnimation.pause();
+            spriteAnimationRunning = false;
+            runPauseSprites.setText("Run");
+            return;
+        }
+
+        spriteAnimation.play();
+        spriteAnimationRunning = true;
+        runPauseSprites.setText("Pause");
+    }
+
+    private void updateSpriteFrameStatus() {
+        spriteFrameStatus.setText(
+                "master "
+                        + animationFrame
+                        + " · runner "
+                        + animationFrame % RUNNER_FRAME_COUNT
+                        + " · warmup "
+                        + animationFrame / 2);
     }
 
     private void sendDemoScreen() {
