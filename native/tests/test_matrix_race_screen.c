@@ -189,6 +189,60 @@ static void test_vbz_metrics_match_source_font(void) {
     assert(colon.ofs_x == 1);
 }
 
+static void test_vbz_zero_bitmap_matches_source_rows(void) {
+    lv_font_glyph_dsc_t glyph = {0};
+
+    assert(
+            matrix_font_vbz_9.get_glyph_dsc(
+                    &matrix_font_vbz_9,
+                    &glyph,
+                    '0',
+                    0));
+
+    lv_draw_buf_t *draw_buffer =
+            lv_draw_buf_create(
+                    glyph.box_w,
+                    glyph.box_h,
+                    LV_COLOR_FORMAT_A8,
+                    LV_STRIDE_AUTO);
+
+    assert(draw_buffer != NULL);
+
+    const void *bitmap =
+            matrix_font_vbz_9.get_glyph_bitmap(
+                    &glyph,
+                    draw_buffer);
+
+    assert(bitmap == draw_buffer);
+
+    /*
+     * Source rows for '0':
+     *   0x78 = 01111000
+     *   0xCC = 11001100
+     */
+    const uint8_t *row0 =
+            &draw_buffer->data[0];
+    const uint8_t *row1 =
+            &draw_buffer->data[
+                    draw_buffer->header.stride];
+
+    assert(row0[0] == 0x00);
+    assert(row0[1] == 0xff);
+    assert(row0[2] == 0xff);
+    assert(row0[3] == 0xff);
+    assert(row0[4] == 0xff);
+    assert(row0[5] == 0x00);
+
+    assert(row1[0] == 0xff);
+    assert(row1[1] == 0xff);
+    assert(row1[2] == 0x00);
+    assert(row1[3] == 0x00);
+    assert(row1[4] == 0xff);
+    assert(row1[5] == 0xff);
+
+    lv_draw_buf_destroy(draw_buffer);
+}
+
 static void test_vbz_9_and_10_render_as_distinct_pixel_fonts(void) {
     MatrixFramebuffer frame9;
     MatrixFramebuffer frame10;
@@ -261,6 +315,7 @@ int main(void) {
     test_independent_line_and_text_colors_render();
     test_pixel_fonts_render_only_theme_colors();
     test_vbz_metrics_match_source_font();
+    test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_9_and_10_render_as_distinct_pixel_fonts();
     test_unsupported_font_size_is_rejected();
 
