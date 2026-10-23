@@ -150,7 +150,7 @@ int main(void) {
     test_default_screen_renders_lines();
     test_font_family_and_size_are_configurable();
     test_independent_line_and_text_colors_render();
-    test_antialiasing_is_quantized_to_theme_colors();
+    test_pixel_fonts_render_only_theme_colors();
     test_unsupported_font_size_is_rejected();
 
     puts("matrix_race_screen tests passed");
