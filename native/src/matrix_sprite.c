@@ -21,54 +21,25 @@ typedef struct {
 /*
  * Native 10x12 running cycle designed from the running motion itself.
  *
- * The body is fixed:
- * - 3x3 head;
- * - one-pixel neck;
- * - one-pixel torso;
+ * The body is fixed and faces left:
+ * - 3x3 head centered slightly ahead of the torso;
+ * - one-pixel vertical neck;
+ * - torso leaning one pixel forward toward the left;
  * - one shoulder joint and one hip joint.
  *
  * Only the limbs move. Each arm and leg is a one-pixel polyline with one
- * intermediate joint. The six poses form contact, recoil and passing phases,
- * followed by the opposite-side equivalents. Arms move contralaterally to
- * the legs.
+ * intermediate joint. The arm swing stays compact around the torso; the legs
+ * carry most of the visible motion through contact, recoil and passing phases.
+ * The second half repeats those shapes with the opposite foot contacting the
+ * ground.
  */
 static const MatrixRunnerPose RUNNER_POSES[
         MATRIX_SPRITE_FRAME_COUNT] = {
     {
-        .forward_elbow = {7, 5},
-        .forward_hand = {8, 4},
-        .backward_elbow = {4, 5},
-        .backward_hand = {2, 5},
-        .forward_knee = {7, 8},
-        .forward_foot = {9, 10},
-        .backward_knee = {4, 8},
-        .backward_foot = {2, 9}
-    },
-    {
-        .forward_elbow = {7, 5},
-        .forward_hand = {8, 6},
-        .backward_elbow = {4, 5},
-        .backward_hand = {3, 6},
-        .forward_knee = {7, 8},
-        .forward_foot = {8, 10},
-        .backward_knee = {4, 8},
-        .backward_foot = {3, 10}
-    },
-    {
-        .forward_elbow = {6, 5},
-        .forward_hand = {7, 7},
-        .backward_elbow = {4, 5},
-        .backward_hand = {3, 6},
-        .forward_knee = {7, 7},
-        .forward_foot = {6, 9},
-        .backward_knee = {5, 8},
-        .backward_foot = {4, 10}
-    },
-    {
         .forward_elbow = {3, 5},
-        .forward_hand = {2, 4},
-        .backward_elbow = {6, 5},
-        .backward_hand = {8, 5},
+        .forward_hand = {3, 6},
+        .backward_elbow = {5, 5},
+        .backward_hand = {6, 6},
         .forward_knee = {3, 8},
         .forward_foot = {1, 10},
         .backward_knee = {6, 8},
@@ -76,9 +47,9 @@ static const MatrixRunnerPose RUNNER_POSES[
     },
     {
         .forward_elbow = {3, 5},
-        .forward_hand = {2, 6},
-        .backward_elbow = {6, 5},
-        .backward_hand = {7, 6},
+        .forward_hand = {4, 6},
+        .backward_elbow = {5, 5},
+        .backward_hand = {6, 6},
         .forward_knee = {3, 8},
         .forward_foot = {2, 10},
         .backward_knee = {6, 8},
@@ -86,15 +57,45 @@ static const MatrixRunnerPose RUNNER_POSES[
     },
     {
         .forward_elbow = {4, 5},
-        .forward_hand = {3, 7},
-        .backward_elbow = {6, 5},
-        .backward_hand = {7, 6},
-        .forward_knee = {3, 7},
-        .forward_foot = {4, 9},
+        .forward_hand = {4, 6},
+        .backward_elbow = {5, 5},
+        .backward_hand = {6, 6},
+        .forward_knee = {4, 8},
+        .forward_foot = {3, 10},
+        .backward_knee = {5, 8},
+        .backward_foot = {6, 10}
+    },
+    {
+        .forward_elbow = {3, 5},
+        .forward_hand = {3, 6},
+        .backward_elbow = {5, 5},
+        .backward_hand = {6, 6},
+        .forward_knee = {3, 8},
+        .forward_foot = {1, 9},
+        .backward_knee = {6, 8},
+        .backward_foot = {8, 10}
+    },
+    {
+        .forward_elbow = {3, 5},
+        .forward_hand = {4, 6},
+        .backward_elbow = {5, 5},
+        .backward_hand = {6, 6},
+        .forward_knee = {3, 8},
+        .forward_foot = {2, 10},
+        .backward_knee = {6, 8},
+        .backward_foot = {7, 10}
+    },
+    {
+        .forward_elbow = {4, 5},
+        .forward_hand = {4, 6},
+        .backward_elbow = {5, 5},
+        .backward_hand = {6, 6},
+        .forward_knee = {4, 8},
+        .forward_foot = {3, 10},
         .backward_knee = {5, 8},
         .backward_foot = {6, 10}
     }
-};
+}
 
 static const uint16_t WARMUP[
         MATRIX_SPRITE_FRAME_COUNT][MATRIX_SPRITE_HEIGHT] = {
@@ -220,8 +221,8 @@ static void draw_runner(
     for (uint8_t head_y = 0;
             head_y < 3u;
             head_y++) {
-        for (uint8_t head_x = 5;
-                head_x < 8u;
+        for (uint8_t head_x = 3;
+                head_x < 6u;
                 head_x++) {
             draw_pixel(
                     framebuffer,
@@ -239,18 +240,18 @@ static void draw_runner(
             framebuffer,
             x,
             y,
-            (MatrixSpritePoint){6, 3},
+            (MatrixSpritePoint){4, 3},
             color);
 
     draw_line(
             framebuffer,
             x,
             y,
-            (MatrixSpritePoint){5, 4},
+            (MatrixSpritePoint){4, 4},
             (MatrixSpritePoint){5, 6},
             color);
 
-    const MatrixSpritePoint shoulder = {5, 4};
+    const MatrixSpritePoint shoulder = {4, 4};
     const MatrixSpritePoint hip = {5, 6};
 
     draw_line(
