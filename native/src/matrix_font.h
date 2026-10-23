@@ -7,4 +7,7 @@
 const lv_font_t *matrix_font_resolve(
         MatrixFontSpec font);
 
+const lv_font_t *matrix_large_font_resolve(
+        MatrixFontSpec font);
+
 #endif
