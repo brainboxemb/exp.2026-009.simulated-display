@@ -1,6 +1,7 @@
 #include "matrix_font.h"
 
-#include "matrix_numeric_font.h"\n#include "matrix_pixel_font.h"
+#include "matrix_numeric_font.h"
+#include "matrix_pixel_font.h"
 #include "matrix_vbz_font.h"
 
 const lv_font_t *matrix_font_resolve(
