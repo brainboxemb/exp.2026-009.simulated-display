@@ -23,11 +23,11 @@
 #define HEADER_COUNTER_WIDTH 21u
 
 #define WARNING_Y 0
-#define WARNING_WIDTH 9u
+#define WARNING_WIDTH 11u
 #define WARNING_GAP 1u
-#define WARNING_HEIGHT 9u
-#define WARNING_GLYPH_WIDTH 7u
-#define WARNING_GLYPH_HEIGHT 7u
+#define WARNING_HEIGHT 11u
+#define WARNING_GLYPH_WIDTH 11u
+#define WARNING_GLYPH_HEIGHT 11u
 
 #define LEFT_SPRITE_X 1
 #define LEFT_NUMBER_X 12
@@ -65,38 +65,55 @@ static const uint8_t FINISH_FLAG[FINISH_FLAG_HEIGHT] = {
  * WiFi unavailable: a broad signal bar, a narrower bar below it and one
  * diagonal strike-through.
  */
-static const uint8_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
-    0x7f,
-    0x7f,
-    0x00,
-    0x3e,
-    0x3e,
-    0x08,
-    0x08
+static const uint16_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
+    0x000,
+    0x3fe,
+    0x3fe,
+    0x000,
+    0x0f8,
+    0x0f8,
+    0x000,
+    0x060,
+    0x060,
+    0x000,
+    0x000
 };
 
 /*
- * Registration server unavailable: two open, staggered link shapes. Keeping
- * the loops open avoids the small raster reading as the digit 8.
+ * Registration server unavailable: two diagonal chain links, based on the
+ * conventional link icon. The links are offset from each other instead of
+ * forming two vertically stacked loops.
  */
-static const uint8_t WARNING_LINK[WARNING_GLYPH_HEIGHT] = {
-    0x38,
-    0x44,
-    0x40,
-    0x1c,
-    0x02,
-    0x11,
-    0x0e
+static const uint16_t WARNING_LINK[WARNING_GLYPH_HEIGHT] = {
+    0x00c,
+    0x012,
+    0x021,
+    0x041,
+    0x082,
+    0x0c4,
+    0x118,
+    0x208,
+    0x408,
+    0x410,
+    0x220
 };
 
-static const uint8_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
-    0x60,
-    0x30,
-    0x18,
-    0x0c,
-    0x06,
-    0x03,
-    0x01
+/*
+ * Two-pixel diagonal strike-through across the complete warning block.
+ * Both outer corners are part of the strike.
+ */
+static const uint16_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
+    0x600,
+    0x300,
+    0x180,
+    0x0c0,
+    0x060,
+    0x030,
+    0x018,
+    0x00c,
+    0x006,
+    0x003,
+    0x003
 };
 
 static void draw_finish_flag(
@@ -109,8 +126,8 @@ static void draw_finish_flag(
         for (uint16_t column = 0;
                 column < FINISH_FLAG_WIDTH;
                 column++) {
-            const uint8_t mask =
-                    (uint8_t)(
+            const uint16_t mask =
+                    (uint16_t)(
                             1u
                             << (FINISH_FLAG_WIDTH
                                     - 1u
@@ -132,7 +149,7 @@ static void draw_finish_flag(
 static void draw_warning_block(
         MatrixFramebuffer *framebuffer,
         uint16_t x,
-        const uint8_t glyph[WARNING_GLYPH_HEIGHT],
+        const uint16_t glyph[WARNING_GLYPH_HEIGHT],
         const MatrixTheme *theme) {
     for (uint16_t row = 0;
             row < WARNING_HEIGHT;
@@ -164,16 +181,16 @@ static void draw_warning_block(
             if ((glyph[row] & mask) != 0) {
                 matrix_framebuffer_set(
                         framebuffer,
-                        (uint16_t)(x + 1u + column),
-                        (uint16_t)(WARNING_Y + 1u + row),
+                        (uint16_t)(x + column),
+                        (uint16_t)(WARNING_Y + row),
                         theme->warning_text_color);
             }
 
             if ((WARNING_STRIKE[row] & mask) != 0) {
                 matrix_framebuffer_set(
                         framebuffer,
-                        (uint16_t)(x + 1u + column),
-                        (uint16_t)(WARNING_Y + 1u + row),
+                        (uint16_t)(x + column),
+                        (uint16_t)(WARNING_Y + row),
                         theme->warning_strike_color);
             }
         }
