@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#ifdef _WIN32
+#include <fcntl.h>
+#include <io.h>
+#endif
+
 static void write_u16_be(uint16_t value) {
     fputc((value >> 8) & 0xff, stdout);
     fputc(value & 0xff, stdout);
@@ -47,6 +52,11 @@ static bool read_u32_be(uint32_t *value) {
 }
 
 int main(void) {
+#ifdef _WIN32
+    if (_setmode(_fileno(stdin), _O_BINARY) == -1) return 4;
+    if (_setmode(_fileno(stdout), _O_BINARY) == -1) return 5;
+#endif
+
     SerialLcd lcd;
     serial_lcd_init(&lcd);
     write_frame(&lcd);

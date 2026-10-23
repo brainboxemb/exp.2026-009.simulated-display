@@ -135,7 +135,7 @@ static void execute_command(SerialLcd *lcd) {
     switch (lcd->command) {
         case CMD_CLEAR: clear_screen(lcd); break;
         case CMD_SET_X:
-            if ((uint16_t)p[0] + 5u <= DISPLAY_WIDTH) {
+            if ((uint16_t)p[0] + 6u <= DISPLAY_WIDTH) {
                 lcd->text_origin_x = p[0]; lcd->cursor_x = p[0]; lcd->text_length = 0;
             }
             break;

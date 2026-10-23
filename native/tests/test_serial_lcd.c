@@ -50,6 +50,15 @@ static void test_fifteen_characters_fit_90_pixels(void) {
     assert(display_framebuffer_get(&lcd.framebuffer, 84, 1));
 }
 
+static void test_invalid_text_origin_is_ignored(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+    const uint8_t input[] = {0x7c,0x18,85, 0x7c,0x19,28};
+    serial_lcd_feed(&lcd, input, sizeof(input));
+    assert(lcd.text_origin_x == 0);
+    assert(lcd.text_origin_y == 0);
+}
+
 static void test_position_and_clear(void) {
     SerialLcd lcd;
     serial_lcd_init(&lcd);
@@ -75,6 +84,7 @@ int main(void) {
     test_command_can_be_split_across_reads();
     test_text_is_rendered_in_c();
     test_fifteen_characters_fit_90_pixels();
+    test_invalid_text_origin_is_ignored();
     test_position_and_clear();
     test_line_command();
     puts("serial_lcd tests passed");
