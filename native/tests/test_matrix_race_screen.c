@@ -18,7 +18,7 @@ static const MatrixRaceScreenData SAMPLE = {
         {"999", "999"},
         {"999", "999"}
     },
-    .footer = {"520", "234", "346", "12"}
+    .footer = "520 234 346 12"
 };
 
 static void test_default_screen_renders_lines(void) {
