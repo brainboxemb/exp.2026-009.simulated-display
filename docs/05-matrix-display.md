@@ -21,10 +21,13 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 The current demo screen supports four preview layouts:
 
 - `Registraties`: the default preview shows three full-width registration
-  rows with team number, main time, hundredths and ranking. The ranking suffix
-  is a separate raised VBZ `e`; the footer spans the full 160-pixel width;
-- `Registraties (>4)`: a fifth registration uses the footer area and the
-  footer disappears completely;
+  rows with the same roomy 13-pixel vertical cadence as the mixed left side.
+  Each row contains team number, main time, hundredths and ranking. The ranking
+  suffix is a separate raised VBZ `e`; the footer spans the full 160-pixel
+  width;
+- `Registraties (>4)`: overflow uses a compact five-row cadence because the
+  extra registrations consume the footer area; the footer disappears
+  completely;
 - `Registraties + klaarstaan`: three compact incoming-team rows on the left
   and up to four ready teams on the right. The footer remains full width;
 - `Registraties + klaarstaan (>4 klaar)`: the right side extends into the
