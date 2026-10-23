@@ -19,6 +19,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
     private static final int REQUEST_CLEAR = 1;
     private static final int REQUEST_THEME = 2;
     private static final int REQUEST_ANIMATION_FRAME = 3;
+    private static final int REQUEST_CONNECTION_STATUS = 4;
     private static final int MAX_PIXELS = 1_000_000;
 
     private final Process process;
@@ -81,6 +82,19 @@ final class MatrixDisplayProcess implements AutoCloseable {
 
         input.writeInt(REQUEST_ANIMATION_FRAME);
         input.writeByte(frame);
+        input.flush();
+    }
+
+    synchronized void connectionStatus(
+            boolean wifiConnected,
+            boolean registrationServerConnected)
+            throws IOException {
+        input.writeInt(REQUEST_CONNECTION_STATUS);
+        input.writeByte(wifiConnected ? 1 : 0);
+        input.writeByte(
+                registrationServerConnected
+                        ? 1
+                        : 0);
         input.flush();
     }
 
