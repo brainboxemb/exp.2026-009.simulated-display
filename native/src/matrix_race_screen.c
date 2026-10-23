@@ -11,6 +11,7 @@
 #define HEADER_TEXT_Y -1
 #define MAIN_COLUMN_X 81
 #define FOOTER_LINE_Y 52
+#define COMPACT_FOOTER_LINE_Y 54
 
 #define HEADER_LOCATION_X 1
 #define HEADER_LOCATION_WIDTH 38
@@ -55,6 +56,7 @@
 #define REGISTRATION_RANK_SUFFIX_WIDTH 12
 
 #define FOOTER_Y 54
+#define COMPACT_FOOTER_Y 55
 
 static lv_display_t *display;
 static MatrixFramebuffer *active_framebuffer;
@@ -426,6 +428,19 @@ bool matrix_race_screen_render(
             data->layout != MATRIX_RACE_LAYOUT_REGISTRATIONS;
     const bool compact_mixed =
             data->layout == MATRIX_RACE_LAYOUT_MIXED_COMPACT_FOOTER;
+    const MatrixFontSpec compact_font_spec = {
+        MATRIX_FONT_UNSCII,
+        8
+    };
+    const lv_font_t *compact_font =
+            compact_mixed
+                    ? matrix_font_resolve(compact_font_spec)
+                    : NULL;
+
+    if (compact_mixed
+            && compact_font == NULL) {
+        return false;
+    }
 
     create_line(
             screen,
@@ -448,7 +463,9 @@ bool matrix_race_screen_render(
     create_line(
             screen,
             0,
-            FOOTER_LINE_Y,
+            compact_mixed
+                    ? COMPACT_FOOTER_LINE_Y
+                    : FOOTER_LINE_Y,
             mixed_layout
                     ? MAIN_COLUMN_X
                     : MATRIX_DISPLAY_WIDTH,
@@ -534,9 +551,10 @@ bool matrix_race_screen_render(
             32,
             42
         };
+        const size_t visible_registration_rows = 4u;
 
         for (size_t index = 0;
-                index < MATRIX_RACE_LEFT_ROW_COUNT;
+                index < visible_registration_rows;
                 index++) {
             const MatrixRaceLeftRow *row =
                     &data->left_rows[index];
@@ -594,9 +612,10 @@ bool matrix_race_screen_render(
         };
         static const int32_t compact_row_y[] = {
             12,
-            22,
-            32,
-            42
+            20,
+            28,
+            36,
+            44
         };
         const size_t visible_left_rows =
                 compact_mixed
@@ -611,6 +630,11 @@ bool matrix_race_screen_render(
                             ? compact_row_y[index]
                             : normal_row_y[index];
 
+            const lv_font_t *mixed_row_font =
+                    compact_mixed
+                            ? compact_font
+                            : row_number_font;
+
             create_label(
                     screen,
                     data->left_rows[index].number,
@@ -619,7 +643,7 @@ bool matrix_race_screen_render(
                     MIXED_LEFT_NUMBER_WIDTH,
                     LV_TEXT_ALIGN_RIGHT,
                     &theme->row_number,
-                    row_number_font);
+                    mixed_row_font);
             create_label(
                     screen,
                     data->left_rows[index].time,
@@ -628,7 +652,9 @@ bool matrix_race_screen_render(
                     MIXED_LEFT_TIME_WIDTH,
                     LV_TEXT_ALIGN_RIGHT,
                     &theme->row_time,
-                    row_time_font);
+                    compact_mixed
+                            ? compact_font
+                            : row_time_font);
         }
 
         static const int32_t right_row_y[] = {
@@ -666,13 +692,17 @@ bool matrix_race_screen_render(
                     screen,
                     data->footer,
                     1,
-                    FOOTER_Y,
+                    compact_mixed
+                            ? COMPACT_FOOTER_Y
+                            : FOOTER_Y,
                     mixed_layout
                             ? MAIN_COLUMN_X - 2
                             : MATRIX_DISPLAY_WIDTH - 2,
                     LV_TEXT_ALIGN_LEFT,
                     &theme->footer,
-                    footer_font);
+                    compact_mixed
+                            ? compact_font
+                            : footer_font);
 
     lv_obj_set_style_text_letter_space(
             footer,
