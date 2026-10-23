@@ -15,6 +15,7 @@ References:
 | `18` | 1 | Set cursor X (`0..89`) |
 | `19` | 1 | Set cursor Y (`0..34`) |
 | `1A` | 1 | **Experiment extension:** draw large 13×18 digit bitmap; parameter is ASCII `0`..`9` |
+| `1B` | 2 | **Experiment extension:** set cursor position as `yy xx` (`y=0..34`, `x=0..89`) |
 | `10` | 3 | Set/reset pixel: `x y value` |
 | `0C` | 5 | Draw/erase line: `x0 y0 x1 y1 value` |
 | `03` | 4 | Draw/erase circle: `x y radius value` |
@@ -44,6 +45,18 @@ The marker detection is streaming: `FE FE` still works when the two bytes arrive
 
 Stepping to the next sprite appearance on every `FE FE` is the deterministic simulator behavior for this PoP.
 
+## Combined cursor position command
+
+The original SparkFun X and Y commands remain available for compatibility, but the experiment adds one preferred command for setting the complete cursor position atomically:
+
+```text
+7C 1B yy xx
+```
+
+The parameter order deliberately follows the legacy display convention: **Y first, then X**. For example, `7C 1B 05 0A` sets the cursor to `(Y,X)=(5,10)`.
+
+Both coordinates are validated together. If either value is outside the 90×35 display, the cursor remains unchanged.
+
 ## Large digit bitmap command
 
 The original large numeric bitmaps are exposed through an experiment-specific command while retaining SparkFun framing:
@@ -61,7 +74,7 @@ The JavaFX **Protocol** field is a convenience editor for the raw serial stream.
 Example:
 
 ```text
-|\\x00|\\x18\\x0A|\\x19\\x05HELLO|\\x1A7
+|\\x00|\\x1B\\x05\\x0AHELLO|\\x1A7
 ```
 
 Here `|` is the literal SparkFun command prefix `0x7C`; only the non-printable command/value bytes need escaping.

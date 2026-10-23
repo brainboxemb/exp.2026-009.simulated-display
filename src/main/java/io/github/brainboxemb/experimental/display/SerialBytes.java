@@ -12,7 +12,11 @@ final class SerialBytes {
     }
 
     static byte[] home() {
-        return new byte[]{0x7c, 0x18, 0x00, 0x7c, 0x19, 0x00};
+        return position(0, 0);
+    }
+
+    static byte[] position(int y, int x) {
+        return new byte[]{0x7c, 0x1b, (byte) y, (byte) x};
     }
 
     static byte[] pixel(int x, int y, boolean on) {

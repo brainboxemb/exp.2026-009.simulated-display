@@ -103,7 +103,7 @@ public final class SimulatedDisplayFxApplication extends Application {
                 sprite);
 
         TextField protocol = new TextField(
-                "|\\x00|\\x18\\x0A|\\x19\\x05HELLO|\\x1A7");
+                "|\\x00|\\x1B\\x05\\x0AHELLO|\\x1A7");
         protocol.setPrefColumnCount(45);
 
         Button sendProtocol = new Button("Send protocol");

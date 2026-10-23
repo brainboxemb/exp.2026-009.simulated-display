@@ -140,6 +140,28 @@ static void test_cursor_commands_accept_display_edges(void) {
     assert(lcd.cursor_y == 34);
 }
 
+static void test_position_command_sets_y_and_x_together(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t input[] = {0x7c, 0x1b, 34, 89};
+    serial_lcd_feed(&lcd, input, sizeof(input));
+
+    assert(lcd.cursor_y == 34);
+    assert(lcd.cursor_x == 89);
+}
+
+static void test_position_command_rejects_invalid_coordinate(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t input[] = {0x7c, 0x1b, 35, 90};
+    serial_lcd_feed(&lcd, input, sizeof(input));
+
+    assert(lcd.cursor_y == 0);
+    assert(lcd.cursor_x == 0);
+}
+
 static void test_invalid_cursor_coordinates_are_ignored(void) {
     SerialLcd lcd;
     serial_lcd_init(&lcd);
@@ -232,6 +254,8 @@ int main(void) {
     test_single_sprite_marker_falls_back_to_character_254();
     test_backspace_uses_proportional_character_position();
     test_cursor_commands_accept_display_edges();
+    test_position_command_sets_y_and_x_together();
+    test_position_command_rejects_invalid_coordinate();
     test_invalid_cursor_coordinates_are_ignored();
     test_clear_resets_cursor_to_top_left();
     test_bitmap_digit_command_draws_at_cursor();

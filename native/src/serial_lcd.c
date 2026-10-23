@@ -22,6 +22,7 @@
 #define CMD_SET_X 0x18u
 #define CMD_SET_Y 0x19u
 #define CMD_BITMAP_DIGIT 0x1au
+#define CMD_SET_POSITION 0x1bu
 
 static void set_pixel(SerialLcd *lcd, int x, int y, bool on) {
     if (x < 0 || y < 0 || x >= (int)DISPLAY_WIDTH || y >= (int)DISPLAY_HEIGHT) {
@@ -288,6 +289,8 @@ static uint8_t command_parameter_count(uint8_t command) {
         case CMD_SET_Y:
         case CMD_BITMAP_DIGIT:
             return 1;
+        case CMD_SET_POSITION:
+            return 2;
         case CMD_PIXEL:
             return 3;
         case CMD_CIRCLE:
@@ -317,6 +320,7 @@ static bool known_command(uint8_t command) {
         case CMD_SET_X:
         case CMD_SET_Y:
         case CMD_BITMAP_DIGIT:
+        case CMD_SET_POSITION:
             return true;
         default:
             return false;
@@ -339,6 +343,14 @@ static void execute_command(SerialLcd *lcd) {
         case CMD_SET_Y:
             if ((uint16_t)parameters[0] < DISPLAY_HEIGHT) {
                 lcd->cursor_y = parameters[0];
+                reset_text_history(lcd);
+            }
+            break;
+        case CMD_SET_POSITION:
+            if ((uint16_t)parameters[0] < DISPLAY_HEIGHT
+                    && (uint16_t)parameters[1] < DISPLAY_WIDTH) {
+                lcd->cursor_y = parameters[0];
+                lcd->cursor_x = parameters[1];
                 reset_text_history(lcd);
             }
             break;

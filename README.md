@@ -86,10 +86,10 @@ which sends SparkFun-style **set pixel (10,5)**.
 The JavaFX simulator also has a **Protocol** field. Ordinary ASCII is sent unchanged and `\\xNN` inserts one raw byte, so this can be entered directly:
 
 ```text
-|\\x00|\\x18\\x0A|\\x19\\x05HELLO|\\x1A7
+|\\x00|\\x1B\\x05\\x0AHELLO|\\x1A7
 ```
 
-That clears the display, sets X=10 and Y=5, writes `HELLO`, and invokes the custom large-digit bitmap command for digit 7.
+That clears the display, sets `(Y,X)=(5,10)` in one command, writes `HELLO`, and invokes the custom large-digit bitmap command for digit 7.
 
 ## Implemented slice
 
@@ -99,6 +99,7 @@ The C parser currently understands:
 - proportional character advances from the original custom map;
 - `FE FE` sprite marker using the six imported `SpriteMap1` appearances;
 - custom SparkFun-framed `7C 1A <digit>` command for the imported 13×18 `Bitmap_0..Bitmap_9` digits;
+- custom `7C 1B yy xx` command to set cursor Y and X atomically;
 - clear;
 - set X / set Y;
 - set/reset pixel;
