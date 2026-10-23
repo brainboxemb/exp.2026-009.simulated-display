@@ -201,7 +201,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
         fontFamily.getItems().addAll(
                 "UNSCII",
                 "Montserrat");
-        fontFamily.setValue("UNSCII");
+        fontFamily.setValue("Montserrat");
 
         refreshFontSizes();
         fontFamily.setOnAction(
@@ -227,19 +227,19 @@ final class MatrixDisplayWindow implements AutoCloseable {
         setSizes(
                 headerSize,
                 sizes,
-                8);
+                10);
         setSizes(
                 rowSize,
                 sizes,
-                8);
+                10);
         setSizes(
                 largeSize,
                 sizes,
-                16);
+                20);
         setSizes(
                 footerSize,
                 sizes,
-                8);
+                10);
     }
 
     private static void setSizes(

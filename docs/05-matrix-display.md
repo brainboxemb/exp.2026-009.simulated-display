@@ -70,7 +70,7 @@ The first font registry contains:
 | `MATRIX_FONT_UNSCII` | 8, 16 |
 | `MATRIX_FONT_MONTSERRAT` | 8, 10, 12, 14, 16, 18, 20 |
 
-UNSCII is the default because its pixel-like appearance fits a low-resolution LED matrix. Unsupported family/size combinations are rejected instead of silently choosing another font.
+Montserrat 10 is the default for header, left rows and footer; Montserrat 20 is the default for the four large right-side values. Five 10-pixel text rows fit the 64-pixel height with 3-pixel inter-row spacing: 50 + 12 = 62 pixels. UNSCII remains available as an alternative. Unsupported family/size combinations are rejected instead of silently choosing another font.
 
 Adding another font family only requires extending the font registry; the screen/theme API stays unchanged.
 

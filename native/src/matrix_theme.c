@@ -8,23 +8,23 @@ MatrixTheme matrix_theme_default_create(void) {
         .background_color = 0x0000u,
         .line_color = red,
         .header = {
-            .font = {MATRIX_FONT_UNSCII, 8},
+            .font = {MATRIX_FONT_MONTSERRAT, 10},
             .color = red
         },
         .row_number = {
-            .font = {MATRIX_FONT_UNSCII, 8},
+            .font = {MATRIX_FONT_MONTSERRAT, 10},
             .color = red
         },
         .row_time = {
-            .font = {MATRIX_FONT_UNSCII, 8},
+            .font = {MATRIX_FONT_MONTSERRAT, 10},
             .color = red
         },
         .large_value = {
-            .font = {MATRIX_FONT_UNSCII, 16},
+            .font = {MATRIX_FONT_MONTSERRAT, 20},
             .color = red
         },
         .footer = {
-            .font = {MATRIX_FONT_UNSCII, 8},
+            .font = {MATRIX_FONT_MONTSERRAT, 10},
             .color = red
         }
     };
