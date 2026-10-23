@@ -18,23 +18,27 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 
 ## First race screen
 
-The current demo screen supports three preview layouts:
+The current demo screen supports four preview layouts:
 
-- `Registraties`: full-width registration rows with team number, main time,
-  hundredths and ranking. The ranking suffix is a separate raised VBZ `e`;
+- `Registraties`: up to four full-width registration rows with team number,
+  main time, hundredths and ranking. The ranking suffix is a separate raised
+  VBZ `e`; the footer spans the full 160-pixel width;
+- `Registraties (>4)`: a fifth registration uses the footer area and the
+  footer disappears completely;
 - `Registraties + klaarstaan`: three compact incoming-team rows on the left
-  and ready-team values on the right;
-- `Registraties + klaarstaan (>4)`: five 8px compact incoming-team rows and
-  a smaller footer zone.
+  and up to four ready teams on the right. The footer remains full width;
+- `Registraties + klaarstaan (>4 klaar)`: the right side extends into the
+  footer area for additional ready teams. The footer remains only on the left
+  and is therefore 81 pixels wide.
 
-The two mixed layouts show the runner and warmup sprites. The registrations-only
-layout has no middle divider and no sprites. All layouts keep the header with
+The two mixed layouts show the runner and warmup sprites. Registration-only
+layouts have no middle divider and no sprites. All layouts keep the header with
 location, adaptive clock, static finish flag, counter and conditional
 connection/sync statuses. There is no `Prepare` text.
 
 The current values are demo data in `matrix_host_main.c`. Because the real
 race-data feed is not connected yet, JavaFX exposes a temporary `Layout`
-dropdown for selecting these three preview modes. Later the same native layout
+dropdown for selecting these four preview modes. Later the same native layout
 selection will be derived from the real registration and ready-team counts.
 
 The main vertical divider is at x=81. This keeps the 160-pixel display visually centered while assigning the one-pixel separator itself to the middle boundary. Layout coordinates for mixed-mode content are derived from this divider instead of from the previous x=90 split.
