@@ -24,8 +24,6 @@ typedef struct {
 
 typedef struct {
     DisplayFramebuffer framebuffer;
-    uint8_t text_origin_x;
-    uint8_t text_origin_y;
     uint8_t cursor_x;
     uint8_t cursor_y;
     SerialLcdTextEntry text_history[SERIAL_LCD_TEXT_HISTORY_CAPACITY];

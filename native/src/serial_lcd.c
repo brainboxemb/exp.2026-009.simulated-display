@@ -1,5 +1,6 @@
 #include "serial_lcd.h"
 
+#include "custom_bitmap.h"
 #include "custom_character_map.h"
 
 #include <stdlib.h>
@@ -20,6 +21,7 @@
 #define CMD_SPLASH 0x13u
 #define CMD_SET_X 0x18u
 #define CMD_SET_Y 0x19u
+#define CMD_BITMAP_DIGIT 0x1au
 
 static void set_pixel(SerialLcd *lcd, int x, int y, bool on) {
     if (x < 0 || y < 0 || x >= (int)DISPLAY_WIDTH || y >= (int)DISPLAY_HEIGHT) {
@@ -40,8 +42,8 @@ static void reset_text_history(SerialLcd *lcd) {
 
 static void clear_screen(SerialLcd *lcd) {
     display_framebuffer_clear(&lcd->framebuffer);
-    lcd->cursor_x = lcd->text_origin_x;
-    lcd->cursor_y = lcd->text_origin_y;
+    lcd->cursor_x = 0;
+    lcd->cursor_y = 0;
     reset_text_history(lcd);
     lcd->dirty = true;
 }
@@ -123,16 +125,10 @@ static void erase_block(SerialLcd *lcd, int x0, int y0, int x1, int y1) {
 }
 
 static void next_line(SerialLcd *lcd) {
-    lcd->cursor_x = lcd->text_origin_x;
+    lcd->cursor_x = 0;
 
     const uint16_t next_y = (uint16_t)lcd->cursor_y + 8u;
-    if (next_y + 7u >= DISPLAY_HEIGHT) {
-        lcd->cursor_y = lcd->text_origin_y;
-        reset_text_history(lcd);
-        return;
-    }
-
-    lcd->cursor_y = (uint8_t)next_y;
+    lcd->cursor_y = next_y < DISPLAY_HEIGHT ? (uint8_t)next_y : 0;
 }
 
 static void ensure_horizontal_space(SerialLcd *lcd, uint8_t advance) {
@@ -193,6 +189,37 @@ static void draw_sprite(SerialLcd *lcd) {
 
     lcd->sprite_frame =
             (uint8_t)((lcd->sprite_frame + 1u) % CUSTOM_SPRITE_FRAME_COUNT);
+}
+
+static void draw_bitmap(SerialLcd *lcd, const CustomBitmap *bitmap) {
+    for (uint8_t y = 0; y < bitmap->height; y++) {
+        const uint8_t band = (uint8_t)(y / 7u);
+        const uint8_t bit = (uint8_t)(y % 7u);
+
+        for (uint8_t x = 0; x < bitmap->width; x++) {
+            const uint8_t column =
+                    bitmap->bands[(size_t)band * bitmap->width + x];
+
+            set_pixel(
+                    lcd,
+                    lcd->cursor_x + x,
+                    lcd->cursor_y + y,
+                    (column & (uint8_t)(1u << bit)) != 0);
+        }
+    }
+}
+
+static void draw_bitmap_digit(SerialLcd *lcd, uint8_t value) {
+    if (value < (uint8_t)'0' || value > (uint8_t)'9') {
+        return;
+    }
+
+    CustomBitmap bitmap;
+    if (!custom_bitmap_digit_lookup((uint8_t)(value - (uint8_t)'0'), &bitmap)) {
+        return;
+    }
+
+    draw_bitmap(lcd, &bitmap);
 }
 
 static void erase_previous_text_entry(SerialLcd *lcd) {
@@ -259,6 +286,7 @@ static uint8_t command_parameter_count(uint8_t command) {
         case CMD_BAUD:
         case CMD_SET_X:
         case CMD_SET_Y:
+        case CMD_BITMAP_DIGIT:
             return 1;
         case CMD_PIXEL:
             return 3;
@@ -288,6 +316,7 @@ static bool known_command(uint8_t command) {
         case CMD_SPLASH:
         case CMD_SET_X:
         case CMD_SET_Y:
+        case CMD_BITMAP_DIGIT:
             return true;
         default:
             return false;
@@ -303,17 +332,18 @@ static void execute_command(SerialLcd *lcd) {
             break;
         case CMD_SET_X:
             if ((uint16_t)parameters[0] < DISPLAY_WIDTH) {
-                lcd->text_origin_x = parameters[0];
                 lcd->cursor_x = parameters[0];
                 reset_text_history(lcd);
             }
             break;
         case CMD_SET_Y:
-            if ((uint16_t)parameters[0] + 7u < DISPLAY_HEIGHT) {
-                lcd->text_origin_y = parameters[0];
+            if ((uint16_t)parameters[0] < DISPLAY_HEIGHT) {
                 lcd->cursor_y = parameters[0];
                 reset_text_history(lcd);
             }
+            break;
+        case CMD_BITMAP_DIGIT:
+            draw_bitmap_digit(lcd, parameters[0]);
             break;
         case CMD_PIXEL:
             set_pixel(lcd, parameters[0], parameters[1], parameters[2] != 0);
@@ -360,8 +390,6 @@ static void execute_command(SerialLcd *lcd) {
 void serial_lcd_init(SerialLcd *lcd) {
     display_framebuffer_clear(&lcd->framebuffer);
 
-    lcd->text_origin_x = 0;
-    lcd->text_origin_y = 0;
     lcd->cursor_x = 0;
     lcd->cursor_y = 0;
     lcd->text_length = 0;

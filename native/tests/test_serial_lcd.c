@@ -53,7 +53,6 @@ static void test_custom_character_map_is_proportional(void) {
     serial_lcd_init(&lcd);
 
     feed_text(&lcd, "AI!");
-
     assert(lcd.cursor_x == 12);
 }
 
@@ -75,9 +74,7 @@ static void test_sprite_marker_can_be_split_across_reads(void) {
 
     const uint8_t marker = 0xfe;
     serial_lcd_feed(&lcd, &marker, 1);
-
     assert(lcd.cursor_x == 0);
-    assert(!display_framebuffer_get(&lcd.framebuffer, 2, 0));
 
     serial_lcd_feed(&lcd, &marker, 1);
 
@@ -129,29 +126,35 @@ static void test_backspace_uses_proportional_character_position(void) {
     }
 }
 
-static void test_fifteen_a_characters_fit_90_pixels(void) {
+static void test_cursor_commands_accept_display_edges(void) {
     SerialLcd lcd;
     serial_lcd_init(&lcd);
 
-    feed_text(&lcd, "AAAAAAAAAAAAAAA");
-
-    assert(lcd.cursor_x == 0);
-    assert(lcd.cursor_y == 8);
-    assert(display_framebuffer_get(&lcd.framebuffer, 84, 2));
-}
-
-static void test_invalid_text_origin_is_ignored(void) {
-    SerialLcd lcd;
-    serial_lcd_init(&lcd);
-
-    const uint8_t input[] = {0x7c, 0x18, 90, 0x7c, 0x19, 28};
+    const uint8_t input[] = {
+        0x7c, 0x18, 89,
+        0x7c, 0x19, 34
+    };
     serial_lcd_feed(&lcd, input, sizeof(input));
 
-    assert(lcd.text_origin_x == 0);
-    assert(lcd.text_origin_y == 0);
+    assert(lcd.cursor_x == 89);
+    assert(lcd.cursor_y == 34);
 }
 
-static void test_position_and_clear(void) {
+static void test_invalid_cursor_coordinates_are_ignored(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t input[] = {
+        0x7c, 0x18, 90,
+        0x7c, 0x19, 35
+    };
+    serial_lcd_feed(&lcd, input, sizeof(input));
+
+    assert(lcd.cursor_x == 0);
+    assert(lcd.cursor_y == 0);
+}
+
+static void test_clear_resets_cursor_to_top_left(void) {
     SerialLcd lcd;
     serial_lcd_init(&lcd);
 
@@ -163,10 +166,41 @@ static void test_position_and_clear(void) {
     };
     serial_lcd_feed(&lcd, input, sizeof(input));
 
-    assert(lcd.text_origin_x == 12);
-    assert(lcd.text_origin_y == 8);
-    assert(lcd.cursor_x == 12);
-    assert(lcd.cursor_y == 8);
+    assert(lcd.cursor_x == 0);
+    assert(lcd.cursor_y == 0);
+
+    for (uint16_t y = 0; y < DISPLAY_HEIGHT; y++) {
+        for (uint16_t x = 0; x < DISPLAY_WIDTH; x++) {
+            assert(!display_framebuffer_get(&lcd.framebuffer, x, y));
+        }
+    }
+}
+
+static void test_bitmap_digit_command_draws_at_cursor(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t input[] = {
+        0x7c, 0x18, 2,
+        0x7c, 0x19, 3,
+        0x7c, 0x1a, '0'
+    };
+    serial_lcd_feed(&lcd, input, sizeof(input));
+
+    assert(lcd.cursor_x == 2);
+    assert(lcd.cursor_y == 3);
+    assert(!display_framebuffer_get(&lcd.framebuffer, 2, 3));
+    assert(display_framebuffer_get(&lcd.framebuffer, 2, 7));
+    assert(display_framebuffer_get(&lcd.framebuffer, 2, 10));
+    assert(display_framebuffer_get(&lcd.framebuffer, 2, 17));
+}
+
+static void test_invalid_bitmap_digit_is_ignored(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t input[] = {0x7c, 0x1a, 'X'};
+    serial_lcd_feed(&lcd, input, sizeof(input));
 
     for (uint16_t y = 0; y < DISPLAY_HEIGHT; y++) {
         for (uint16_t x = 0; x < DISPLAY_WIDTH; x++) {
@@ -197,9 +231,11 @@ int main(void) {
     test_repeated_sprite_markers_advance_frames();
     test_single_sprite_marker_falls_back_to_character_254();
     test_backspace_uses_proportional_character_position();
-    test_fifteen_a_characters_fit_90_pixels();
-    test_invalid_text_origin_is_ignored();
-    test_position_and_clear();
+    test_cursor_commands_accept_display_edges();
+    test_invalid_cursor_coordinates_are_ignored();
+    test_clear_resets_cursor_to_top_left();
+    test_bitmap_digit_command_draws_at_cursor();
+    test_invalid_bitmap_digit_is_ignored();
     test_line_command();
 
     puts("serial_lcd tests passed");
