@@ -20,7 +20,7 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 
 The current demo screen follows the supplied layout reference:
 
-- header with location, clock, static finish flag, counter and conditional connection warnings;
+- header with location, adaptive clock, static finish flag, counter and conditional connection/sync statuses;
 - three passed-runner rows on the left;
 - two large-value rows on the right;
 - a 10×12 runner sprite at the far left of the first passed-runner row;
@@ -42,14 +42,21 @@ a separate diagonal strike-through. The local registration-server warning uses
 two diagonally offset white chain links based on the conventional link icon,
 with the same strike-through. The extra 11×11 resolution gives the two links
 enough separation to remain recognizable.
+
+A third 11×11 status block appears while synchronization is active. It uses a
+green background with two separate white curved arrows: the upper arc ends in a
+right-side arrowhead and the lower arc ends in a left-side arrowhead. Sync is an
+active state rather than an error, so it has no red strike-through.
+
 A warning is not rendered while its connection is healthy. The strike-through
 runs from outer corner to outer corner and is two pixels thick across the
-diagonal, has its own configurable
-`warning_strike_color` and defaults to red; the icon remains white on the
-blue warning background. The visible warning group owns the right edge of the
-header; the counter and flag shift left only by the space needed for the active
-blocks. Two simultaneous warnings have a one-pixel separator between them. The
-warning blocks start at y=0; the finish flag starts one pixel lower at y=1.
+diagonal, has its own configurable `warning_strike_color` and defaults to red;
+the icon remains white on the blue warning background. Visible status blocks
+own the right edge of the header; the counter and flag shift left only by the
+space needed for the active blocks. Adjacent status blocks have a one-pixel
+separator. The warning/status blocks start at y=0; the finish flag starts one
+pixel lower at y=1. When the status group grows into the normal clock area, the
+clock field shrinks from the right and its centered text therefore moves left.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
 sprite, so its number starts at x=12. The runner uses the original six-frame
@@ -86,8 +93,9 @@ Each text role has its own `MatrixTextStyle`:
 
 A style contains both a color and a font specification. The theme separately owns
 `background_color`, `line_color`, `sprite_color`, `flag_color`,
-`warning_background_color`, `warning_text_color` and
-`warning_strike_color`. Runner and warmup
+`warning_background_color`, `warning_text_color`,
+`warning_strike_color`, `sync_background_color` and `sync_icon_color`.
+Runner and warmup
 sprites share `sprite_color`. The finish flag and warning blocks are therefore
 independently configurable; warning defaults are blue with white glyphs.
 
