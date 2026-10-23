@@ -23,6 +23,7 @@ static const MatrixRaceScreenData SAMPLE = {
     },
     .right_rows = {
         {"999", "999"},
+        {"999", "999"},
         {"999", "999"}
     },
     .footer = "520 234 346 12"
@@ -82,6 +83,18 @@ static void test_default_screen_renders_lines(void) {
                     0,
                     52)
             == theme.line_color);
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    159,
+                    52)
+            == theme.line_color);
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    81,
+                    53)
+            != theme.line_color);
 }
 
 static void test_font_family_and_size_are_configurable(void) {
@@ -686,14 +699,57 @@ static void test_registration_layout_uses_full_width_without_sprites(void) {
             != theme.sprite_color);
 }
 
-static void test_compact_mixed_layout_moves_footer_down(void) {
+static void test_registration_overflow_removes_footer(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
             matrix_theme_default_create();
-    MatrixRaceScreenData compact = SAMPLE;
+    MatrixRaceScreenData overflow = SAMPLE;
 
-    compact.layout =
-            MATRIX_RACE_LAYOUT_MIXED_COMPACT_FOOTER;
+    overflow.layout =
+            MATRIX_RACE_LAYOUT_REGISTRATIONS_OVERFLOW;
+
+    theme.line_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    255,
+                    0);
+    theme.footer.color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    0,
+                    255);
+
+    assert(
+            matrix_race_screen_render(
+                    &framebuffer,
+                    &overflow,
+                    &theme,
+                    0));
+
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    0,
+                    52)
+            != theme.line_color);
+
+    for (size_t index = 0;
+            index < MATRIX_DISPLAY_PIXEL_COUNT;
+            index++) {
+        assert(
+                framebuffer.pixels[index]
+                != theme.footer.color);
+    }
+}
+
+static void test_ready_overflow_keeps_left_half_footer(void) {
+    MatrixFramebuffer framebuffer;
+    MatrixTheme theme =
+            matrix_theme_default_create();
+    MatrixRaceScreenData overflow = SAMPLE;
+
+    overflow.layout =
+            MATRIX_RACE_LAYOUT_MIXED_READY_OVERFLOW;
 
     theme.line_color =
             matrix_pixel_rgb565_create(
@@ -704,7 +760,7 @@ static void test_compact_mixed_layout_moves_footer_down(void) {
     assert(
             matrix_race_screen_render(
                     &framebuffer,
-                    &compact,
+                    &overflow,
                     &theme,
                     0));
 
@@ -713,13 +769,19 @@ static void test_compact_mixed_layout_moves_footer_down(void) {
                     &framebuffer,
                     0,
                     52)
-            != theme.line_color);
+            == theme.line_color);
     assert(
             matrix_framebuffer_get(
                     &framebuffer,
-                    0,
-                    54)
+                    80,
+                    52)
             == theme.line_color);
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    100,
+                    52)
+            != theme.line_color);
     assert(
             matrix_framebuffer_get(
                     &framebuffer,
@@ -830,7 +892,8 @@ int main(void) {
     test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_header_statuses_shift_content_and_clock();
     test_registration_layout_uses_full_width_without_sprites();
-    test_compact_mixed_layout_moves_footer_down();
+    test_registration_overflow_removes_footer();
+    test_ready_overflow_keeps_left_half_footer();
     test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
 
