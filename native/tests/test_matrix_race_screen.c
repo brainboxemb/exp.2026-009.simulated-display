@@ -482,75 +482,79 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
     assert(
             matrix_framebuffer_get(
                     &wifi_frame,
-                    123,
+                    121,
                     1)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    113,
+                    109,
                     1)
             == theme.flag_color);
 
     /*
-     * One warning occupies the rightmost 9-pixel block. With two warnings,
+     * One warning occupies the rightmost 11-pixel block. With two warnings,
      * WiFi is left of the broken-link warning.
      */
     assert(
             matrix_framebuffer_get(
                     &wifi_frame,
-                    151,
-                    0)
+                    149,
+                    10)
             == theme.warning_background_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    141,
-                    0)
+                    137,
+                    10)
             == theme.warning_background_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    151,
-                    0)
+                    149,
+                    10)
             == theme.warning_background_color);
-
-    assert(
-            matrix_framebuffer_get(
-                    &disconnected_frame,
-                    144,
-                    1)
-            == theme.warning_text_color);
-    assert(
-            matrix_framebuffer_get(
-                    &disconnected_frame,
-                    155,
-                    1)
-            == theme.warning_text_color);
 
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
                     142,
                     1)
+            == theme.warning_text_color);
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
+                    156,
+                    0)
+            == theme.warning_text_color);
+
+    /*
+     * The strike reaches both outer corners and is two pixels wide at the
+     * top-left and bottom-right edges.
+     */
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
+                    137,
+                    0)
             == theme.warning_strike_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    143,
-                    1)
+                    138,
+                    0)
             == theme.warning_strike_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    152,
-                    1)
+                    146,
+                    10)
             == theme.warning_strike_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    153,
-                    1)
+                    147,
+                    10)
             == theme.warning_strike_color);
 }
 
