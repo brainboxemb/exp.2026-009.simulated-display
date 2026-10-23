@@ -23,6 +23,7 @@ static MatrixRaceScreenData DEMO_SCREEN = {
     .counter = "999",
     .wifi_connected = true,
     .registration_server_connected = true,
+    .synchronizing = false,
     .left_rows = {
         {"999", "99:99"},
         {"999", "99:99"},
@@ -138,6 +139,8 @@ static bool read_theme(MatrixTheme *theme) {
     uint16_t warning_background_color = 0;
     uint16_t warning_text_color = 0;
     uint16_t warning_strike_color = 0;
+    uint16_t sync_background_color = 0;
+    uint16_t sync_icon_color = 0;
     uint8_t family = 0;
     uint8_t header_size = 0;
     uint8_t row_size = 0;
@@ -155,6 +158,8 @@ static bool read_theme(MatrixTheme *theme) {
             || !read_u16_be(&warning_background_color)
             || !read_u16_be(&warning_text_color)
             || !read_u16_be(&warning_strike_color)
+            || !read_u16_be(&sync_background_color)
+            || !read_u16_be(&sync_icon_color)
             || !read_u8(&family)
             || !read_u8(&header_size)
             || !read_u8(&row_size)
@@ -179,6 +184,8 @@ static bool read_theme(MatrixTheme *theme) {
     theme->warning_background_color = warning_background_color;
     theme->warning_text_color = warning_text_color;
     theme->warning_strike_color = warning_strike_color;
+    theme->sync_background_color = sync_background_color;
+    theme->sync_icon_color = sync_icon_color;
 
     theme->header.font.family =
             (MatrixFontFamily)family;
@@ -298,11 +305,14 @@ int main(void) {
             case MATRIX_HOST_REQUEST_CONNECTION_STATUS: {
                 uint8_t wifi_connected = 0;
                 uint8_t registration_server_connected = 0;
+                uint8_t synchronizing = 0;
 
                 if (!read_u8(&wifi_connected)
                         || !read_u8(&registration_server_connected)
+                        || !read_u8(&synchronizing)
                         || wifi_connected > 1u
-                        || registration_server_connected > 1u) {
+                        || registration_server_connected > 1u
+                        || synchronizing > 1u) {
                     return 6;
                 }
 
@@ -310,6 +320,8 @@ int main(void) {
                         wifi_connected != 0;
                 DEMO_SCREEN.registration_server_connected =
                         registration_server_connected != 0;
+                DEMO_SCREEN.synchronizing =
+                        synchronizing != 0;
 
                 if (demo_visible) {
                     if (!draw_demo_screen(
