@@ -18,8 +18,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
     private static final int REQUEST_DEMO_SCREEN = 0;
     private static final int REQUEST_CLEAR = 1;
     private static final int REQUEST_THEME = 2;
-    private static final int REQUEST_ANIMATION_TICK = 3;
-    private static final int REQUEST_ANIMATION_FRAME = 4;
+    private static final int REQUEST_ANIMATION_FRAME = 3;
     private static final int MAX_PIXELS = 1_000_000;
 
     private final Process process;
@@ -71,11 +70,6 @@ final class MatrixDisplayProcess implements AutoCloseable {
     synchronized void clear()
             throws IOException {
         sendRequest(REQUEST_CLEAR);
-    }
-
-    synchronized void animationTick()
-            throws IOException {
-        sendRequest(REQUEST_ANIMATION_TICK);
     }
 
     synchronized void animationFrame(int frame)
