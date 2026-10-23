@@ -409,6 +409,52 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
 }
 
 
+static void test_finish_flag_animates_before_counter(void) {
+    MatrixFramebuffer frame0;
+    MatrixFramebuffer frame2;
+    MatrixTheme theme =
+            matrix_theme_default_create();
+
+    assert(
+            matrix_race_screen_render(
+                    &frame0,
+                    &SAMPLE,
+                    &theme,
+                    0));
+    assert(
+            matrix_race_screen_render(
+                    &frame2,
+                    &SAMPLE,
+                    &theme,
+                    2));
+
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    123,
+                    2)
+            == theme.sprite_color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    124,
+                    2)
+            != theme.sprite_color);
+
+    assert(
+            matrix_framebuffer_get(
+                    &frame2,
+                    123,
+                    2)
+            != theme.sprite_color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame2,
+                    124,
+                    2)
+            == theme.sprite_color);
+}
+
 static void test_runner_and_warmup_animate_in_their_status_columns(void) {
     MatrixFramebuffer frame0;
     MatrixFramebuffer frame2;
@@ -509,6 +555,7 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
+    test_finish_flag_animates_before_counter();
     test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
 
