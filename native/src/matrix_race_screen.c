@@ -19,13 +19,12 @@
 #define FINISH_FLAG_Y 2
 #define FINISH_FLAG_WIDTH 7u
 #define FINISH_FLAG_HEIGHT 7u
-#define FINISH_FLAG_GAP 1u
 
 #define HEADER_COUNTER_WIDTH 21u
 
 #define WARNING_Y 2
 #define WARNING_WIDTH 5u
-#define WARNING_SLOT_WIDTH 6u
+#define WARNING_GAP 1u
 #define WARNING_HEIGHT 8u
 #define WARNING_GLYPH_WIDTH 3u
 #define WARNING_GLYPH_HEIGHT 5u
@@ -362,10 +361,16 @@ bool matrix_race_screen_render(
         warning_count++;
     }
 
+    const uint16_t warning_group_width =
+            warning_count == 0u
+                    ? 0u
+                    : (uint16_t)(
+                            warning_count * WARNING_WIDTH
+                            + (warning_count - 1u) * WARNING_GAP);
     const uint16_t counter_right =
             (uint16_t)(
                     MATRIX_DISPLAY_WIDTH
-                    - warning_count * WARNING_SLOT_WIDTH);
+                    - warning_group_width);
     const uint16_t counter_x =
             (uint16_t)(
                     counter_right
@@ -373,7 +378,6 @@ bool matrix_race_screen_render(
     const uint16_t finish_flag_x =
             (uint16_t)(
                     counter_x
-                    - FINISH_FLAG_GAP
                     - FINISH_FLAG_WIDTH);
 
     create_label(
@@ -475,8 +479,7 @@ bool matrix_race_screen_render(
     uint16_t warning_x =
             (uint16_t)(
                     MATRIX_DISPLAY_WIDTH
-                    - warning_count * WARNING_SLOT_WIDTH
-                    + 1u);
+                    - warning_group_width);
 
     if (!data->wifi_connected) {
         draw_warning_block(
@@ -487,7 +490,8 @@ bool matrix_race_screen_render(
         warning_x =
                 (uint16_t)(
                         warning_x
-                        + WARNING_SLOT_WIDTH);
+                        + WARNING_WIDTH
+                        + WARNING_GAP);
     }
 
     if (!data->registration_server_connected) {
