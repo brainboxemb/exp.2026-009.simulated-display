@@ -27,9 +27,10 @@ static MatrixRaceScreenData DEMO_SCREEN = {
     .registration_server_connected = true,
     .synchronizing = false,
     .left_rows = {
-        {"999", "99:99"},
-        {"999", "99:99"},
-        {"999", "99:99"}
+        {"999", "99:99", "99", "1"},
+        {"999", "99:99", "99", "2"},
+        {"999", "99:99", "99", "3"},
+        {"999", "99:99", "99", "4"}
     },
     .right_rows = {
         {"999", "999"},
