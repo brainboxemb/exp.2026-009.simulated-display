@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 
-#define MATRIX_RACE_LEFT_ROW_COUNT 3u
+#define MATRIX_RACE_LEFT_ROW_COUNT 4u
 #define MATRIX_RACE_RIGHT_ROW_COUNT 2u
 
 typedef enum {
@@ -18,6 +18,8 @@ typedef enum {
 typedef struct {
     const char *number;
     const char *time;
+    const char *hundredths;
+    const char *rank;
 } MatrixRaceLeftRow;
 
 typedef struct {
