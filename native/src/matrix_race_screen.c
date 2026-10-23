@@ -28,7 +28,7 @@
 #define RIGHT_RIGHT_X 126
 #define RIGHT_RIGHT_WIDTH 33
 
-#define FOOTER_Y 53
+#define FOOTER_Y 54
 
 static lv_display_t *display;
 static MatrixFramebuffer *active_framebuffer;
