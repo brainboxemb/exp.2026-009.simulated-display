@@ -1,0 +1,160 @@
+#include "matrix_numeric_font.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+
+#define NUMERIC_HEIGHT 12u
+#define NUMERIC_WIDTH 8u
+
+typedef struct {
+    uint32_t codepoint;
+    uint8_t width;
+    uint8_t advance;
+    uint8_t rows[NUMERIC_HEIGHT];
+} NumericGlyph;
+
+/*
+ * Hand-drawn 8x12 numeric glyphs for the large-value fields.
+ *
+ * This is deliberately not a scaled VBZ glyph set. Each digit is designed at
+ * its final pixel size so round and diagonal forms remain intentional.
+ */
+static const NumericGlyph glyphs[] = {
+    {' ', 0, 4, {0}},
+    {'-', 8, 9, {
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x7e, 0x7e, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    }},
+    {'0', 8, 9, {
+        0x7e, 0xc3, 0xc3, 0xc3,
+        0xc3, 0xc3, 0xc3, 0xc3,
+        0xc3, 0xc3, 0xc3, 0x7e
+    }},
+    {'1', 8, 9, {
+        0x18, 0x38, 0x78, 0x18,
+        0x18, 0x18, 0x18, 0x18,
+        0x18, 0x18, 0x18, 0x7e
+    }},
+    {'2', 8, 9, {
+        0x7e, 0xc3, 0x03, 0x03,
+        0x06, 0x0c, 0x18, 0x30,
+        0x60, 0xc0, 0xc3, 0xff
+    }},
+    {'3', 8, 9, {
+        0x7e, 0xc3, 0x03, 0x03,
+        0x0e, 0x0e, 0x03, 0x03,
+        0x03, 0x03, 0xc3, 0x7e
+    }},
+    {'4', 8, 9, {
+        0xc0, 0xc0, 0xc6, 0xc6,
+        0xc6, 0xff, 0x06, 0x06,
+        0x06, 0x06, 0x06, 0x06
+    }},
+    {'5', 8, 9, {
+        0xff, 0xc3, 0xc0, 0xc0,
+        0xfc, 0x06, 0x03, 0x03,
+        0x03, 0x03, 0xc3, 0x7e
+    }},
+    {'6', 8, 9, {
+        0x7e, 0xc3, 0xc0, 0xc0,
+        0xfc, 0xc6, 0xc3, 0xc3,
+        0xc3, 0xc3, 0xc3, 0x7e
+    }},
+    {'7', 8, 9, {
+        0xff, 0xc3, 0x03, 0x06,
+        0x0c, 0x18, 0x30, 0x60,
+        0xc0, 0xc0, 0xc0, 0xc0
+    }},
+    {'8', 8, 9, {
+        0x7e, 0xc3, 0xc3, 0xc3,
+        0x66, 0x3c, 0x66, 0xc3,
+        0xc3, 0xc3, 0xc3, 0x7e
+    }},
+    {'9', 8, 9, {
+        0x7e, 0xc3, 0xc3, 0xc3,
+        0xc3, 0x63, 0x3f, 0x03,
+        0x03, 0x03, 0xc3, 0x7e
+    }}
+};
+
+#define GLYPH_COUNT (sizeof(glyphs) / sizeof(glyphs[0]))
+
+static int32_t glyph_index_find(uint32_t letter) {
+    for (uint32_t index = 0; index < GLYPH_COUNT; index++) {
+        if (glyphs[index].codepoint == letter) {
+            return (int32_t)index;
+        }
+    }
+    return -1;
+}
+
+static bool glyph_descriptor_get(
+        const lv_font_t *font,
+        lv_font_glyph_dsc_t *descriptor,
+        uint32_t letter,
+        uint32_t letter_next) {
+    LV_UNUSED(font);
+    LV_UNUSED(letter_next);
+
+    const int32_t index = glyph_index_find(letter);
+    if (index < 0) {
+        return false;
+    }
+
+    const NumericGlyph *glyph = &glyphs[index];
+
+    descriptor->adv_w = glyph->advance;
+    descriptor->box_w = glyph->width;
+    descriptor->box_h = glyph->width == 0 ? 0 : NUMERIC_HEIGHT;
+    descriptor->ofs_x = 0;
+    descriptor->ofs_y = 0;
+    descriptor->stride = glyph->width;
+    descriptor->format = LV_FONT_GLYPH_FORMAT_A8;
+    descriptor->is_placeholder = false;
+    descriptor->gid.index = (uint32_t)index;
+
+    return true;
+}
+
+static const void *glyph_bitmap_get(
+        lv_font_glyph_dsc_t *descriptor,
+        lv_draw_buf_t *draw_buffer) {
+    if (descriptor->gid.index >= GLYPH_COUNT || draw_buffer == NULL) {
+        return NULL;
+    }
+
+    const NumericGlyph *glyph = &glyphs[descriptor->gid.index];
+
+    memset(draw_buffer->data, 0, draw_buffer->data_size);
+
+    for (uint32_t y = 0; y < NUMERIC_HEIGHT; y++) {
+        for (uint32_t x = 0; x < glyph->width; x++) {
+            draw_buffer->data[y * draw_buffer->header.stride + x] =
+                    (glyph->rows[y] & (0x80u >> x)) != 0
+                    ? 0xffu
+                    : 0x00u;
+        }
+    }
+
+    return draw_buffer;
+}
+
+const lv_font_t matrix_font_numeric_12 = {
+    .dsc = NULL,
+    .fallback = NULL,
+    .user_data = NULL,
+    .get_glyph_dsc = glyph_descriptor_get,
+    .get_glyph_bitmap = glyph_bitmap_get,
+    .release_glyph = NULL,
+    .line_height = NUMERIC_HEIGHT,
+    .base_line = 0,
+    .cap_height = NUMERIC_HEIGHT,
+    .x_height = NUMERIC_HEIGHT,
+    .subpx = LV_FONT_SUBPX_NONE,
+    .kerning = LV_FONT_KERNING_NONE,
+    .static_bitmap = 0,
+    .underline_position = -1,
+    .underline_thickness = 1
+};
