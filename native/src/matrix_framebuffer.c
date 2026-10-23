@@ -1,5 +1,6 @@
 #include "matrix_framebuffer.h"
 
+#include <stdbool.h>
 #include <string.h>
 
 static bool valid_coordinate(
