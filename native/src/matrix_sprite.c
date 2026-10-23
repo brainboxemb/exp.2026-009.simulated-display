@@ -4,6 +4,7 @@
 
 #define RUNNER_SOURCE_WIDTH 7u
 #define RUNNER_SOURCE_HEIGHT 7u
+#define RUNNER_LEG_SOURCE_Y 4u
 
 /*
  * Original six-frame SpriteMap1 pattern from the legacy display, expressed as
@@ -97,6 +98,187 @@ static const uint16_t WARMUP[
     }
 };
 
+static uint16_t runner_target_x(uint16_t source_x) {
+    return (uint16_t)(
+            (source_x
+                    * (MATRIX_SPRITE_WIDTH - 1u)
+                    + (RUNNER_SOURCE_WIDTH - 1u) / 2u)
+            / (RUNNER_SOURCE_WIDTH - 1u));
+}
+
+static uint16_t runner_target_y(uint16_t source_y) {
+    return (uint16_t)(
+            (source_y
+                    * (MATRIX_SPRITE_HEIGHT - 1u)
+                    + (RUNNER_SOURCE_HEIGHT - 1u) / 2u)
+            / (RUNNER_SOURCE_HEIGHT - 1u));
+}
+
+static void draw_runner_line(
+        MatrixFramebuffer *framebuffer,
+        uint16_t origin_x,
+        uint16_t origin_y,
+        uint16_t x0,
+        uint16_t y0,
+        uint16_t x1,
+        uint16_t y1,
+        MatrixPixel color) {
+    int current_x = (int)x0;
+    int current_y = (int)y0;
+    const int target_x = (int)x1;
+    const int target_y = (int)y1;
+    const int dx =
+            target_x >= current_x
+                    ? target_x - current_x
+                    : current_x - target_x;
+    const int sx =
+            current_x < target_x
+                    ? 1
+                    : -1;
+    const int dy =
+            target_y >= current_y
+                    ? current_y - target_y
+                    : target_y - current_y;
+    const int sy =
+            current_y < target_y
+                    ? 1
+                    : -1;
+    int error = dx + dy;
+
+    for (;;) {
+        matrix_framebuffer_set(
+                framebuffer,
+                (uint16_t)(origin_x + current_x),
+                (uint16_t)(origin_y + current_y),
+                color);
+
+        if (current_x == target_x
+                && current_y == target_y) {
+            break;
+        }
+
+        const int doubled_error = 2 * error;
+
+        if (doubled_error >= dy) {
+            error += dy;
+            current_x += sx;
+        }
+
+        if (doubled_error <= dx) {
+            error += dx;
+            current_y += sy;
+        }
+    }
+}
+
+static bool runner_source_pixel(
+        const uint8_t columns[RUNNER_SOURCE_WIDTH],
+        uint16_t source_x,
+        uint16_t source_y) {
+    return (columns[source_x]
+            & (uint8_t)(1u << source_y))
+            != 0;
+}
+
+static void draw_runner_legs(
+        MatrixFramebuffer *framebuffer,
+        const uint8_t columns[RUNNER_SOURCE_WIDTH],
+        uint16_t x,
+        uint16_t y,
+        MatrixPixel color) {
+    for (uint16_t source_y = RUNNER_LEG_SOURCE_Y;
+            source_y < RUNNER_SOURCE_HEIGHT;
+            source_y++) {
+        for (uint16_t source_x = 0;
+                source_x < RUNNER_SOURCE_WIDTH;
+                source_x++) {
+            if (!runner_source_pixel(
+                    columns,
+                    source_x,
+                    source_y)) {
+                continue;
+            }
+
+            const uint16_t target_x =
+                    runner_target_x(source_x);
+            const uint16_t target_y =
+                    runner_target_y(source_y);
+
+            matrix_framebuffer_set(
+                    framebuffer,
+                    (uint16_t)(x + target_x),
+                    (uint16_t)(y + target_y),
+                    color);
+
+            if (source_x + 1u < RUNNER_SOURCE_WIDTH
+                    && runner_source_pixel(
+                            columns,
+                            source_x + 1u,
+                            source_y)) {
+                draw_runner_line(
+                        framebuffer,
+                        x,
+                        y,
+                        target_x,
+                        target_y,
+                        runner_target_x(source_x + 1u),
+                        target_y,
+                        color);
+            }
+
+            if (source_y + 1u < RUNNER_SOURCE_HEIGHT
+                    && runner_source_pixel(
+                            columns,
+                            source_x,
+                            source_y + 1u)) {
+                draw_runner_line(
+                        framebuffer,
+                        x,
+                        y,
+                        target_x,
+                        target_y,
+                        target_x,
+                        runner_target_y(source_y + 1u),
+                        color);
+            }
+
+            if (source_x + 1u < RUNNER_SOURCE_WIDTH
+                    && source_y + 1u < RUNNER_SOURCE_HEIGHT
+                    && runner_source_pixel(
+                            columns,
+                            source_x + 1u,
+                            source_y + 1u)) {
+                draw_runner_line(
+                        framebuffer,
+                        x,
+                        y,
+                        target_x,
+                        target_y,
+                        runner_target_x(source_x + 1u),
+                        runner_target_y(source_y + 1u),
+                        color);
+            }
+
+            if (source_x > 0
+                    && source_y + 1u < RUNNER_SOURCE_HEIGHT
+                    && runner_source_pixel(
+                            columns,
+                            source_x - 1u,
+                            source_y + 1u)) {
+                draw_runner_line(
+                        framebuffer,
+                        x,
+                        y,
+                        target_x,
+                        target_y,
+                        runner_target_x(source_x - 1u),
+                        runner_target_y(source_y + 1u),
+                        color);
+            }
+        }
+    }
+}
+
 static void draw_runner(
         MatrixFramebuffer *framebuffer,
         uint8_t frame,
@@ -114,6 +296,10 @@ static void draw_runner(
                         target_y
                         * RUNNER_SOURCE_HEIGHT
                         / MATRIX_SPRITE_HEIGHT);
+
+        if (source_y >= RUNNER_LEG_SOURCE_Y) {
+            continue;
+        }
 
         for (uint16_t target_x = 0;
                 target_x < MATRIX_SPRITE_WIDTH;
@@ -137,6 +323,13 @@ static void draw_runner(
                     color);
         }
     }
+
+    draw_runner_legs(
+            framebuffer,
+            columns,
+            x,
+            y,
+            color);
 
     const uint16_t *arms =
             RUNNER_ARMS[
