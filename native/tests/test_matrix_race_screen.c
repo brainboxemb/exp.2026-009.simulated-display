@@ -10,6 +10,8 @@ static const MatrixRaceScreenData SAMPLE = {
     .location = "WP-99",
     .clock = "99:99:99",
     .counter = "999",
+    .wifi_connected = true,
+    .registration_server_connected = true,
     .left_rows = {
         {"999", "99:99"},
         {"999", "99:99"},
@@ -168,7 +170,10 @@ static bool is_theme_color(
             || pixel == theme->row_time.color
             || pixel == theme->large_value.color
             || pixel == theme->footer.color
-            || pixel == theme->sprite_color;
+            || pixel == theme->sprite_color
+            || pixel == theme->flag_color
+            || pixel == theme->warning_background_color
+            || pixel == theme->warning_text_color;
 }
 
 static void test_pixel_fonts_render_only_theme_colors(void) {
@@ -409,54 +414,113 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
 }
 
 
-static void test_finish_flag_animates_before_counter(void) {
-    MatrixFramebuffer frame0;
-    MatrixFramebuffer frame2;
+static void test_header_status_blocks_shift_flag_and_counter(void) {
+    MatrixFramebuffer connected_frame;
+    MatrixFramebuffer wifi_frame;
+    MatrixFramebuffer disconnected_frame;
     MatrixTheme theme =
             matrix_theme_default_create();
+    MatrixRaceScreenData wifi_warning = SAMPLE;
+    MatrixRaceScreenData disconnected = SAMPLE;
+
+    theme.flag_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    255,
+                    0);
+    theme.warning_background_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    0,
+                    255);
+    theme.warning_text_color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    255,
+                    255);
+
+    wifi_warning.wifi_connected = false;
+    disconnected.wifi_connected = false;
+    disconnected.registration_server_connected = false;
 
     assert(
             matrix_race_screen_render(
-                    &frame0,
+                    &connected_frame,
                     &SAMPLE,
                     &theme,
                     0));
     assert(
             matrix_race_screen_render(
-                    &frame2,
-                    &SAMPLE,
+                    &wifi_frame,
+                    &wifi_warning,
                     &theme,
-                    2));
+                    0));
+    assert(
+            matrix_race_screen_render(
+                    &disconnected_frame,
+                    &disconnected,
+                    &theme,
+                    0));
 
     /*
-     * The first checker block stays fixed. A trailing-edge pixel changes
-     * between wave frames without moving the flag as a whole.
+     * No warning: flag starts at x=131.
+     * One warning: flag and counter shift 6 pixels left.
+     * Two warnings: they shift 12 pixels left.
      */
     assert(
             matrix_framebuffer_get(
-                    &frame0,
-                    123,
+                    &connected_frame,
+                    131,
                     2)
-            == theme.sprite_color);
+            == theme.flag_color);
     assert(
             matrix_framebuffer_get(
-                    &frame2,
-                    123,
+                    &wifi_frame,
+                    125,
                     2)
-            == theme.sprite_color);
+            == theme.flag_color);
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
+                    119,
+                    2)
+            == theme.flag_color);
+
+    /*
+     * One warning occupies the rightmost 5-pixel block. With two warnings,
+     * WiFi is left of the registration-server warning.
+     */
+    assert(
+            matrix_framebuffer_get(
+                    &wifi_frame,
+                    155,
+                    2)
+            == theme.warning_background_color);
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
+                    149,
+                    2)
+            == theme.warning_background_color);
+    assert(
+            matrix_framebuffer_get(
+                    &disconnected_frame,
+                    155,
+                    2)
+            == theme.warning_background_color);
 
     assert(
             matrix_framebuffer_get(
-                    &frame0,
-                    132,
-                    2)
-            == theme.sprite_color);
+                    &disconnected_frame,
+                    150,
+                    3)
+            == theme.warning_text_color);
     assert(
             matrix_framebuffer_get(
-                    &frame2,
-                    132,
-                    2)
-            != theme.sprite_color);
+                    &disconnected_frame,
+                    156,
+                    3)
+            == theme.warning_text_color);
 }
 
 static void test_runner_and_warmup_animate_in_their_status_columns(void) {
@@ -559,7 +623,7 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
-    test_finish_flag_animates_before_counter();
+    test_header_status_blocks_shift_flag_and_counter();
     test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
 
