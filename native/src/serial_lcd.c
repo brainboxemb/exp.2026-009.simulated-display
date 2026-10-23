@@ -9,7 +9,9 @@
 #define CMD_BITMAP ((uint8_t)'B')
 #define CMD_CLEAR ((uint8_t)'C')
 #define CMD_POSITION ((uint8_t)'L')
-#define CMD_SPRITE ((uint8_t)'N')
+#define CMD_SPRITE_MENU ((uint8_t)'N')
+
+#define SPRITE_CMD_VELOCITY ((uint8_t)'V')
 
 #define CHARACTER_HEIGHT 7u
 #define SPRITE_ADVANCE 8u
@@ -258,7 +260,7 @@ static uint8_t command_parameter_count(uint8_t command) {
         case CMD_CLEAR:
             return 1;
 
-        case CMD_SPRITE:
+        case CMD_SPRITE_MENU:
             return 2;
 
         case CMD_POSITION:
@@ -274,7 +276,7 @@ static bool command_known(uint8_t command) {
         case CMD_BITMAP:
         case CMD_CLEAR:
         case CMD_POSITION:
-        case CMD_SPRITE:
+        case CMD_SPRITE_MENU:
             return true;
 
         default:
@@ -309,11 +311,19 @@ static void execute_position(SerialLcd *lcd) {
     reset_text_history(lcd);
 }
 
-static void execute_sprite_command(SerialLcd *lcd) {
+/*
+ * Legacy sprite velocity command:
+ *
+ *     /NVv
+ *
+ * N selects the sprite command menu, V selects velocity and v is 1..9.
+ * The original firmware stores the general-timer interval as 2 * v.
+ */
+static void execute_sprite_velocity_command(SerialLcd *lcd) {
     const uint8_t subcommand = lcd->parameters[0];
     const uint8_t velocity = lcd->parameters[1];
 
-    if (subcommand != (uint8_t)'V'
+    if (subcommand != SPRITE_CMD_VELOCITY
             && subcommand != (uint8_t)'v') {
         return;
     }
@@ -342,8 +352,8 @@ static void execute_command(SerialLcd *lcd) {
             draw_bitmap_digit(lcd, lcd->parameters[0]);
             break;
 
-        case CMD_SPRITE:
-            execute_sprite_command(lcd);
+        case CMD_SPRITE_MENU:
+            execute_sprite_velocity_command(lcd);
             break;
 
         default:
