@@ -421,11 +421,11 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
 static int first_header_pixel_x(
         const MatrixFramebuffer *framebuffer,
         MatrixPixel color) {
-    for (uint16_t x = HEADER_CLOCK_X;
+    for (uint16_t x = 40u;
             x < 97u;
             x++) {
         for (uint16_t y = 0;
-                y < HEADER_LINE_Y;
+                y < 11u;
                 y++) {
             if (matrix_framebuffer_get(
                     framebuffer,
