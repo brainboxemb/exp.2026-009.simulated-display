@@ -9,9 +9,15 @@ On Windows it is perfectly reasonable to use **NetBeans for the JavaFX applicati
 
 ## Recommended Windows setup
 
-## Fastest Windows installation with Chocolatey
+## Install the Windows native toolchain
 
-If Chocolatey is already installed, open **PowerShell as Administrator** and install the native toolchain explicitly:
+Choose **one** of the following installation methods. They install the same MSVC/C++ toolchain required by this experiment.
+
+### Option A — Chocolatey
+
+This is the recommended route when Chocolatey is already installed.
+
+Open **PowerShell as Administrator**:
 
 ```powershell
 choco install visualstudio2026buildtools -y
@@ -19,7 +25,9 @@ choco install visualstudio2026-workload-vctools -y
 choco install cmake -y
 ```
 
-The important second package is `visualstudio2026-workload-vctools`: the Build Tools package by itself installs only the basic build-tools product, while the VCTools workload adds the Visual C/C++ compiler and recommended native build components.
+The important second package is `visualstudio2026-workload-vctools`. It adds the Visual C/C++ compiler and native build workload to Visual Studio Build Tools.
+
+You do **not** need to open Visual Studio Installer and manually select `Desktop development with C++` after using these Chocolatey commands.
 
 Optionally install VS Code through Chocolatey as well:
 
@@ -27,46 +35,11 @@ Optionally install VS Code through Chocolatey as well:
 choco install vscode -y
 ```
 
-After installation, close and reopen VS Code and PowerShell. Verify:
+### Option B — Visual Studio Installer
 
-```powershell
-cmake --version
-```
+Use this only when you prefer the graphical installer instead of Chocolatey.
 
-You do not need `cl` to work from an ordinary PowerShell prompt for VS Code/CMake Tools to use MSVC. CMake Tools can activate the Visual Studio developer environment itself.
-
-### Java side
-
-Install:
-
-- JDK 21;
-- Apache NetBeans.
-
-Open the repository root as a Maven project in NetBeans. JavaFX dependencies are resolved by Maven.
-
-Verify:
-
-```powershell
-java -version
-mvn -version
-```
-
-If NetBeans uses its bundled Maven integration, a separately installed global Maven is optional for IDE use. A command-line Maven installation is useful for the terminal commands below.
-
-### Native C side with VS Code
-
-Install Visual Studio Code and add these Microsoft extensions:
-
-- **C/C++**;
-- **CMake Tools**.
-
-The extensions provide editing, code navigation, configuration and build integration. They do **not** by themselves provide a C compiler.
-
-### C compiler and CMake
-
-The recommended Windows compiler is **MSVC**, installed through **Visual Studio Build Tools**. The Chocolatey commands above are the recommended installation route for this experiment. The Visual Studio Installer route below is the equivalent manual alternative.
-
-In the Visual Studio Installer, select the workload:
+Install **Visual Studio Build Tools 2026** and select the workload:
 
 ```text
 Desktop development with C++
@@ -78,18 +51,21 @@ Make sure the workload includes:
 - a Windows SDK;
 - CMake tools for Windows.
 
-This is enough to compile this experiment; the full Visual Studio IDE is not required.
+The full Visual Studio IDE is not required.
 
-If `cmake` is not available on the command line after installing the Build Tools workload, install the normal Kitware CMake package separately and make sure it is added to `PATH`.
+If `cmake` is still unavailable afterwards, install Kitware CMake separately and add it to `PATH`.
 
-Verify the native tools in a new terminal:
+### Verify
+
+Close and reopen PowerShell and VS Code after installation.
 
 ```powershell
 cmake --version
-cl
 ```
 
-For `cl`, a normal PowerShell window may not contain the Visual Studio compiler environment. VS Code CMake Tools normally locates the installed Visual Studio toolchain itself. For direct manual `cl` use, launch a Visual Studio Developer PowerShell / Developer Command Prompt.
+A normal PowerShell window does not necessarily expose `cl.exe` directly. That is fine: VS Code CMake Tools can activate the installed Visual Studio developer environment automatically.
+
+For direct manual `cl` use, open a Visual Studio Developer PowerShell / Developer Command Prompt.
 
 ## VS Code workflow
 
