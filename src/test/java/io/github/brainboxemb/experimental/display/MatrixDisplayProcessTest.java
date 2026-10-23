@@ -36,6 +36,20 @@ final class MatrixDisplayProcessTest {
             assertEquals(130, frame.green(0, 11));
             assertEquals(132, frame.blue(0, 11));
 
+            process.animationFrame(2);
+
+            MatrixDisplayFrame stepped =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+
+            assertNotNull(
+                    stepped,
+                    "matrix host did not render selected sprite frame");
+            assertEquals(255, stepped.red(1, 22));
+            assertEquals(0, stepped.green(1, 22));
+            assertEquals(0, stepped.blue(1, 22));
+
             process.applyTheme(
                     new MatrixDisplayThemeConfig(
                             0x0000,
