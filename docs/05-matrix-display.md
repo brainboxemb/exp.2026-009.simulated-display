@@ -25,8 +25,8 @@ The current demo screen supports four preview layouts:
   Each row contains team number, main time, hundredths and ranking. The ranking
   suffix is a separate raised VBZ `e`; the footer spans the full 160-pixel
   width;
-- `Registraties (>4)`: overflow uses a compact five-row cadence because the
-  extra registrations consume the footer area; the footer disappears
+- `Registraties (>3)`: the fourth registration uses the former footer space
+  while keeping the same 13-pixel row cadence. The footer disappears
   completely;
 - `Registraties + klaarstaan`: three compact incoming-team rows on the left
   and up to four ready teams on the right. The footer remains full width;
