@@ -544,10 +544,9 @@ bool matrix_race_screen_render(
             39
         };
         static const int32_t overflow_registration_row_y[] = {
-            12,
-            22,
-            32,
-            42,
+            13,
+            26,
+            39,
             52
         };
         const size_t visible_registration_rows =
