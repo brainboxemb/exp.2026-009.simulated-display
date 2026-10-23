@@ -7,21 +7,18 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 include(FetchContent)
 
-# LVGL is configured from its own empty defconfig plus the small set of
-# features used by the 160x64 matrix renderer. Unspecified LVGL defaults are
-# intentionally not used.
-set(FETCHCONTENT_BASE_DIR
-    "${CMAKE_BINARY_DIR}/_deps"
+set(LV_BUILD_CONF_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/lv_conf.h
     CACHE PATH "" FORCE)
-set(LV_BUILD_CONF_PATH "" CACHE PATH "" FORCE)
-set(LV_BUILD_USE_KCONFIG ON CACHE BOOL "" FORCE)
-set(LV_BUILD_DEFCONFIG_STRICT ON CACHE BOOL "" FORCE)
-set(LV_BUILD_DEFCONFIG_PATH
-    "${FETCHCONTENT_BASE_DIR}/lvgl-src/configs/defconfigs/empty.defconfig;${CMAKE_CURRENT_SOURCE_DIR}/lvgl-matrix.defconfig"
-    CACHE STRING "" FORCE)
+set(LV_BUILD_USE_KCONFIG OFF CACHE BOOL "" FORCE)
+set(LV_BUILD_SET_CONFIG_OPTS OFF CACHE BOOL "" FORCE)
 set(LV_BUILD_INSTALL OFF CACHE BOOL "" FORCE)
 set(LV_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(LV_FETCH_DEPENDENCIES OFF CACHE BOOL "" FORCE)
+set(CONFIG_LV_BUILD_DEMOS OFF CACHE BOOL "" FORCE)
+set(CONFIG_LV_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(CONFIG_LV_USE_THORVG OFF CACHE BOOL "" FORCE)
+set(CONFIG_LV_USE_THORVG_INTERNAL OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
     lvgl
@@ -30,6 +27,56 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(lvgl)
+
+#
+# LVGL's default CMake target recursively includes every source file and lets
+# preprocessor configuration make unused platform/features empty. For this
+# small matrix renderer we remove whole optional subsystems that are disabled
+# in lv_conf.h, so they are not compiled at all.
+#
+get_target_property(LVGL_MATRIX_SOURCES lvgl SOURCES)
+
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX "/src/drivers/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX "/src/libs/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX "/src/others/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX "/src/debugging/")
+
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/draw/(dma2d|espressif|eve|nanovg|nema_gfx|nxp|opengles|renesas|sdl|sifli|snapshot|vg_lite)/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/draw/sw/arm2d/")
+
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/layouts/(flex|grid)/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/themes/(default|mono|simple)/")
+
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/widgets/")
+list(APPEND LVGL_MATRIX_SOURCES
+    "${lvgl_SOURCE_DIR}/src/widgets/label/lv_label.c")
+
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/font/(binfont_loader|font_manager|freetype|imgfont|tiny_ttf)/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/font/lv_font_(dejavu|source_han_sans|montserrat_(22|24|26|28|30|32|34|36|38|40|42|44|46|48)).*\\.c$")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/font/lv_font_montserrat_14_aligned\\.c$")
+
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/image/svg/")
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/image/lv_(bmp|libjpeg_turbo|libpng|libwebp|lodepng|tjpgd)\\.c$")
+
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/fs/lv_fs_(arduino_esp_littlefs|arduino_sd|fatfs|frogfs|littlefs|memfs|posix|stdio|uefi|win32)\\.(c|cpp)$")
+
+list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
+    "/src/osal/lv_(cmsis_rtos2|freertos|linux|mqx|pthread|rtthread|sdl2|windows)\\.c$")
+
+set_property(
+    TARGET lvgl
+    PROPERTY SOURCES "${LVGL_MATRIX_SOURCES}")
 
 add_library(legacy-display
     src/display_framebuffer.c
