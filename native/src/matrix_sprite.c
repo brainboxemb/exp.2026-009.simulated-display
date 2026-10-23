@@ -43,7 +43,7 @@ static const uint16_t RUNNER[
         0x078, 0x0b4, 0x030, 0x030,
         0x030, 0x050, 0x088, 0x104
     }
-}
+};
 
 /*
  * Warmup keeps head, torso and legs fixed. Only the arm position changes:
