@@ -19,8 +19,9 @@
 #define HEADER_COUNTER_X 121
 #define HEADER_COUNTER_WIDTH 38
 
-#define LEFT_NUMBER_X 1
-#define LEFT_NUMBER_WIDTH 28
+#define LEFT_SPRITE_X 1
+#define LEFT_NUMBER_X 12
+#define LEFT_NUMBER_WIDTH 17
 #define LEFT_TIME_X 33
 #define LEFT_TIME_WIDTH 55
 
@@ -330,15 +331,15 @@ bool matrix_race_screen_render(
             framebuffer,
             MATRIX_SPRITE_RUNNER,
             animation_frame,
-            RIGHT_SPRITE_X,
-            right_row_y[0],
-            theme->large_value.color);
+            LEFT_SPRITE_X,
+            left_row_y[0],
+            theme->row_number.color);
     matrix_sprite_draw(
             framebuffer,
             MATRIX_SPRITE_WARMUP,
             (uint8_t)(animation_frame / 2u),
             RIGHT_SPRITE_X,
-            right_row_y[1],
+            right_row_y[0],
             theme->large_value.color);
 
     return true;
