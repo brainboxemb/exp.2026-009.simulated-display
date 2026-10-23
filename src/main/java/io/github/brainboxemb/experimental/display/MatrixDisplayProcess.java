@@ -20,6 +20,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
     private static final int REQUEST_THEME = 2;
     private static final int REQUEST_ANIMATION_FRAME = 3;
     private static final int REQUEST_CONNECTION_STATUS = 4;
+    private static final int REQUEST_LAYOUT = 5;
     private static final int MAX_PIXELS = 1_000_000;
 
     private final Process process;
@@ -82,6 +83,18 @@ final class MatrixDisplayProcess implements AutoCloseable {
 
         input.writeInt(REQUEST_ANIMATION_FRAME);
         input.writeByte(frame);
+        input.flush();
+    }
+
+    synchronized void layout(int layout)
+            throws IOException {
+        if (layout < 0 || layout > 2) {
+            throw new IllegalArgumentException(
+                    "layout must be 0..2");
+        }
+
+        input.writeInt(REQUEST_LAYOUT);
+        input.writeByte(layout);
         input.flush();
     }
 
