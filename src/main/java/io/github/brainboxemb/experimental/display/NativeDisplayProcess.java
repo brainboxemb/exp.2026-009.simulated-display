@@ -21,10 +21,10 @@ final class NativeDisplayProcess implements AutoCloseable {
     private static final int MAX_FRAME_PIXELS = 1_000_000;
     private static final int GENERAL_TIMER_TICK_REQUEST = -1;
     /*
-     * Timer1 normal mode at 921.6 kHz:
-     * 65536 counts / 921600 Hz = 71.111... ms.
+     * Legacy general-timer base: WaitTimePulse uses interval 10 while
+     * /WTnn is documented as nn * 100 ms. Therefore one base tick is 10 ms.
      */
-    private static final long GENERAL_TIMER_TICK_NANOS = 71_111_111L;
+    private static final long GENERAL_TIMER_TICK_NANOS = 10_000_000L;
 
     private final Process process;
     private final DataOutputStream serialInput;

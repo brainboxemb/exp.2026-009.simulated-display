@@ -85,7 +85,7 @@ Ordinary character bytes are rendered using the imported custom character map. T
 
 The `?` in `/C?` is a required filler byte and is deliberately ignored. It preserves the legacy minimum slash-command length.
 
-Two consecutive byte values `FE FE` place a sprite. The JavaFX **Sprite** button sends those bytes directly. The sprite animates automatically in place through the six imported appearances. `/NV1`..`/NV9` controls velocity. The native core starts at firmware-default v=4; the JavaFX velocity field initially shows 2 like the old control sheet and only changes the native value when **Set** is pressed.
+Two consecutive byte values `FE FE` place a sprite. The JavaFX **Sprite** button sends those bytes directly. The sprite animates automatically in place through the six imported appearances. `/NV1`..`/NV9` controls velocity. The native core starts at firmware-default v=4; the JavaFX velocity field initially shows 2 like the old control sheet and only changes the native value when **Set** is pressed. The desktop runtime uses the legacy-derived **10 ms general-timer tick**.
 
 The JavaFX **Protocol** field accepts the same stream as the native parser. For example:
 

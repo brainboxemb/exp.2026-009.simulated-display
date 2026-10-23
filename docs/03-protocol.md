@@ -88,7 +88,9 @@ The legacy `/NVv` command is implemented for `v=1..9`. As in the supplied firmwa
 
 The old desktop control sheet starts its editable **Sprite velocity** field at **2**. JavaFX mirrors that visible start value, but it does not send `/NV2` automatically; the firmware-default v=4 remains active until **Set** is pressed.
 
-The supplied Timer1 initialization gives a Timer1 clock of 921.6 kHz in normal mode with prescaler 8. If the general timer advances once per 16-bit Timer1 overflow, one base tick is `65536 / 921600 = 71.111... ms`. The desktop runtime currently uses that **71.111 ms** base. This Timer1-overflow mapping should still be verified against the original ISR when that source is available.
+The legacy general-timer base can be inferred more directly from the wait function: `/WTnn` is documented as at least `nn * 100 ms`, while initialization sets `WaitTimePulse` to interval 10. Therefore the simulator uses a **10 ms general-timer tick**.
+
+For sprite velocity the firmware stores `2*v` ticks, giving approximately 20 ms per frame at v=1, 40 ms at v=2, 80 ms at the firmware default v=4, and 180 ms at v=9.
 
 ## JavaFX protocol input
 
