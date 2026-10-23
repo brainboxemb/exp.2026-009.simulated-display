@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #define HEADER_LINE_Y 11
+#define HEADER_TEXT_Y -1
 #define MAIN_COLUMN_X 90
 #define FOOTER_LINE_Y 52
 
@@ -27,7 +28,7 @@
 #define RIGHT_RIGHT_X 126
 #define RIGHT_RIGHT_WIDTH 33
 
-#define FOOTER_Y 52
+#define FOOTER_Y 53
 
 static lv_display_t *display;
 static MatrixFramebuffer *active_framebuffer;
@@ -217,7 +218,7 @@ bool matrix_race_screen_render(
             screen,
             data->location,
             HEADER_LOCATION_X,
-            0,
+            HEADER_TEXT_Y,
             HEADER_LOCATION_WIDTH,
             LV_TEXT_ALIGN_LEFT,
             &theme->header,
@@ -226,7 +227,7 @@ bool matrix_race_screen_render(
             screen,
             data->clock,
             HEADER_CLOCK_X,
-            0,
+            HEADER_TEXT_Y,
             HEADER_CLOCK_WIDTH,
             LV_TEXT_ALIGN_CENTER,
             &theme->header,
@@ -235,7 +236,7 @@ bool matrix_race_screen_render(
             screen,
             data->counter,
             HEADER_COUNTER_X,
-            0,
+            HEADER_TEXT_Y,
             HEADER_COUNTER_WIDTH,
             LV_TEXT_ALIGN_RIGHT,
             &theme->header,
