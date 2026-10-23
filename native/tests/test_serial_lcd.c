@@ -1,3 +1,4 @@
+#include "custom_character_map.h"
 #include "serial_lcd.h"
 
 #include <assert.h>
@@ -64,28 +65,87 @@ static void test_sprite_marker_can_be_split_across_reads(void) {
 
     serial_lcd_feed(&lcd, &marker, 1);
     assert(lcd.cursor_x == 0);
+    assert(lcd.sprite_count == 0);
 
     serial_lcd_feed(&lcd, &marker, 1);
 
-    assert(lcd.cursor_x == 7);
-    assert(display_framebuffer_get(&lcd.framebuffer, 2, 0));
-    assert(display_framebuffer_get(&lcd.framebuffer, 0, 7));
-    assert(lcd.sprite_frame == 1);
+    assert(lcd.cursor_x == 8);
+    assert(lcd.sprite_count == 1);
+    assert(lcd.sprite_frame == 0);
 }
 
-static void test_repeated_sprite_markers_advance_frames(void) {
+static void test_sprite_marker_bit_is_not_visible(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t input[] = {0xfe, 0xfe};
+    serial_lcd_feed(&lcd, input, sizeof(input));
+
+    for (uint16_t x = 0; x < 8; x++) {
+        assert(!display_framebuffer_get(
+                &lcd.framebuffer,
+                x,
+                7));
+    }
+}
+
+static void test_sprite_update_repaints_same_position(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t input[] = {0xfe, 0xfe};
+    serial_lcd_feed(&lcd, input, sizeof(input));
+
+    assert(!display_framebuffer_get(
+            &lcd.framebuffer,
+            0,
+            5));
+
+    serial_lcd_mark_clean(&lcd);
+    serial_lcd_update_sprites(&lcd);
+
+    assert(lcd.sprite_frame == 1);
+    assert(lcd.cursor_x == 8);
+    assert(display_framebuffer_get(
+            &lcd.framebuffer,
+            0,
+            5));
+    assert(serial_lcd_dirty(&lcd));
+}
+
+static void test_sprite_update_cycles_all_frames(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t input[] = {0xfe, 0xfe};
+    serial_lcd_feed(&lcd, input, sizeof(input));
+
+    for (uint8_t frame = 1;
+            frame <= CUSTOM_SPRITE_FRAME_COUNT;
+            frame++) {
+        serial_lcd_update_sprites(&lcd);
+    }
+
+    assert(lcd.sprite_frame == 0);
+    assert(lcd.cursor_x == 8);
+}
+
+static void test_clear_removes_sprite_animation_state(void) {
     SerialLcd lcd;
     serial_lcd_init(&lcd);
 
     const uint8_t input[] = {
         0xfe, 0xfe,
-        0xfe, 0xfe
+        '/', 'C', '?'
     };
-
     serial_lcd_feed(&lcd, input, sizeof(input));
 
-    assert(lcd.cursor_x == 14);
-    assert(lcd.sprite_frame == 2);
+    assert(lcd.sprite_count == 0);
+
+    serial_lcd_mark_clean(&lcd);
+    serial_lcd_update_sprites(&lcd);
+
+    assert(!serial_lcd_dirty(&lcd));
 }
 
 static void test_single_sprite_marker_falls_back_to_character_254(void) {
@@ -98,7 +158,7 @@ static void test_single_sprite_marker_falls_back_to_character_254(void) {
     assert(lcd.cursor_x == 14);
 
     for (uint16_t x = 0; x < 7; x++) {
-        assert(display_framebuffer_get(
+        assert(!display_framebuffer_get(
                 &lcd.framebuffer,
                 x,
                 7));
@@ -252,7 +312,10 @@ int main(void) {
     test_custom_character_map_is_proportional();
     test_full_custom_character_range_is_available();
     test_sprite_marker_can_be_split_across_reads();
-    test_repeated_sprite_markers_advance_frames();
+    test_sprite_marker_bit_is_not_visible();
+    test_sprite_update_repaints_same_position();
+    test_sprite_update_cycles_all_frames();
+    test_clear_removes_sprite_animation_state();
     test_single_sprite_marker_falls_back_to_character_254();
     test_backspace_uses_proportional_character_position();
     test_position_command_sets_y_and_x_together();

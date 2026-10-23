@@ -10,6 +10,9 @@
 #define CMD_CLEAR ((uint8_t)'C')
 #define CMD_POSITION ((uint8_t)'L')
 
+#define CHARACTER_HEIGHT 7u
+#define SPRITE_ADVANCE 8u
+
 static void set_pixel(SerialLcd *lcd, int x, int y, bool on) {
     if (x < 0 || y < 0 || x >= (int)DISPLAY_WIDTH || y >= (int)DISPLAY_HEIGHT) {
         return;
@@ -34,11 +37,17 @@ static void reset_text_history(SerialLcd *lcd) {
     lcd->text_length = 0;
 }
 
+static void reset_sprites(SerialLcd *lcd) {
+    lcd->sprite_count = 0;
+    lcd->sprite_frame = 0;
+}
+
 static void clear_screen(SerialLcd *lcd) {
     display_framebuffer_clear(&lcd->framebuffer);
     lcd->cursor_x = 0;
     lcd->cursor_y = 0;
     reset_text_history(lcd);
+    reset_sprites(lcd);
     lcd->dirty = true;
 }
 
@@ -60,18 +69,35 @@ static void ensure_horizontal_space(
     }
 }
 
+static void draw_columns_at(
+        SerialLcd *lcd,
+        uint8_t origin_x,
+        uint8_t origin_y,
+        const uint8_t columns[CUSTOM_CHARACTER_COLUMNS],
+        uint8_t width) {
+    for (uint8_t x = 0; x < width; x++) {
+        const uint8_t visible_bits =
+                (uint8_t)(columns[x] & 0x7fu);
+
+        for (uint8_t y = 0; y < CHARACTER_HEIGHT; y++) {
+            set_pixel(
+                    lcd,
+                    origin_x + x,
+                    origin_y + y,
+                    (visible_bits & (uint8_t)(1u << y)) != 0);
+        }
+    }
+}
+
 static void draw_columns(
         SerialLcd *lcd,
         const uint8_t columns[CUSTOM_CHARACTER_COLUMNS]) {
-    for (uint8_t x = 0; x < CUSTOM_CHARACTER_COLUMNS; x++) {
-        for (uint8_t y = 0; y < 8u; y++) {
-            set_pixel(
-                    lcd,
-                    lcd->cursor_x + x,
-                    lcd->cursor_y + y,
-                    (columns[x] & (uint8_t)(1u << y)) != 0);
-        }
-    }
+    draw_columns_at(
+            lcd,
+            lcd->cursor_x,
+            lcd->cursor_y,
+            columns,
+            CUSTOM_CHARACTER_COLUMNS);
 }
 
 static void record_text_entry(
@@ -114,17 +140,47 @@ static void draw_character(
     advance_cursor(lcd, glyph.advance);
 }
 
-static void draw_sprite(SerialLcd *lcd) {
-    ensure_horizontal_space(lcd, CUSTOM_SPRITE_WIDTH);
-    draw_columns(
+static void render_sprite(
+        SerialLcd *lcd,
+        const SerialLcdSprite *sprite) {
+    draw_columns_at(
             lcd,
-            custom_character_map_sprite_frame(lcd->sprite_frame));
-    record_text_entry(lcd, CUSTOM_CHARACTER_COLUMNS);
-    advance_cursor(lcd, CUSTOM_SPRITE_WIDTH);
+            sprite->x,
+            sprite->y,
+            custom_character_map_sprite_frame(lcd->sprite_frame),
+            CUSTOM_SPRITE_WIDTH);
+}
 
-    lcd->sprite_frame =
-            (uint8_t)((lcd->sprite_frame + 1u)
-                    % CUSTOM_SPRITE_FRAME_COUNT);
+static void place_sprite(SerialLcd *lcd) {
+    ensure_horizontal_space(lcd, SPRITE_ADVANCE);
+
+    if (lcd->sprite_count >= SERIAL_LCD_SPRITE_CAPACITY) {
+        return;
+    }
+
+    SerialLcdSprite *sprite =
+            &lcd->sprites[lcd->sprite_count++];
+
+    sprite->x = lcd->cursor_x;
+    sprite->y = lcd->cursor_y;
+
+    /*
+     * Character 254 reserves seven sprite columns plus one blank separator.
+     * Bit 7 is metadata in the legacy display memory and is never visible.
+     */
+    for (uint8_t x = 0; x < SPRITE_ADVANCE; x++) {
+        for (uint8_t y = 0; y < CHARACTER_HEIGHT; y++) {
+            set_pixel(
+                    lcd,
+                    lcd->cursor_x + x,
+                    lcd->cursor_y + y,
+                    false);
+        }
+    }
+
+    render_sprite(lcd, sprite);
+    record_text_entry(lcd, SPRITE_ADVANCE);
+    advance_cursor(lcd, SPRITE_ADVANCE);
 }
 
 static void draw_bitmap(
@@ -178,7 +234,7 @@ static void erase_previous_text_entry(SerialLcd *lcd) {
     lcd->cursor_y = entry.y;
 
     for (uint8_t x = 0; x < entry.clear_width; x++) {
-        for (uint8_t y = 0; y < 8u; y++) {
+        for (uint8_t y = 0; y < CHARACTER_HEIGHT; y++) {
             set_pixel(
                     lcd,
                     entry.x + x,
@@ -249,10 +305,6 @@ static void execute_position(SerialLcd *lcd) {
 static void execute_command(SerialLcd *lcd) {
     switch (lcd->command) {
         case CMD_CLEAR:
-            /*
-             * Legacy clear is /C?. The required filler byte is consumed
-             * above and intentionally ignored.
-             */
             clear_screen(lcd);
             break;
 
@@ -276,7 +328,7 @@ static void process_text_byte(
         lcd->pending_sprite_marker = false;
 
         if (value == SPRITE_MARKER) {
-            draw_sprite(lcd);
+            place_sprite(lcd);
             return;
         }
 
@@ -314,11 +366,12 @@ void serial_lcd_init(SerialLcd *lcd) {
     lcd->cursor_x = 0;
     lcd->cursor_y = 0;
     lcd->text_length = 0;
+    lcd->sprite_count = 0;
+    lcd->sprite_frame = 0;
     lcd->parser_state = SERIAL_LCD_TEXT;
     lcd->command = 0;
     lcd->parameter_count = 0;
     lcd->parameter_expected = 0;
-    lcd->sprite_frame = 0;
     lcd->pending_sprite_marker = false;
     lcd->dirty = true;
 }
@@ -358,6 +411,20 @@ void serial_lcd_feed(
                 }
                 break;
         }
+    }
+}
+
+void serial_lcd_update_sprites(SerialLcd *lcd) {
+    if (lcd->sprite_count == 0) {
+        return;
+    }
+
+    lcd->sprite_frame =
+            (uint8_t)((lcd->sprite_frame + 1u)
+                    % CUSTOM_SPRITE_FRAME_COUNT);
+
+    for (uint16_t index = 0; index < lcd->sprite_count; index++) {
+        render_sprite(lcd, &lcd->sprites[index]);
     }
 }
 

@@ -85,7 +85,7 @@ Ordinary character bytes are rendered using the imported custom character map. T
 
 The `?` in `/C?` is a required filler byte and is deliberately ignored. It preserves the legacy minimum slash-command length.
 
-Two consecutive byte values `FE FE` place a sprite. The JavaFX **Sprite** button sends those bytes directly.
+Two consecutive byte values `FE FE` place a sprite. The JavaFX **Sprite** button sends those bytes directly. The sprite then animates automatically in place through the six imported appearances; the desktop runtime supplies a 200 ms clock tick while the C core owns frame selection and rendering.
 
 The JavaFX **Protocol** field accepts the same stream as the native parser. For example:
 

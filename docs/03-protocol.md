@@ -71,7 +71,11 @@ The simulator uses the supplied legacy `CharMap1`:
 
 The supplied legacy sprite code documents that a sprite is placed by sending character 254 twice consecutively. fileciteturn323file0L12-L13
 
-The current simulator recognizes `FE FE` across input chunk boundaries and renders the imported `SpriteMap1` appearance at the current cursor position.
+The current simulator recognizes `FE FE` across input chunk boundaries and places one sprite at the current cursor position. The visible sprite is seven pixels wide; character 254 advances the cursor by eight pixels so one blank separator column remains.
+
+The legacy display stores sprite metadata in bit 7. That bit is **not a visible eighth pixel row**. The simulator therefore renders only bits 0..6.
+
+After placement, a runtime animation tick calls the C core to update every existing sprite in place and advance the shared six-frame `SpriteMap1` sequence. The desktop PoP currently supplies one tick every **200 ms**. The supplied `Sprite.asm` shows relative velocity control (`/NVv`) but does not include the timer timebase needed to reproduce its exact millisecond rate, so 200 ms is an explicit simulator choice rather than a claim about the original hardware timing.
 
 ## JavaFX protocol input
 
@@ -96,6 +100,8 @@ Java to native:
 ```text
 uint32 big-endian byte_count
 byte[byte_count] serial_chunk
+
+byte_count = FFFFFFFF means: host-runtime animation tick (no serial payload)
 ```
 
 Native to Java:
