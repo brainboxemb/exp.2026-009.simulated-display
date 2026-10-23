@@ -20,6 +20,8 @@ static const MatrixRaceScreenData DEMO_SCREEN = {
     .location = "WP-99",
     .clock = "99:99:99",
     .counter = "999",
+    .wifi_connected = false,
+    .registration_server_connected = false,
     .left_rows = {
         {"999", "99:99"},
         {"999", "99:99"},
@@ -131,6 +133,9 @@ static bool read_theme(MatrixTheme *theme) {
     uint16_t large_color = 0;
     uint16_t footer_color = 0;
     uint16_t sprite_color = 0;
+    uint16_t flag_color = 0;
+    uint16_t warning_background_color = 0;
+    uint16_t warning_text_color = 0;
     uint8_t family = 0;
     uint8_t header_size = 0;
     uint8_t row_size = 0;
@@ -144,6 +149,9 @@ static bool read_theme(MatrixTheme *theme) {
             || !read_u16_be(&large_color)
             || !read_u16_be(&footer_color)
             || !read_u16_be(&sprite_color)
+            || !read_u16_be(&flag_color)
+            || !read_u16_be(&warning_background_color)
+            || !read_u16_be(&warning_text_color)
             || !read_u8(&family)
             || !read_u8(&header_size)
             || !read_u8(&row_size)
@@ -164,6 +172,9 @@ static bool read_theme(MatrixTheme *theme) {
     theme->large_value.color = large_color;
     theme->footer.color = footer_color;
     theme->sprite_color = sprite_color;
+    theme->flag_color = flag_color;
+    theme->warning_background_color = warning_background_color;
+    theme->warning_text_color = warning_text_color;
 
     theme->header.font.family =
             (MatrixFontFamily)family;
