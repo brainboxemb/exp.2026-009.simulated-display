@@ -173,7 +173,7 @@ bool matrix_race_screen_render(
     const lv_font_t *row_time_font =
             matrix_font_resolve(theme->row_time.font);
     const lv_font_t *large_value_font =
-            matrix_font_resolve(theme->large_value.font);
+            matrix_large_font_resolve(theme->large_value.font);
     const lv_font_t *footer_font =
             matrix_font_resolve(theme->footer.font);
 
