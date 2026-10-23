@@ -14,7 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-final class SimulatedDisplayFxApplication extends Application {
+public final class SimulatedDisplayFxApplication extends Application {
 
     private static final int WIDTH = 90;
     private static final int HEIGHT = 35;
