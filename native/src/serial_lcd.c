@@ -81,8 +81,8 @@ static void next_line(SerialLcd *lcd) {
 }
 
 static void draw_character(SerialLcd *lcd, uint8_t ascii) {
-    if (ascii == '') { next_line(lcd); return; }
-    if (ascii == '') {
+    if (ascii == '\r') { next_line(lcd); return; }
+    if (ascii == '\b') {
         if (lcd->text_length == 0) return;
         lcd->text_length--;
         if (lcd->cursor_x == lcd->text_origin_x) {
@@ -168,7 +168,7 @@ void serial_lcd_feed(SerialLcd *lcd, const uint8_t *data, size_t size) {
         switch (lcd->parser_state) {
             case SERIAL_LCD_TEXT:
                 if (value == COMMAND_PREFIX) lcd->parser_state = SERIAL_LCD_COMMAND;
-                else if ((value >= 0x20u && value <= 0x7eu) || value == '' || value == '') draw_character(lcd, value);
+                else if ((value >= 0x20u && value <= 0x7eu) || value == '\r' || value == '\b') draw_character(lcd, value);
                 break;
             case SERIAL_LCD_COMMAND:
                 lcd->command = value;
