@@ -34,9 +34,10 @@ The current values are demo data in `matrix_host_main.c`. They will later come f
 The first passed-runner row reserves the far-left 10 pixels for the runner
 sprite, so its number starts at x=12. The original six-frame legacy SpriteMap1
 sequence defines the gait phases, but the runner is redrawn natively as six
-10×12 poses rather than scaled from 7×7. Head and torso use the extra resolution
-for readability; arms and legs are intentional one-pixel strokes, and crossing
-legs can overlap instead of turning into a two-pixel bar.
+10×12 poses rather than scaled from 7×7. Every pose keeps the same 3×3 head,
+one-pixel neck and stable torso. Only arms and legs change between gait phases;
+lower legs remain intentional one-pixel strokes, and crossing legs can overlap
+instead of turning into a two-pixel bar.
 
 The first ready-runner row reserves the first 10 pixels after the vertical
 divider for the warmup sprite. Its body and legs stay fixed while the arms move
