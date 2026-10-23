@@ -577,8 +577,8 @@ static void test_header_statuses_shift_content_and_clock(void) {
     assert(
             matrix_framebuffer_get(
                     &all_status_frame,
-                    150,
-                    1)
+                    151,
+                    2)
             == theme.sync_icon_color);
 
     /*
