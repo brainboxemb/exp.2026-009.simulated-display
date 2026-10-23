@@ -15,13 +15,14 @@
 #define MATRIX_HOST_REQUEST_CLEAR 1u
 #define MATRIX_HOST_REQUEST_THEME 2u
 #define MATRIX_HOST_REQUEST_ANIMATION_FRAME 3u
+#define MATRIX_HOST_REQUEST_CONNECTION_STATUS 4u
 
-static const MatrixRaceScreenData DEMO_SCREEN = {
+static MatrixRaceScreenData DEMO_SCREEN = {
     .location = "WP-99",
     .clock = "99:99:99",
     .counter = "999",
-    .wifi_connected = false,
-    .registration_server_connected = false,
+    .wifi_connected = true,
+    .registration_server_connected = true,
     .left_rows = {
         {"999", "99:99"},
         {"999", "99:99"},
@@ -288,6 +289,35 @@ int main(void) {
                 }
 
                 write_frame(&framebuffer);
+                break;
+            }
+
+            case MATRIX_HOST_REQUEST_CONNECTION_STATUS: {
+                uint8_t wifi_connected = 0;
+                uint8_t registration_server_connected = 0;
+
+                if (!read_u8(&wifi_connected)
+                        || !read_u8(&registration_server_connected)
+                        || wifi_connected > 1u
+                        || registration_server_connected > 1u) {
+                    return 6;
+                }
+
+                DEMO_SCREEN.wifi_connected =
+                        wifi_connected != 0;
+                DEMO_SCREEN.registration_server_connected =
+                        registration_server_connected != 0;
+
+                if (demo_visible) {
+                    if (!draw_demo_screen(
+                            &framebuffer,
+                            &theme,
+                            animation_frame)) {
+                        return 6;
+                    }
+
+                    write_frame(&framebuffer);
+                }
                 break;
             }
 
