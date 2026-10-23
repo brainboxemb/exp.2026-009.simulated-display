@@ -656,6 +656,18 @@ static void test_header_statuses_shift_content_and_clock(void) {
                     151,
                     2)
             == theme.sync_icon_color);
+    assert(
+            matrix_framebuffer_get(
+                    &all_status_frame,
+                    150,
+                    8)
+            == theme.sync_icon_color);
+    assert(
+            matrix_framebuffer_get(
+                    &all_status_frame,
+                    154,
+                    5)
+            == theme.sync_background_color);
 
     /*
      * Warning strikes cover both outer corners and are two pixels thick.
