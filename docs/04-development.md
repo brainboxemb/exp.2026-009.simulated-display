@@ -158,6 +158,18 @@ Installing the C/C++ extension is not enough. Install Visual Studio Build Tools 
 
 That can be normal. CMake Tools can activate the Visual Studio developer environment internally. Use a Developer PowerShell if you want to call `cl` manually.
 
+### NetBeans prints `Unsupported JavaFX configuration`
+
+When NetBeans starts the plain launcher through Maven `exec`, JavaFX may print:
+
+```text
+WARNING: Unsupported JavaFX configuration: classes were loaded from 'unnamed module ...'
+```
+
+That warning is caused by the classpath-based NetBeans/Maven launch and is not the reason for an application failure. The experiment currently accepts this warning for the simple non-modular PoP setup.
+
+A failure such as `Unable to construct Application instance` is different and must not be ignored; the JavaFX application class must be public and expose a public no-argument constructor. This contract is covered by an automated test.
+
 ### JavaFX says that `display-host` is missing
 
 Build the native project first:
