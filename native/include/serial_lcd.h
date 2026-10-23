@@ -30,7 +30,7 @@ typedef struct {
     uint16_t text_length;
     SerialLcdParserState parser_state;
     uint8_t command;
-    uint8_t parameters[5];
+    uint8_t parameters[4];
     uint8_t parameter_count;
     uint8_t parameter_expected;
     uint8_t sprite_frame;

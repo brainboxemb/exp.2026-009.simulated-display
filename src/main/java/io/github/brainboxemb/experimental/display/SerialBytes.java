@@ -8,7 +8,7 @@ final class SerialBytes {
     }
 
     static byte[] clear() {
-        return new byte[]{0x7c, 0x00};
+        return new byte[]{'/', 'C', '?'};
     }
 
     static byte[] home() {
@@ -16,11 +16,19 @@ final class SerialBytes {
     }
 
     static byte[] position(int y, int x) {
-        return new byte[]{0x7c, 0x1b, (byte) y, (byte) x};
-    }
+        if (y < 0 || y >= 35 || x < 0 || x >= 90) {
+            throw new IllegalArgumentException(
+                    "position outside 90x35 display");
+        }
 
-    static byte[] pixel(int x, int y, boolean on) {
-        return new byte[]{0x7c, 0x10, (byte) x, (byte) y, (byte) (on ? 1 : 0)};
+        return new byte[]{
+            '/',
+            'L',
+            (byte) ('0' + y / 10),
+            (byte) ('0' + y % 10),
+            (byte) ('0' + x / 10),
+            (byte) ('0' + x % 10)
+        };
     }
 
     static byte[] sprite() {
@@ -28,7 +36,8 @@ final class SerialBytes {
     }
 
     static byte[] parseProtocolText(String text) {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ByteArrayOutputStream output =
+                new ByteArrayOutputStream();
 
         for (int index = 0; index < text.length();) {
             char value = text.charAt(index);
@@ -36,7 +45,8 @@ final class SerialBytes {
             if (value != '\\') {
                 if (value > 0x7f) {
                     throw new IllegalArgumentException(
-                            "Protocol text must be ASCII at position " + index);
+                            "Protocol text must be ASCII at position "
+                                    + index);
                 }
 
                 output.write(value);
@@ -71,49 +81,35 @@ final class SerialBytes {
 
             if (escape != 'x' && escape != 'X') {
                 throw new IllegalArgumentException(
-                        "Unsupported escape \\" + escape + " at position " + index);
+                        "Unsupported escape \\"
+                                + escape
+                                + " at position "
+                                + index);
             }
 
             if (index + 3 >= text.length()) {
                 throw new IllegalArgumentException(
-                        "Incomplete \\xNN escape at position " + index);
+                        "Incomplete \\xNN escape at position "
+                                + index);
             }
 
-            int high = Character.digit(text.charAt(index + 2), 16);
-            int low = Character.digit(text.charAt(index + 3), 16);
+            int high =
+                    Character.digit(
+                            text.charAt(index + 2),
+                            16);
+            int low =
+                    Character.digit(
+                            text.charAt(index + 3),
+                            16);
+
             if (high < 0 || low < 0) {
                 throw new IllegalArgumentException(
-                        "Invalid \\xNN escape at position " + index);
+                        "Invalid \\xNN escape at position "
+                                + index);
             }
 
             output.write((high << 4) | low);
             index += 4;
-        }
-
-        return output.toByteArray();
-    }
-
-    static byte[] parseHex(String text) {
-        String normalized = text.trim().replace(',', ' ');
-        if (normalized.isEmpty()) {
-            return new byte[0];
-        }
-
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-        for (String part : normalized.split("\\s+")) {
-            String token =
-                    part.startsWith("0x") || part.startsWith("0X")
-                            ? part.substring(2)
-                            : part;
-
-            int value = Integer.parseInt(token, 16);
-            if (value < 0 || value > 255) {
-                throw new IllegalArgumentException(
-                        "Byte outside 00..FF: " + part);
-            }
-
-            output.write(value);
         }
 
         return output.toByteArray();

@@ -8,39 +8,78 @@ import org.junit.jupiter.api.Test;
 final class SerialBytesTest {
 
     @Test
-    void protocolTextKeepsAsciiAndExpandsHexEscapes() {
-        byte[] bytes = SerialBytes.parseProtocolText(
-                "|\\x00|\\x18\\x0A|\\x19\\x05HELLO|\\x1A7");
-
+    void protocolTextKeepsReadableCommandsUnchanged() {
         assertArrayEquals(
                 new byte[]{
-                    0x7c, 0x00,
-                    0x7c, 0x18, 0x0a,
-                    0x7c, 0x19, 0x05,
+                    '/', 'C', '?',
+                    '/', 'L', '0', '5', '1', '0',
                     'H', 'E', 'L', 'L', 'O',
-                    0x7c, 0x1a, '7'
+                    '/', 'B', '7'
                 },
-                bytes);
+                SerialBytes.parseProtocolText(
+                        "/C?/L0510HELLO/B7"));
     }
 
     @Test
-    void protocolTextSupportsBackslashCarriageReturnAndBackspace() {
+    void clearUsesMinimumLengthLegacyForm() {
         assertArrayEquals(
-                new byte[]{'A', '\\', '\r', '\b'},
-                SerialBytes.parseProtocolText("A\\\\\\r\\b"));
+                new byte[]{'/', 'C', '?'},
+                SerialBytes.clear());
+    }
+
+    @Test
+    void positionUsesReadableYyXxForm() {
+        assertArrayEquals(
+                new byte[]{
+                    '/', 'L',
+                    '0', '5',
+                    '1', '0'
+                },
+                SerialBytes.position(5, 10));
+    }
+
+    @Test
+    void positionRejectsCoordinatesOutsideDisplay() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> SerialBytes.position(35, 0));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> SerialBytes.position(0, 90));
+    }
+
+    @Test
+    void protocolTextSupportsRawSpriteBytes() {
+        assertArrayEquals(
+                new byte[]{
+                    (byte) 0xfe,
+                    (byte) 0xfe
+                },
+                SerialBytes.parseProtocolText(
+                        "\\xFE\\xFE"));
+    }
+
+    @Test
+    void protocolTextSupportsCarriageReturnAndBackspace() {
+        assertArrayEquals(
+                new byte[]{'A', '\r', '\b'},
+                SerialBytes.parseProtocolText(
+                        "A\\r\\b"));
     }
 
     @Test
     void protocolTextRejectsMalformedHexEscape() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> SerialBytes.parseProtocolText("\\xG1"));
+                () -> SerialBytes.parseProtocolText(
+                        "\\xG1"));
     }
 
     @Test
     void protocolTextRejectsNonAsciiInput() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> SerialBytes.parseProtocolText("é"));
+                () -> SerialBytes.parseProtocolText(
+                        "é"));
     }
 }

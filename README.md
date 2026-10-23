@@ -2,7 +2,7 @@
 
 Proof of Principle for running **native C display software** behind a **Java 21 / JavaFX 21** desktop simulator, with the portable C core intended to remain usable later on ESP32 / ESP-IDF.
 
-Status: **active — first 90×35 LCD/LED vertical slice implemented on PR #2; qualification in progress**.
+Status: **active — first 90×35 display vertical slice implemented on PR #2; qualification in progress**.
 
 - [Cross-project record](https://github.com/brainboxemb/brainboxemb.meta/blob/main/experiments/009-simulated-display/README.md)
 - [Meta tracking issue #188](https://github.com/brainboxemb/brainboxemb.meta/issues/188)
@@ -12,10 +12,8 @@ Status: **active — first 90×35 LCD/LED vertical slice implemented on PR #2; q
 
 | Mode | Pixels | Output | Interpretation |
 | --- | --- | --- | --- |
-| Serial LED | 90 × 35 | Red monochrome LEDs | SparkFun Graphic Serial LCD-style byte stream; C-owned custom character rendering |
+| Serial LED | 90 × 35 | Red monochrome LEDs | Legacy serial character and slash-command stream interpreted in C |
 | HUB75 | 160 × 64 (five panels) | RGB LEDs | Synchronized application data with a separate native C interpreter |
-
-The SparkFun command set is a protocol reference. The simulated hardware is intentionally a red LED matrix rather than a physical SparkFun LCD.
 
 ## Current architecture
 
@@ -26,7 +24,7 @@ serial bytes
 native C streaming parser
     |
     v
-custom character + sprite + graphics renderer
+custom character + sprite + bitmap renderer
     |
     v
 90x35 bit-packed framebuffer
@@ -39,7 +37,7 @@ native display-host process
 JavaFX red LED matrix
 ```
 
-JavaFX does not interpret LCD commands or rasterize characters. It launches the native process, sends raw serial chunks and paints the pixels returned by C.
+JavaFX does not interpret display commands or rasterize characters. It launches the native process, sends raw serial chunks and paints the pixels returned by C.
 
 The portable C core has no Java, JavaFX, libuv, ESP-IDF or Arduino dependency.
 
@@ -75,39 +73,42 @@ The Java application looks for:
 
 Override with `-Ddisplay.native=<path>` if required.
 
-On startup the simulator sends `HELLO WORLD` as ordinary ASCII bytes. The UI also accepts raw hexadecimal bytes, for example:
+## Serial protocol
+
+Ordinary character bytes are rendered using the imported custom character map. The main readable commands are:
 
 ```text
-7C 10 0A 05 01
+/C?       clear screen and home cursor
+/Lyyxx    set cursor, yy=00..34 and xx=00..89
+/B0..9    draw one large 13x18 digit bitmap
 ```
 
-which sends SparkFun-style **set pixel (10,5)**.
+The `?` in `/C?` is a required filler byte and is deliberately ignored. It preserves the legacy minimum slash-command length.
 
-The JavaFX simulator also has a **Protocol** field. Ordinary ASCII is sent unchanged and `\\xNN` inserts one raw byte, so this can be entered directly:
+Two consecutive byte values `FE FE` place a sprite. The JavaFX **Sprite** button sends those bytes directly.
+
+The JavaFX **Protocol** field accepts the same stream as the native parser. For example:
 
 ```text
-|\\x00|\\x1B\\x05\\x0AHELLO|\\x1A7
+/C?/L0510HELLO/B7
 ```
 
-That clears the display, sets `(Y,X)=(5,10)` in one command, writes `HELLO`, and invokes the custom large-digit bitmap command for digit 7.
+This clears the display, positions the cursor at `(Y,X)=(5,10)`, writes `HELLO`, and draws large digit 7.
+
+For non-printable bytes, the Protocol field accepts `\xNN`. For example `\xFE\xFE` sends the sprite marker.
 
 ## Implemented slice
 
 The C parser currently understands:
 
-- legacy custom character codes 31..255, carriage return and backspace;
+- custom character codes 31..255;
 - proportional character advances from the original custom map;
-- `FE FE` sprite marker using the six imported `SpriteMap1` appearances;
-- custom SparkFun-framed `7C 1A <digit>` command for the imported 13×18 `Bitmap_0..Bitmap_9` digits;
-- custom `7C 1B yy xx` command to set cursor Y and X atomically;
-- clear;
-- set X / set Y;
-- set/reset pixel;
-- line;
-- circle;
-- box;
-- erase block.
+- carriage return and backspace;
+- `/C?` clear;
+- `/Lyyxx` cursor positioning;
+- `/B0`..`/B9` large digit bitmaps;
+- `FE FE` sprite marker using the imported `SpriteMap1` appearances.
 
-Demo, reverse mode, splash, backlight and baud are recognized at the stream-framing level but are not simulated yet.
+`CharMap1`, `SpriteMap1` and `Bitmap_0..Bitmap_9` were imported from the supplied legacy data. `Bitmap_Batavieren` and the other unrelated legacy bitmaps were deliberately excluded.
 
-See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [protocol slice](docs/03-protocol.md) and [development setup](docs/04-development.md).
+See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [protocol](docs/03-protocol.md) and [development setup](docs/04-development.md).

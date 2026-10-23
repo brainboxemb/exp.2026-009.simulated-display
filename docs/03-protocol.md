@@ -1,87 +1,93 @@
-# Serial LCD protocol slice
+# Serial display protocol
 
-The experiment uses the SparkFun **Graphic Serial LCD Backpack** framing as the protocol reference: ordinary printable ASCII is rendered as text, while `0x7C` (`|`) introduces a command. The original firmware also recognizes carriage return and backspace as text controls.
+The 90×35 simulator uses one small streaming protocol based on the supplied legacy display behavior. There is no separate SparkFun compatibility layer.
 
-References:
+Ordinary character bytes are rendered through the C-owned custom character map. Slash-prefixed ASCII commands provide display control.
 
-- <https://learn.sparkfun.com/tutorials/serial-graphic-lcd-hookup/ascii-commands>
-- <https://github.com/sparkfun/GraphicLCD_Serial_Backpack/tree/master/Firmware/AVR_Firmware>
+## Commands
 
-## Implemented commands
+| Command | Meaning |
+| --- | --- |
+| `/C?` | Clear framebuffer and reset cursor to `(0,0)`; the third byte is required and ignored |
+| `/Lyyxx` | Set cursor position with decimal `yy=00..34` and `xx=00..89` |
+| `/B0`..`/B9` | Draw one imported 13×18 digit bitmap at the current cursor position |
+| `FE FE` | Place a sprite marker using the imported `SpriteMap1` data |
+| `CR` | Move to the next 8-pixel text row |
+| `BS` | Erase the previous rendered character cell and restore its cursor position |
 
-| Bytes after `0x7C` | Parameters | Experiment behavior |
-| --- | ---: | --- |
-| `00` | 0 | Clear framebuffer and reset cursor to `(0,0)` |
-| `18` | 1 | Set cursor X (`0..89`) |
-| `19` | 1 | Set cursor Y (`0..34`) |
-| `1A` | 1 | **Experiment extension:** draw large 13×18 digit bitmap; parameter is ASCII `0`..`9` |
-| `1B` | 2 | **Experiment extension:** set cursor position as `yy xx` (`y=0..34`, `x=0..89`) |
-| `10` | 3 | Set/reset pixel: `x y value` |
-| `0C` | 5 | Draw/erase line: `x0 y0 x1 y1 value` |
-| `03` | 4 | Draw/erase circle: `x y radius value` |
-| `0F` | 5 | Draw/erase box: `x0 y0 x1 y1 value` |
-| `05` | 4 | Erase block: `x0 y0 x1 y1` |
+The parser is streaming. Commands may be split across arbitrary input chunks.
 
-Known but deliberately not simulated yet: demo (`04`), reverse (`12`), splash (`13`), backlight (`02 value`) and baud (`07 value`). Parameter bytes are still consumed so subsequent stream parsing remains aligned.
+## Clear
 
-## Custom character map
-
-The simulator uses the legacy `CharMap1` supplied for this experiment rather than the temporary 5×7 font.
-
-- character codes **31..255** are retained;
-- each entry stores its original proportional cursor advance plus eight bitmap columns;
-- bit 0 is the top pixel and all eight row bits are rendered;
-- carriage return advances to the next 8-pixel line;
-- backspace returns to the previous proportional character position;
-- `0x7C` remains the serial command prefix and therefore cannot be emitted as an ordinary character byte in this protocol.
-
-`CharMap1`, `SpriteMap1` and `Bitmap_0..Bitmap_9` were converted from the supplied legacy include file. `Bitmap_Batavieren` and the other legacy `Bitmap_*` tables remain deliberately excluded.
-
-## Sprite marker
-
-Two consecutive bytes `FE FE` render a sprite at the current text cursor. The six imported `SpriteMap1` appearances are used in sequence and wrap after frame six. The sprite advances the cursor by the original `wSprite1 = 7` pixels.
-
-The marker detection is streaming: `FE FE` still works when the two bytes arrive in separate host chunks. A single `FE` followed by another byte falls back to legacy character 254 before the following byte is processed.
-
-Stepping to the next sprite appearance on every `FE FE` is the deterministic simulator behavior for this PoP.
-
-## Combined cursor position command
-
-The original SparkFun X and Y commands remain available for compatibility, but the experiment adds one preferred command for setting the complete cursor position atomically:
+Clear has the legacy minimum-length form:
 
 ```text
-7C 1B yy xx
+/C?
 ```
 
-The parameter order deliberately follows the legacy display convention: **Y first, then X**. For example, `7C 1B 05 0A` sets the cursor to `(Y,X)=(5,10)`.
+The byte after `C` is consumed but ignored. Therefore `/CX`, `/C0` and `/C?` all have identical behavior. The documented form is `/C?`.
 
-Both coordinates are validated together. If either value is outside the 90×35 display, the cursor remains unchanged.
-
-## Large digit bitmap command
-
-The original large numeric bitmaps are exposed through an experiment-specific command while retaining SparkFun framing:
+## Cursor position
 
 ```text
-7C 1A <ASCII digit>
+/Lyyxx
 ```
 
-For example, `7C 1A 37` draws the old 13×18 bitmap for digit `7` at the current cursor position. The command clips naturally at the framebuffer edge and does not move the cursor.
+Coordinates are decimal ASCII and use **Y first, then X**.
 
-## JavaFX protocol text input
-
-The JavaFX **Protocol** field is a convenience editor for the raw serial stream. Ordinary ASCII is emitted unchanged and `\\xNN` inserts one byte. This makes control-byte commands readable without inventing a second display protocol.
-
-Example:
+Examples:
 
 ```text
-|\\x00|\\x1B\\x05\\x0AHELLO|\\x1A7
+/L0000
+/L0510
+/L3489
 ```
 
-Here `|` is the literal SparkFun command prefix `0x7C`; only the non-printable command/value bytes need escaping.
+All four characters must be decimal digits. Both coordinates are validated as one command. Invalid input leaves the cursor unchanged.
 
-## 90×35 geometry
+## Large digit bitmap
 
-The reference SparkFun firmware targets 128×64 and 160×128 displays. This experiment intentionally targets **90×35**. Text wrapping follows each custom character's stored advance rather than assuming fixed 6-pixel cells.
+```text
+/Bn
+```
+
+where `n` is `0` through `9`.
+
+The command renders the corresponding imported 13×18 `Bitmap_n` at the current cursor position. Rendering clips at framebuffer edges and does not move the cursor.
+
+## Character map
+
+The simulator uses the supplied legacy `CharMap1`:
+
+- character codes 31..255 are retained;
+- each entry has its original proportional cursor advance;
+- each entry contains eight vertical bitmap columns;
+- bit 0 is the top pixel;
+- all eight row bits are rendered.
+
+`/` is reserved as the command prefix and therefore is not rendered as an ordinary character byte.
+
+## Sprite
+
+The supplied legacy sprite code documents that a sprite is placed by sending character 254 twice consecutively. fileciteturn323file0L12-L13
+
+The current simulator recognizes `FE FE` across input chunk boundaries and renders the imported `SpriteMap1` appearance at the current cursor position.
+
+## JavaFX protocol input
+
+The JavaFX **Protocol** field sends its readable ASCII directly to the C parser:
+
+```text
+/C?/L0510HELLO/B7
+```
+
+The field supports `\xNN` only for bytes that cannot be typed directly, for example:
+
+```text
+\xFE\xFE
+```
+
+JavaFX does not interpret the display commands; it only converts optional `\xNN` escapes to bytes and forwards the stream.
 
 ## Host framing
 
@@ -99,7 +105,7 @@ Native to Java:
 uint16 big-endian width
 uint16 big-endian height
 uint32 big-endian payload_size
-byte[payload_size] pixels       # one byte per logical pixel, 0 or 1
+byte[payload_size] pixels
 ```
 
-A serial command may be split across multiple host requests; that chunk independence is tested in C. Full uncompressed frames are intentional for the first 90×35 slice.
+The full uncompressed frame is intentional for this first 90×35 slice.
