@@ -37,13 +37,15 @@ no pole and has its own `flag_color`, independent of the runner/warmup
 `sprite_color`.
 
 Two optional 9×9 warning blocks can appear to the right of the counter. The
-WiFi warning uses a compact signal symbol with a diagonal strike-through. The
-local registration-server warning uses a broken-link symbol, also with a
-strike-through. A warning is not rendered while its connection is healthy.
-The visible warning group owns the right edge of the header; the counter and
-flag shift left only by the space needed for the active blocks. Two simultaneous
-warnings have a one-pixel separator between them. The warning blocks and the
-finish flag start at y=1.
+WiFi warning uses two white horizontal signal bars, each two pixels high, plus
+a separate diagonal strike-through. The local registration-server warning uses
+a white link symbol with the same strike-through. A warning is not rendered
+while its connection is healthy. The strike-through has its own configurable
+`warning_strike_color` and defaults to red; the icon remains white on the
+blue warning background. The visible warning group owns the right edge of the
+header; the counter and flag shift left only by the space needed for the active
+blocks. Two simultaneous warnings have a one-pixel separator between them. The
+warning blocks and finish flag start at y=0.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
 sprite, so its number starts at x=12. The runner uses the original six-frame
@@ -80,7 +82,8 @@ Each text role has its own `MatrixTextStyle`:
 
 A style contains both a color and a font specification. The theme separately owns
 `background_color`, `line_color`, `sprite_color`, `flag_color`,
-`warning_background_color` and `warning_text_color`. Runner and warmup
+`warning_background_color`, `warning_text_color` and
+`warning_strike_color`. Runner and warmup
 sprites share `sprite_color`. The finish flag and warning blocks are therefore
 independently configurable; warning defaults are blue with white glyphs.
 
