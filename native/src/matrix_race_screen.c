@@ -130,23 +130,21 @@ static const uint16_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
 };
 
 /*
- * Synchronizing: two compact curved arrows centered inside the 11x11 status
- * block. The surrounding green margin keeps the symbol from reading as one
- * large circle. The upper arc points right and the lower arc points left.
- * This status is positive/active rather than a warning, so it uses the sync
- * colors and no strike-through.
+ * Synchronizing: two explicit opposing arrows. A small 11x11 raster reads
+ * these horizontal arrows much more clearly than a miniature circular sync
+ * symbol: the upper arrow points right and the lower arrow points left.
  */
 static const uint16_t STATUS_SYNC[WARNING_GLYPH_HEIGHT] = {
     0x000,
+    0x018,
+    0x1fe,
+    0x018,
     0x000,
-    0x1c0,
-    0x220,
-    0x070,
-    0x038,
-    0x180,
-    0x110,
-    0x0e0,
     0x000,
+    0x000,
+    0x0c0,
+    0x3fc,
+    0x0c0,
     0x000
 };
 
