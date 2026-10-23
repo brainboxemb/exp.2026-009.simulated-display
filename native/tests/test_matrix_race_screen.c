@@ -70,7 +70,7 @@ static void test_default_screen_renders_lines(void) {
     assert(
             matrix_framebuffer_get(
                     &framebuffer,
-                    90,
+                    81,
                     30)
             == theme.line_color);
     assert(
@@ -345,7 +345,7 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
                     &framebuffer,
                     53,
                     footer_color,
-                    90));
+                    81));
     assert(
             !row_contains_color(
                     &framebuffer,
