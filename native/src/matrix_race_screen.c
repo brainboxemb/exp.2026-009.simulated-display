@@ -80,9 +80,9 @@ static void style_screen(
             screen,
             0,
             0);
-    lv_obj_clear_flag(
+    lv_obj_set_scrollable(
             screen,
-            LV_OBJ_FLAG_SCROLLABLE);
+            false);
 }
 
 static void create_line(
