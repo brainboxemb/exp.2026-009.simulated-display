@@ -12,6 +12,8 @@ record MatrixDisplayThemeConfig(
         int warningBackgroundColor,
         int warningTextColor,
         int warningStrikeColor,
+        int syncBackgroundColor,
+        int syncIconColor,
         int fontFamily,
         int headerSize,
         int rowSize,
@@ -30,6 +32,8 @@ record MatrixDisplayThemeConfig(
         requireUnsigned16(warningBackgroundColor);
         requireUnsigned16(warningTextColor);
         requireUnsigned16(warningStrikeColor);
+        requireUnsigned16(syncBackgroundColor);
+        requireUnsigned16(syncIconColor);
 
         if (fontFamily < 0 || fontFamily > 1) {
             throw new IllegalArgumentException(
