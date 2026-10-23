@@ -28,7 +28,7 @@ static const MatrixRaceScreenData DEMO_SCREEN = {
         {"999", "999"},
         {"999", "999"}
     },
-    .footer = {"520", "234", "346", "12"}
+    .footer = "520 234 346 12"
 };
 
 static void write_u16_be(uint16_t value) {
