@@ -21,8 +21,8 @@
 
 #define FINISH_FLAG_X 123
 #define FINISH_FLAG_Y 2
-#define FINISH_FLAG_WIDTH 8u
-#define FINISH_FLAG_HEIGHT 7u
+#define FINISH_FLAG_WIDTH 10u
+#define FINISH_FLAG_HEIGHT 8u
 #define FINISH_FLAG_FRAME_COUNT 4u
 
 #define LEFT_SPRITE_X 1
@@ -45,55 +45,60 @@ static bool lvgl_initialized;
 
 /*
  * Small checkered finish flag shown next to the finished-team counter.
- * There is deliberately no pole: only the cloth is visible. The transparent
- * checker cells show the screen background; four shapes give the trailing
- * edge a restrained waving motion.
+ * There is deliberately no pole: only the cloth is visible. Two-pixel checker
+ * blocks keep the flag readable at this size. The left part of the cloth stays
+ * stable while only the trailing columns change across four restrained wave
+ * frames.
  */
-static const uint8_t FINISH_FLAG[
+static const uint16_t FINISH_FLAG[
         FINISH_FLAG_FRAME_COUNT][FINISH_FLAG_HEIGHT] = {
     {
-        0xaa,
-        0x55,
-        0xaa,
-        0x55,
-        0xaa,
-        0x54,
-        0xa8
+        0x333,
+        0x333,
+        0x0cc,
+        0x0cc,
+        0x333,
+        0x333,
+        0x0cc,
+        0x0cc
     },
     {
-        0x54,
-        0xaa,
-        0x55,
-        0xaa,
-        0x55,
-        0xa8,
-        0x50
+        0x330,
+        0x333,
+        0x0c3,
+        0x0cc,
+        0x33c,
+        0x333,
+        0x0c3,
+        0x0cc
     },
     {
-        0xa8,
-        0x54,
-        0xaa,
-        0x55,
-        0xaa,
-        0x50,
-        0xa0
+        0x330,
+        0x330,
+        0x0c3,
+        0x0c3,
+        0x33c,
+        0x33c,
+        0x0c3,
+        0x0c3
     },
     {
-        0x54,
-        0xa8,
-        0x54,
-        0xaa,
-        0x55,
-        0xa0,
-        0x40
+        0x333,
+        0x330,
+        0x0cc,
+        0x0c3,
+        0x333,
+        0x330,
+        0x0cc,
+        0x0c3
     }
-};
+}
 
 static void draw_finish_flag(
         MatrixFramebuffer *framebuffer,
         uint8_t frame,
         MatrixPixel color) {
-    const uint8_t *rows =
+    const uint16_t *rows =
             FINISH_FLAG[
                     frame
                     % FINISH_FLAG_FRAME_COUNT];
@@ -104,8 +109,8 @@ static void draw_finish_flag(
         for (uint16_t column = 0;
                 column < FINISH_FLAG_WIDTH;
                 column++) {
-            const uint8_t mask =
-                    (uint8_t)(
+            const uint16_t mask =
+                    (uint16_t)(
                             1u
                             << (FINISH_FLAG_WIDTH
                                     - 1u
