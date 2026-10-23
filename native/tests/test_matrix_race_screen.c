@@ -69,6 +69,34 @@ static void test_font_family_and_size_are_configurable(void) {
                     &theme));
 }
 
+static void test_vbz_9_and_10_render(void) {
+    MatrixFramebuffer framebuffer;
+    MatrixTheme theme =
+            matrix_theme_default_create();
+
+    theme.header.font.family =
+            MATRIX_FONT_VBZ;
+    theme.header.font.size = 9;
+    theme.row_number.font.family =
+            MATRIX_FONT_VBZ;
+    theme.row_number.font.size = 10;
+    theme.row_time.font.family =
+            MATRIX_FONT_VBZ;
+    theme.row_time.font.size = 10;
+    theme.large_value.font.family =
+            MATRIX_FONT_VBZ;
+    theme.large_value.font.size = 10;
+    theme.footer.font.family =
+            MATRIX_FONT_VBZ;
+    theme.footer.font.size = 9;
+
+    assert(
+            matrix_race_screen_render(
+                    &framebuffer,
+                    &SAMPLE,
+                    &theme));
+}
+
 static void test_independent_line_and_text_colors_render(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
@@ -149,6 +177,7 @@ static void test_unsupported_font_size_is_rejected(void) {
 int main(void) {
     test_default_screen_renders_lines();
     test_font_family_and_size_are_configurable();
+    test_vbz_9_and_10_render();
     test_independent_line_and_text_colors_render();
     test_pixel_fonts_render_only_theme_colors();
     test_unsupported_font_size_is_rejected();
