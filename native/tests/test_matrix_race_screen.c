@@ -12,6 +12,7 @@ static const MatrixRaceScreenData SAMPLE = {
     .counter = "999",
     .wifi_connected = true,
     .registration_server_connected = true,
+    .synchronizing = false,
     .left_rows = {
         {"999", "99:99"},
         {"999", "99:99"},
@@ -174,7 +175,9 @@ static bool is_theme_color(
             || pixel == theme->flag_color
             || pixel == theme->warning_background_color
             || pixel == theme->warning_text_color
-            || pixel == theme->warning_strike_color;
+            || pixel == theme->warning_strike_color
+            || pixel == theme->sync_background_color
+            || pixel == theme->sync_icon_color;
 }
 
 static void test_pixel_fonts_render_only_theme_colors(void) {
@@ -415,15 +418,44 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
 }
 
 
-static void test_header_status_blocks_shift_flag_and_counter(void) {
+static int first_header_pixel_x(
+        const MatrixFramebuffer *framebuffer,
+        MatrixPixel color) {
+    for (uint16_t x = HEADER_CLOCK_X;
+            x < 97u;
+            x++) {
+        for (uint16_t y = 0;
+                y < HEADER_LINE_Y;
+                y++) {
+            if (matrix_framebuffer_get(
+                    framebuffer,
+                    x,
+                    y)
+                    == color) {
+                return (int)x;
+            }
+        }
+    }
+
+    return -1;
+}
+
+static void test_header_statuses_shift_content_and_clock(void) {
     MatrixFramebuffer connected_frame;
     MatrixFramebuffer wifi_frame;
     MatrixFramebuffer disconnected_frame;
+    MatrixFramebuffer all_status_frame;
     MatrixTheme theme =
             matrix_theme_default_create();
     MatrixRaceScreenData wifi_warning = SAMPLE;
     MatrixRaceScreenData disconnected = SAMPLE;
+    MatrixRaceScreenData all_status = SAMPLE;
 
+    theme.header.color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    128,
+                    0);
     theme.flag_color =
             matrix_pixel_rgb565_create(
                     0,
@@ -444,10 +476,25 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
                     255,
                     0,
                     0);
+    theme.sync_background_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    160,
+                    72);
+    theme.sync_icon_color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    255,
+                    255);
 
     wifi_warning.wifi_connected = false;
+
     disconnected.wifi_connected = false;
     disconnected.registration_server_connected = false;
+
+    all_status.wifi_connected = false;
+    all_status.registration_server_connected = false;
+    all_status.synchronizing = true;
 
     assert(
             matrix_race_screen_render(
@@ -467,11 +514,18 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
                     &disconnected,
                     &theme,
                     0));
+    assert(
+            matrix_race_screen_render(
+                    &all_status_frame,
+                    &all_status,
+                    &theme,
+                    0));
 
     /*
-     * No warning: flag starts at x=132.
-     * One warning reserves 11 pixels on the right, moving flag/counter left.
-     * Two warnings reserve 23 pixels including their one-pixel separator.
+     * No status: flag x=132.
+     * One 11px status: x=121.
+     * Two statuses plus separator: x=109.
+     * Three statuses plus separators: x=97.
      */
     assert(
             matrix_framebuffer_get(
@@ -491,71 +545,85 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
                     109,
                     1)
             == theme.flag_color);
-
-    /*
-     * One warning occupies the rightmost 11-pixel block. With two warnings,
-     * WiFi is left of the broken-link warning.
-     */
     assert(
             matrix_framebuffer_get(
-                    &wifi_frame,
-                    149,
-                    10)
-            == theme.warning_background_color);
-    assert(
-            matrix_framebuffer_get(
-                    &disconnected_frame,
-                    137,
-                    10)
-            == theme.warning_background_color);
-    assert(
-            matrix_framebuffer_get(
-                    &disconnected_frame,
-                    149,
-                    10)
-            == theme.warning_background_color);
-
-    assert(
-            matrix_framebuffer_get(
-                    &disconnected_frame,
-                    142,
+                    &all_status_frame,
+                    97,
                     1)
-            == theme.warning_text_color);
-    assert(
-            matrix_framebuffer_get(
-                    &disconnected_frame,
-                    156,
-                    0)
-            == theme.warning_text_color);
+            == theme.flag_color);
 
     /*
-     * The strike reaches both outer corners and is two pixels wide at the
-     * top-left and bottom-right edges.
+     * With all three statuses, WiFi, broken link and sync occupy x=125, 137
+     * and 149. Sync is green/white and deliberately has no red strike.
      */
     assert(
             matrix_framebuffer_get(
-                    &disconnected_frame,
+                    &all_status_frame,
+                    125,
+                    10)
+            == theme.warning_background_color);
+    assert(
+            matrix_framebuffer_get(
+                    &all_status_frame,
                     137,
+                    10)
+            == theme.warning_background_color);
+    assert(
+            matrix_framebuffer_get(
+                    &all_status_frame,
+                    149,
+                    0)
+            == theme.sync_background_color);
+    assert(
+            matrix_framebuffer_get(
+                    &all_status_frame,
+                    152,
+                    1)
+            == theme.sync_icon_color);
+
+    /*
+     * Warning strikes cover both outer corners and are two pixels thick.
+     */
+    assert(
+            matrix_framebuffer_get(
+                    &all_status_frame,
+                    125,
                     0)
             == theme.warning_strike_color);
     assert(
             matrix_framebuffer_get(
-                    &disconnected_frame,
-                    138,
+                    &all_status_frame,
+                    126,
                     0)
             == theme.warning_strike_color);
     assert(
             matrix_framebuffer_get(
-                    &disconnected_frame,
-                    146,
+                    &all_status_frame,
+                    135,
                     10)
             == theme.warning_strike_color);
-    assert(
-            matrix_framebuffer_get(
-                    &disconnected_frame,
-                    147,
-                    10)
-            == theme.warning_strike_color);
+
+    /*
+     * The first status does not reduce the normal 80px clock field. Once the
+     * right-side group grows further, the field shrinks and the centered clock
+     * therefore moves left.
+     */
+    const int connected_clock_x =
+            first_header_pixel_x(
+                    &connected_frame,
+                    theme.header.color);
+    const int wifi_clock_x =
+            first_header_pixel_x(
+                    &wifi_frame,
+                    theme.header.color);
+    const int all_status_clock_x =
+            first_header_pixel_x(
+                    &all_status_frame,
+                    theme.header.color);
+
+    assert(connected_clock_x >= 0);
+    assert(wifi_clock_x == connected_clock_x);
+    assert(all_status_clock_x < connected_clock_x);
 }
 
 static void test_runner_and_warmup_animate_in_their_status_columns(void) {
@@ -658,7 +726,7 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
-    test_header_status_blocks_shift_flag_and_counter();
+    test_header_statuses_shift_content_and_clock();
     test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
 
