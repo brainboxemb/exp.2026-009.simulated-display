@@ -41,7 +41,7 @@ static void test_default_theme_uses_vbz_and_independent_sprite_color(void) {
     assert(theme.row_time.font.family == MATRIX_FONT_VBZ);
     assert(theme.row_time.font.size == 9);
     assert(theme.large_value.font.family == MATRIX_FONT_VBZ);
-    assert(theme.large_value.font.size == 12);
+    assert(theme.large_value.font.size == 14);
     assert(theme.footer.font.family == MATRIX_FONT_VBZ);
     assert(theme.footer.font.size == 9);
 
@@ -390,6 +390,57 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
                     63,
                     footer_color,
                     81));
+}
+
+static void test_numeric_14_uses_two_pixel_horizontal_strokes(void) {
+    lv_font_glyph_dsc_t glyph = {0};
+
+    assert(
+            matrix_font_numeric_14.get_glyph_dsc(
+                    &matrix_font_numeric_14,
+                    &glyph,
+                    '0',
+                    0));
+    assert(glyph.box_w == 9);
+    assert(glyph.box_h == 14);
+    assert(glyph.adv_w == 10);
+
+    lv_draw_buf_t *draw_buffer =
+            lv_draw_buf_create(
+                    glyph.box_w,
+                    glyph.box_h,
+                    LV_COLOR_FORMAT_A8,
+                    LV_STRIDE_AUTO);
+
+    assert(draw_buffer != NULL);
+    assert(
+            matrix_font_numeric_14.get_glyph_bitmap(
+                    &glyph,
+                    draw_buffer)
+            == draw_buffer);
+
+    for (uint32_t x = 1;
+            x <= 7;
+            x++) {
+        assert(draw_buffer->data[x] == 0xffu);
+        assert(
+                draw_buffer->data[
+                        draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        12u * draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        13u * draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+    }
+
+    lv_draw_buf_destroy(draw_buffer);
 }
 
 static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
@@ -908,6 +959,7 @@ int main(void) {
     test_vbz_metrics_match_source_font();
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
+    test_numeric_14_uses_two_pixel_horizontal_strokes();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_header_statuses_shift_content_and_clock();
     test_registration_layout_uses_full_width_without_sprites();
