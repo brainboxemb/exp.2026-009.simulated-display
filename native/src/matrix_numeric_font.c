@@ -5,7 +5,6 @@
 #include <string.h>
 
 #define NUMERIC_HEIGHT 12u
-#define NUMERIC_WIDTH 8u
 
 typedef struct {
     uint32_t codepoint;
