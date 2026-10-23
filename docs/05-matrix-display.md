@@ -32,12 +32,13 @@ The current demo screen follows the supplied layout reference:
 The current values are demo data in `matrix_host_main.c`. They will later come from the synchronized application-data model.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
-sprite, so its number starts at x=12. The original six-frame legacy SpriteMap1
-sequence defines the gait phases, but the runner is redrawn natively as six
-10×12 poses rather than scaled from 7×7. Every pose keeps the same 3×3 head,
-one-pixel neck and stable torso. Only arms and legs change between gait phases;
-lower legs remain intentional one-pixel strokes, and crossing legs can overlap
-instead of turning into a two-pixel bar.
+sprite, so its number starts at x=12. The runner is now designed independently
+for the 10×12 matrix instead of being derived geometrically from the old 7×7
+sprite. It is modeled as a small skeleton: a fixed 3×3 head, one-pixel neck and
+torso, plus two-segment one-pixel arms and legs. Six poses represent contact,
+recoil and passing, followed by the opposite-side phases. Arm swing is
+contralateral to the leg motion. The legacy SpriteMap1 remains a visual
+reference only.
 
 The first ready-runner row reserves the first 10 pixels after the vertical
 divider for the warmup sprite. Its body and legs stay fixed while the arms move
