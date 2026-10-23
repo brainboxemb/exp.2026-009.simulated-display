@@ -235,31 +235,6 @@ static void draw_status_block(
     }
 }
 
-static void create_registration_rank(
-        lv_obj_t *screen,
-        const MatrixRaceLeftRow *row,
-        int32_t y,
-        const MatrixTextStyle *style,
-        const lv_font_t *font) {
-    create_label(
-            screen,
-            row->rank,
-            REGISTRATION_RANK_X,
-            y,
-            REGISTRATION_RANK_WIDTH,
-            LV_TEXT_ALIGN_RIGHT,
-            style,
-            font);
-    create_label(
-            screen,
-            "e",
-            REGISTRATION_RANK_SUFFIX_X,
-            y - 2,
-            REGISTRATION_RANK_SUFFIX_WIDTH,
-            LV_TEXT_ALIGN_LEFT,
-            style,
-            font);
-}
 
 static lv_color_t lv_color_from_pixel(MatrixPixel pixel) {
     const uint8_t red =
@@ -382,6 +357,32 @@ static lv_obj_t *create_label(
             text != NULL ? text : "");
 
     return label;
+}
+
+static void create_registration_rank(
+        lv_obj_t *screen,
+        const MatrixRaceLeftRow *row,
+        int32_t y,
+        const MatrixTextStyle *style,
+        const lv_font_t *font) {
+    create_label(
+            screen,
+            row->rank,
+            REGISTRATION_RANK_X,
+            y,
+            REGISTRATION_RANK_WIDTH,
+            LV_TEXT_ALIGN_RIGHT,
+            style,
+            font);
+    create_label(
+            screen,
+            "e",
+            REGISTRATION_RANK_SUFFIX_X,
+            y - 2,
+            REGISTRATION_RANK_SUFFIX_WIDTH,
+            LV_TEXT_ALIGN_LEFT,
+            style,
+            font);
 }
 
 bool matrix_race_screen_render(
