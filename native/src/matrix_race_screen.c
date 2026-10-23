@@ -1,6 +1,7 @@
 #include "matrix_race_screen.h"
 
 #include "matrix_font.h"
+#include "matrix_sprite.h"
 #include "lvgl.h"
 
 #include <stddef.h>
@@ -23,10 +24,11 @@
 #define LEFT_TIME_X 33
 #define LEFT_TIME_WIDTH 55
 
-#define RIGHT_X 92
-#define RIGHT_LEFT_WIDTH 32
-#define RIGHT_RIGHT_X 126
-#define RIGHT_RIGHT_WIDTH 33
+#define RIGHT_SPRITE_X 92
+#define RIGHT_VALUE_X 103
+#define RIGHT_VALUE_WIDTH 27
+#define RIGHT_READY_X 133
+#define RIGHT_READY_WIDTH 27
 
 #define FOOTER_Y 54
 
@@ -160,7 +162,8 @@ static lv_obj_t *create_label(
 bool matrix_race_screen_render(
         MatrixFramebuffer *framebuffer,
         const MatrixRaceScreenData *data,
-        const MatrixTheme *theme) {
+        const MatrixTheme *theme,
+        uint8_t animation_frame) {
     if (framebuffer == NULL
             || data == NULL
             || theme == NULL) {
@@ -283,9 +286,9 @@ bool matrix_race_screen_render(
         create_label(
                 screen,
                 data->right_rows[index].left,
-                RIGHT_X,
+                RIGHT_VALUE_X,
                 right_row_y[index],
-                RIGHT_LEFT_WIDTH,
+                RIGHT_VALUE_WIDTH,
                 LV_TEXT_ALIGN_CENTER,
                 &theme->large_value,
                 large_value_font);
@@ -293,9 +296,9 @@ bool matrix_race_screen_render(
         create_label(
                 screen,
                 data->right_rows[index].right,
-                RIGHT_RIGHT_X,
+                RIGHT_READY_X,
                 right_row_y[index],
-                RIGHT_RIGHT_WIDTH,
+                RIGHT_READY_WIDTH,
                 LV_TEXT_ALIGN_CENTER,
                 &theme->large_value,
                 large_value_font);
@@ -322,5 +325,21 @@ bool matrix_race_screen_render(
 
     lv_obj_invalidate(screen);
     lv_refr_now(display);
+
+    matrix_sprite_draw(
+            framebuffer,
+            MATRIX_SPRITE_RUNNER,
+            animation_frame,
+            RIGHT_SPRITE_X,
+            right_row_y[0],
+            theme->large_value.color);
+    matrix_sprite_draw(
+            framebuffer,
+            MATRIX_SPRITE_WARMUP,
+            animation_frame,
+            RIGHT_SPRITE_X,
+            right_row_y[1],
+            theme->large_value.color);
+
     return true;
 }
