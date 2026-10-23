@@ -384,18 +384,25 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
 }
 
 
-static void test_race_sprites_animate_in_right_hand_rows(void) {
+static void test_runner_and_warmup_animate_in_their_status_columns(void) {
     MatrixFramebuffer frame0;
     MatrixFramebuffer frame2;
     MatrixTheme theme =
             matrix_theme_default_create();
 
-    const MatrixPixel sprite_color =
+    const MatrixPixel runner_color =
             matrix_pixel_rgb565_create(
+                    0,
                     255,
-                    255,
+                    0);
+    const MatrixPixel warmup_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    0,
                     255);
-    theme.large_value.color = sprite_color;
+
+    theme.row_number.color = runner_color;
+    theme.large_value.color = warmup_color;
 
     assert(
             matrix_race_screen_render(
@@ -410,38 +417,52 @@ static void test_race_sprites_animate_in_right_hand_rows(void) {
                     &theme,
                     2));
 
+    /*
+     * Runner is in the passed-runner column at the far left.
+     * Warmup is in the ready-runner column after the vertical divider.
+     */
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    4,
+                    13)
+            == runner_color);
     assert(
             matrix_framebuffer_get(
                     &frame0,
                     96,
                     14)
-            == sprite_color);
-    assert(
-            matrix_framebuffer_get(
-                    &frame0,
-                    96,
-                    36)
-            == sprite_color);
+            == warmup_color);
 
+    /*
+     * Frame 2 changes both animations without moving either body to another
+     * screen location.
+     */
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    92,
-                    40)
-            != sprite_color);
+                    1,
+                    22)
+            != runner_color);
     assert(
             matrix_framebuffer_get(
                     &frame2,
-                    92,
-                    40)
-            == sprite_color);
+                    1,
+                    22)
+            == runner_color);
 
     assert(
-            memcmp(
-                    frame0.pixels,
-                    frame2.pixels,
-                    sizeof(frame0.pixels))
-            != 0);
+            matrix_framebuffer_get(
+                    &frame0,
+                    94,
+                    18)
+            != warmup_color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame2,
+                    94,
+                    18)
+            == warmup_color);
 }
 
 static void test_unsupported_font_size_is_rejected(void) {
@@ -469,7 +490,7 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
-    test_race_sprites_animate_in_right_hand_rows();
+    test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
 
     puts("matrix_race_screen tests passed");
