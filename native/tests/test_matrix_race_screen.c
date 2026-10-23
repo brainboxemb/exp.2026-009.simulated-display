@@ -464,62 +464,62 @@ static void test_header_status_blocks_shift_flag_and_counter(void) {
 
     /*
      * No warning: flag starts at x=132.
-     * One warning reserves 5 pixels on the right, moving flag/counter left.
-     * Two warnings reserve 11 pixels including their one-pixel separator.
+     * One warning reserves 9 pixels on the right, moving flag/counter left.
+     * Two warnings reserve 19 pixels including their one-pixel separator.
      */
     assert(
             matrix_framebuffer_get(
                     &connected_frame,
                     132,
-                    2)
+                    1)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &wifi_frame,
-                    127,
-                    2)
+                    123,
+                    1)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    121,
-                    2)
+                    113,
+                    1)
             == theme.flag_color);
 
     /*
-     * One warning occupies the rightmost 5-pixel block. With two warnings,
-     * WiFi is left of the registration-server warning.
+     * One warning occupies the rightmost 9-pixel block. With two warnings,
+     * WiFi is left of the broken-link warning.
      */
     assert(
             matrix_framebuffer_get(
                     &wifi_frame,
-                    155,
-                    2)
+                    151,
+                    1)
             == theme.warning_background_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    149,
-                    2)
+                    141,
+                    1)
             == theme.warning_background_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    155,
-                    2)
+                    151,
+                    1)
             == theme.warning_background_color);
 
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    150,
-                    3)
+                    143,
+                    2)
             == theme.warning_text_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
-                    156,
-                    3)
+                    155,
+                    2)
             == theme.warning_text_color);
 }
 
