@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -54,6 +55,17 @@ final class MatrixDisplayWindow implements AutoCloseable {
             new ColorPicker(Color.RED);
     private final ColorPicker spriteColor =
             new ColorPicker(Color.RED);
+    private final ColorPicker flagColor =
+            new ColorPicker(Color.WHITE);
+    private final ColorPicker warningBackgroundColor =
+            new ColorPicker(Color.web("#0060FF"));
+    private final ColorPicker warningTextColor =
+            new ColorPicker(Color.WHITE);
+
+    private final CheckBox wifiConnected =
+            new CheckBox("WiFi connected");
+    private final CheckBox registrationServerConnected =
+            new CheckBox("Registration server connected");
 
     private final ComboBox<String> fontFamily =
             new ComboBox<>();
@@ -98,6 +110,9 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
         updateSpriteFrameStatus();
 
+        wifiConnected.setSelected(true);
+        registrationServerConnected.setSelected(true);
+
         scale2x.setOnAction(
                 event -> {
                     view.setDisplayScale(
@@ -124,6 +139,12 @@ final class MatrixDisplayWindow implements AutoCloseable {
                         nextSpriteFrame,
                         runPauseSprites);
 
+        HBox connectionControls =
+                new HBox(
+                        12,
+                        wifiConnected,
+                        registrationServerConnected);
+
         Button applyStyle =
                 new Button("Apply style");
         applyStyle.setOnAction(
@@ -138,6 +159,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                         8,
                         displayControls,
                         spriteControls,
+                        connectionControls,
                         styleControls);
         controls.setPadding(
                 new Insets(12, 0, 0, 0));
@@ -172,6 +194,10 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 event -> sendDemoScreen());
         clear.setOnAction(
                 event -> clear());
+        wifiConnected.setOnAction(
+                event -> sendConnectionStatus());
+        registrationServerConnected.setOnAction(
+                event -> sendConnectionStatus());
         stage.setOnHidden(
                 event -> close());
 
@@ -201,6 +227,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
          * the first frame onward.
          */
         applyStyle();
+        sendConnectionStatus();
     }
 
     void show() {
@@ -256,7 +283,16 @@ final class MatrixDisplayWindow implements AutoCloseable {
         grid.add(new Label("Sprites"), 0, 3);
         grid.add(spriteColor, 1, 3);
 
-        grid.add(applyStyle, 6, 3);
+        grid.add(new Label("Flag"), 2, 3);
+        grid.add(flagColor, 3, 3);
+
+        grid.add(new Label("Warning bg"), 4, 3);
+        grid.add(warningBackgroundColor, 5, 3);
+
+        grid.add(new Label("Warning text"), 0, 4);
+        grid.add(warningTextColor, 1, 4);
+
+        grid.add(applyStyle, 6, 4);
         return grid;
     }
 
@@ -355,6 +391,9 @@ final class MatrixDisplayWindow implements AutoCloseable {
                             rgb565(largeColor.getValue()),
                             rgb565(footerColor.getValue()),
                             rgb565(spriteColor.getValue()),
+                            rgb565(flagColor.getValue()),
+                            rgb565(warningBackgroundColor.getValue()),
+                            rgb565(warningTextColor.getValue()),
                             "VBZ".equals(
                                     fontFamily.getValue())
                                     ? 1
@@ -457,6 +496,18 @@ final class MatrixDisplayWindow implements AutoCloseable {
         } catch (IOException exception) {
             status.setText(
                     "Matrix send failed: "
+                            + exception.getMessage());
+        }
+    }
+
+    private void sendConnectionStatus() {
+        try {
+            process.connectionStatus(
+                    wifiConnected.isSelected(),
+                    registrationServerConnected.isSelected());
+        } catch (IOException exception) {
+            status.setText(
+                    "Matrix status failed: "
                             + exception.getMessage());
         }
     }
