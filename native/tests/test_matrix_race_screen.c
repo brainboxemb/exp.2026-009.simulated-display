@@ -724,7 +724,7 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    87,
+                    86,
                     14)
             == runner_color);
 
@@ -748,13 +748,13 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    85,
+                    84,
                     18)
             != runner_color);
     assert(
             matrix_framebuffer_get(
                     &frame2,
-                    85,
+                    84,
                     18)
             == runner_color);
 }
