@@ -29,9 +29,9 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final MatrixDisplayProcess process;
 
     private final ColorPicker backgroundColor =
-            new ColorPicker(Color.BLACK);
+            new ColorPicker(Color.web("#333333"));
     private final ColorPicker lineColor =
-            new ColorPicker(Color.RED);
+            new ColorPicker(Color.GRAY);
     private final ColorPicker headerColor =
             new ColorPicker(Color.RED);
     private final ColorPicker rowColor =
