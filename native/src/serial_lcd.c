@@ -6,6 +6,14 @@
 #define COMMAND_PREFIX ((uint8_t)'/')
 #define SPRITE_MARKER 0xfeu
 
+/*
+ * Legacy dispatcher mapping:
+ *   B = predefined bitmap
+ *   G = graph burst
+ *
+ * Instruction.asm contains a stale "/Bxxbbb" comment inside GRAPHBURST;
+ * the actual command letter for graph burst is G.
+ */
 #define CMD_BITMAP ((uint8_t)'B')
 #define CMD_CLEAR ((uint8_t)'C')
 #define CMD_POSITION ((uint8_t)'L')
