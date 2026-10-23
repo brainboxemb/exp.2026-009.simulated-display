@@ -333,14 +333,14 @@ bool matrix_race_screen_render(
             animation_frame,
             LEFT_SPRITE_X,
             left_row_y[0],
-            theme->row_number.color);
+            theme->sprite_color);
     matrix_sprite_draw(
             framebuffer,
             MATRIX_SPRITE_WARMUP,
             (uint8_t)(animation_frame / 2u),
             RIGHT_SPRITE_X,
             right_row_y[0],
-            theme->large_value.color);
+            theme->sprite_color);
 
     return true;
 }
