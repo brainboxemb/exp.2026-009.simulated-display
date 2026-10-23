@@ -43,9 +43,9 @@ two diagonally offset white chain links based on the conventional link icon,
 with the same strike-through. The extra 11×11 resolution gives the two links
 enough separation to remain recognizable.
 
-A third 11×11 status block appears while synchronization is active. It uses a
-green background with two separate white curved arrows: the upper arc ends in a
-right-side arrowhead and the lower arc ends in a left-side arrowhead. Sync is an
+A third 11×11 status block appears while synchronization is active. It uses a green background with two compact white curved arrows centered inside
+the 11×11 block, leaving a visible green margin around the symbol. The upper arc
+ends in a right-side arrowhead and the lower arc ends in a left-side arrowhead. Sync is an
 active state rather than an error, so it has no red strike-through.
 
 A warning is not rendered while its connection is healthy. The strike-through
