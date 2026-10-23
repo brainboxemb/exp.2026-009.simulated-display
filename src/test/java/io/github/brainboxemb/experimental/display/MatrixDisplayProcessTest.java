@@ -32,9 +32,9 @@ final class MatrixDisplayProcessTest {
             assertEquals(160, frame.width());
             assertEquals(64, frame.height());
 
-            assertEquals(255, frame.red(0, 11));
-            assertEquals(0, frame.green(0, 11));
-            assertEquals(0, frame.blue(0, 11));
+            assertEquals(132, frame.red(0, 11));
+            assertEquals(130, frame.green(0, 11));
+            assertEquals(132, frame.blue(0, 11));
 
             process.applyTheme(
                     new MatrixDisplayThemeConfig(
