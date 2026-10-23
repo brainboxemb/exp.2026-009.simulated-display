@@ -46,6 +46,8 @@ race-data feed is not connected yet, JavaFX exposes a temporary `Layout`
 dropdown for selecting these four preview modes. Later the same native layout
 selection will be derived from the real registration and ready-team counts.
 
+The location label starts at x=0 so values such as `WP-99` use the full left edge of the header.
+
 The main vertical divider is at x=81. This keeps the 160-pixel display visually centered while assigning the one-pixel separator itself to the middle boundary. Layout coordinates for mixed-mode content are derived from this divider instead of from the previous x=90 split.
 
 The finished-team counter in the upper-right header is preceded by a small
@@ -60,10 +62,12 @@ two diagonally offset white chain links based on the conventional link icon,
 with the same strike-through. The extra 11×11 resolution gives the two links
 enough separation to remain recognizable.
 
-A third 11×11 status block appears while synchronization is active. It uses a green background with two compact white curved arrows centered inside
-the 11×11 block, leaving a visible green margin around the symbol. The upper arc
-ends in a right-side arrowhead and the lower arc ends in a left-side arrowhead. Sync is an
-active state rather than an error, so it has no red strike-through.
+A third 11×11 status block appears while synchronization is active. It uses a
+green background with two explicit white horizontal arrows: the upper arrow
+points right and the lower arrow points left. This opposing-arrow shape is used
+instead of a miniature circular sync icon because it remains recognizable at
+11×11 pixels. Sync is an active state rather than an error, so it has no red
+strike-through.
 
 A warning is not rendered while its connection is healthy. The strike-through
 runs from outer corner to outer corner and is two pixels thick across the
