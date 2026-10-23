@@ -411,6 +411,50 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
 
 
 
+
+static void test_runner_lower_legs_stay_one_pixel_wide(void) {
+    const MatrixPixel color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    255,
+                    255);
+
+    for (uint8_t frame = 0;
+            frame < MATRIX_SPRITE_FRAME_COUNT;
+            frame++) {
+        MatrixFramebuffer framebuffer;
+        matrix_framebuffer_clear(&framebuffer);
+
+        matrix_sprite_draw(
+                &framebuffer,
+                MATRIX_SPRITE_RUNNER,
+                frame,
+                0,
+                0,
+                color);
+
+        for (uint16_t y = 8;
+                y < MATRIX_SPRITE_HEIGHT;
+                y++) {
+            bool previous_on = false;
+
+            for (uint16_t x = 0;
+                    x < MATRIX_SPRITE_WIDTH;
+                    x++) {
+                const bool on =
+                        matrix_framebuffer_get(
+                                &framebuffer,
+                                x,
+                                y)
+                        == color;
+
+                assert(!(previous_on && on));
+                previous_on = on;
+            }
+        }
+    }
+}
+
 static void test_runner_arm_swing_uses_extra_matrix_pixels(void) {
     MatrixFramebuffer frame0;
     MatrixFramebuffer frame2;
@@ -441,40 +485,28 @@ static void test_runner_arm_swing_uses_extra_matrix_pixels(void) {
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    7,
-                    4)
+                    3,
+                    5)
             == color);
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    2,
-                    6)
-            == color);
-    assert(
-            matrix_framebuffer_get(
-                    &frame0,
-                    8,
-                    6)
+                    6,
+                    5)
             != color);
 
     assert(
             matrix_framebuffer_get(
                     &frame2,
-                    2,
-                    4)
-            == color);
-    assert(
-            matrix_framebuffer_get(
-                    &frame2,
-                    8,
-                    6)
-            == color);
-    assert(
-            matrix_framebuffer_get(
-                    &frame2,
-                    2,
-                    6)
+                    3,
+                    5)
             != color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame2,
+                    6,
+                    5)
+            == color);
 }
 
 static void test_runner_and_warmup_animate_in_their_status_columns(void) {
@@ -527,13 +559,13 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    1,
+                    7,
                     22)
             != runner_color);
     assert(
             matrix_framebuffer_get(
                     &frame2,
-                    1,
+                    7,
                     22)
             == runner_color);
 
@@ -577,6 +609,7 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
+    test_runner_lower_legs_stay_one_pixel_wide();
     test_runner_arm_swing_uses_extra_matrix_pixels();
     test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
