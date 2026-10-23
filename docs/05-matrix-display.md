@@ -32,8 +32,8 @@ The current demo screen follows the supplied layout reference:
 The current values are demo data in `matrix_host_main.c`. They will later come from the synchronized application-data model.
 
 The finished-team counter in the upper-right header is preceded by a small
-8×7 checkered finish-flag cloth. It deliberately has no pole. Four native
-frames move only the cloth pattern/trailing edge, producing a restrained wave
+10×8 checkered finish-flag cloth. It deliberately has no pole. Four native frames keep the 2×2 checker pattern readable while moving only
+the trailing part of the cloth, producing a restrained wave
 at half the runner animation rate. The flag uses `sprite_color`.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
