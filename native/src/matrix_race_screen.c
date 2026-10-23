@@ -118,23 +118,24 @@ static const uint16_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
 };
 
 /*
- * Synchronizing: two separate curved arrows. The upper arc ends in a
- * right-side arrowhead; the lower arc ends in a left-side arrowhead. This
- * status is positive/active rather than a warning, so it uses the sync colors
- * and no strike-through.
+ * Synchronizing: two compact curved arrows centered inside the 11x11 status
+ * block. The surrounding green margin keeps the symbol from reading as one
+ * large circle. The upper arc points right and the lower arc points left.
+ * This status is positive/active rather than a warning, so it uses the sync
+ * colors and no strike-through.
  */
 static const uint16_t STATUS_SYNC[WARNING_GLYPH_HEIGHT] = {
-    0x0f8,
-    0x306,
-    0x603,
-    0x401,
-    0x003,
-    0x00f,
-    0x780,
-    0x600,
-    0x401,
-    0x306,
-    0x0f8
+    0x000,
+    0x000,
+    0x1c0,
+    0x220,
+    0x070,
+    0x038,
+    0x180,
+    0x110,
+    0x0e0,
+    0x000,
+    0x000
 };
 
 static void draw_finish_flag(
