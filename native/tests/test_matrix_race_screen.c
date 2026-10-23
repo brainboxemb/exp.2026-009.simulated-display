@@ -34,7 +34,7 @@ static void test_default_screen_renders_lines(void) {
             matrix_framebuffer_get(
                     &framebuffer,
                     0,
-                    10)
+                    11)
             == theme.line_color);
     assert(
             matrix_framebuffer_get(
@@ -46,7 +46,7 @@ static void test_default_screen_renders_lines(void) {
             matrix_framebuffer_get(
                     &framebuffer,
                     0,
-                    54)
+                    50)
             == theme.line_color);
 }
 
@@ -95,7 +95,7 @@ static void test_independent_line_and_text_colors_render(void) {
             matrix_framebuffer_get(
                     &framebuffer,
                     0,
-                    10)
+                    11)
             == theme.line_color);
 }
 
