@@ -4,24 +4,33 @@ Status: active. Implementation issue: [#1](https://github.com/brainboxemb/exp.20
 
 ## Stage 1 — LCD vertical slice
 
-1. Fix the LCD byte parser's first protocol subset from the SparkFun reference, including byte framing and cursor semantics.
-2. Implement 90×35 monochrome C framebuffer, 5×7 glyphs with 6×8 cells, and deterministic tests.
-3. Build a minimal native host process and frame transport.
-4. Build a Java 21/JavaFX 21 Maven application; make NetBeans Run Project work with an explicit native build/bootstrap step.
-5. Show HELLO WORLD and raw drawing primitives sent through serial bytes, with CI/CTest and manual UI verification evidence.
+Current implementation on PR #2:
+
+- [x] 90×35 bit-packed monochrome C framebuffer;
+- [x] native 5×7 printable ASCII font in 6×8 cells;
+- [x] chunk-independent serial command state machine;
+- [x] clear, X/Y, pixel, line, circle, box and erase-block commands;
+- [x] native host process with explicit framed stdin/stdout protocol;
+- [x] Java 21 / JavaFX 21 Maven viewer with red LED rendering;
+- [x] text controls and raw hexadecimal serial-byte injection;
+- [x] deterministic C unit tests and local host-protocol smoke test;
+- [ ] GitHub Linux/Windows CI qualification;
+- [ ] human NetBeans/JavaFX visual review on Windows.
 
 ## Stage 2 — LCD qualification
 
-Verify split/combined input buffers, invalid command boundaries, clipping, cursor wrapping, clear and drawing primitives. Confirm exact SparkFun command bytes before claiming protocol compatibility.
+Verify split/combined input buffers, invalid commands, clipping, cursor wrapping, clear, drawing primitives and backspace. Compare exact command bytes and relevant behavior with the SparkFun documentation and original firmware. Record deliberate 90×35 geometry differences rather than hiding them.
+
+Decide whether reverse mode, backlight and baud need visible simulator semantics or only protocol acceptance.
 
 ## Stage 3 — HUB75 PoP
 
-Implement a 160×64 RGB logical framebuffer and a five-panel JavaFX view. Design synchronized data input; evaluate plain-C rendering against LVGL based on a representative example. Investigate an Arduino-free ESP-IDF driver and panel layout.
+Implement a 160×64 RGB logical framebuffer and a five-panel JavaFX view. Design synchronized data input; evaluate a small C renderer against LVGL on a representative layout. Investigate an Arduino-free ESP-IDF HUB75 driver and panel mapping.
 
 ## Stage 4 — ESP32 qualification
 
-Compile the shared C sources in ESP-IDF and validate driver updates on available hardware. Distinguish simulation evidence from real LED-panel evidence.
+Compile shared C sources under ESP-IDF and validate the driver/output boundary on actual hardware when available. Keep physical-panel evidence separate from simulator evidence.
 
 ## Completion
 
-Keep test fixtures and exact CI evidence. Report design conclusions to [the meta experiment record](https://github.com/brainboxemb/brainboxemb.meta/blob/main/experiments/009-simulated-display/README.md); do not imply production adoption.
+Retain exact CI/test evidence and report the conclusion to the [meta experiment record](https://github.com/brainboxemb/brainboxemb.meta/blob/main/experiments/009-simulated-display/README.md). A successful experiment does not itself authorize production adoption.

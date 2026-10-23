@@ -2,30 +2,58 @@
 
 ## Ownership boundaries
 
-- **LCD parser (C):** consumes arbitrary stream chunks, recognizes ASCII text and validated SparkFun-style commands. No Java or transport dependencies.
-- **LCD renderer (C):** converts 5×7 bitmap font and graphic primitives into monochrome framebuffer changes. Character cell is 6×8 pixels, with spacing.
-- **HUB75 interpreter (C):** will consume synchronized application data in a separate domain-specific parser/model; no assumption that HUB75 uses SparkFun commands.
-- **Framebuffer (C):** logical pixels, width/height and pixel format. Red monochrome may be bit-packed; RGB565 is a HUB75 candidate.
-- **Output port:** reports complete or changed pixel regions, independent of output hardware.
-- **Host runtime:** receives input, owns the native core and transfers pixel updates to a JavaFX client. The initial framed transport is intentionally small; libuv is not needed by default.
-- **JavaFX 21:** paints output pixels, user controls and diagnostics; does not render fonts or interpret SparkFun bytes.
-- **ESP32 / ESP-IDF:** platform-specific driver and transport integration. A narrow C adapter may hide a C++ HUB75 driver.
+- **Serial LCD parser (C):** consumes arbitrary byte chunks and maintains command state across calls.
+- **LCD renderer (C):** owns the 5×7 font, text cursor and graphic primitives.
+- **Framebuffer (C):** owns logical monochrome pixels; the current 90×35 representation is bit-packed.
+- **Host runtime (C):** adapts framed stdin requests to serial chunks and emits complete logical frames.
+- **JavaFX 21:** starts the host process, supplies development controls and paints returned pixels. It owns no font/protocol behavior.
+- **HUB75 interpreter (future C):** will consume synchronized application data through a separate model rather than pretending HUB75 uses the serial LCD protocol.
+- **ESP32 / ESP-IDF (future):** platform adapter / hardware driver only. A narrow C bridge may hide a C++ HUB75 driver if needed.
+
+## Process boundary
+
+The initial simulator deliberately uses a child process instead of JNI/JNA:
+
+```text
+JavaFX
+  | uint32 length + raw serial bytes
+  v
+display-host (C)
+  | parser / renderer
+  v
+framebuffer
+  | SDF1 header + full pixel frame
+  v
+JavaFX
+```
+
+This keeps the native code executable and testable by itself, avoids a Java/native ABI dependency, and makes the same parser usable with a later serial or embedded transport.
+
+At 90×35, an unpacked output frame is only 3150 bytes. Full frames are therefore preferable to premature dirty-rectangle complexity in the first slice.
 
 ## Experimental invariants
 
-1. Rendering a given byte sequence must not depend on how input arrives split into reads.
-2. Identical native C test cases work independently of JavaFX and hardware.
-3. The 90×35 LED simulation uses red pixels on black; the SparkFun protocol is adopted only as a documented command/behaviour reference.
-4. HUB75 panel mapping is an output-adapter concern, distinct from the 160×64 logical framebuffer.
-5. No Arduino dependency in the application core.
-6. Font tables and cursor/raster semantics are validated with example bitmaps and protocol tests rather than inferred from UI appearance.
+1. Rendering a byte sequence does not depend on how it is divided into reads.
+2. Font and graphic rendering are C responsibilities.
+3. JavaFX receives logical pixels; it never reconstructs display commands.
+4. The 90×35 LED simulation uses red pixels on black and may deliberately adapt geometry from the 128×64/160×128 SparkFun products.
+5. HUB75 physical panel order belongs at the hardware/output boundary, not in the 160×64 logical application framebuffer.
+6. No Arduino dependency in the application core.
+7. Add libuv or LVGL only when a measured/representative requirement justifies them.
 
-## Open decisions to qualify
+## Qualified vs open decisions
 
-- Exact SparkFun firmware revision / command compatibility subset, especially set-position and drawing opcodes.
-- Pixel synchronization framing: full frames initially, dirty rectangles when justified by measurements.
-- Host transport choice and lifecycle under NetBeans.
-- LVGL value compared with a small renderer for the eventual HUB75 data model.
-- ESP32 variant, HUB75 scan pattern, brightness, driver and memory allocation.
+Chosen for the first slice:
 
-These are tracked experiment questions, not prematurely frozen production interfaces.
+- local process transport instead of TCP/libuv;
+- full logical frames instead of dirty rectangles;
+- C-owned printable ASCII 5×7 font;
+- Java 21 / JavaFX 21 / Maven for NetBeans.
+
+Still open:
+
+- exact set of SparkFun compatibility semantics beyond the implemented command framing;
+- whether simulator-visible reverse/backlight behavior is valuable;
+- HUB75 pixel format (RGB565 is the first candidate);
+- LVGL versus a small native renderer for the synchronized HUB75 application;
+- ESP32 variant, HUB75 driver, scan pattern, brightness and memory strategy.
