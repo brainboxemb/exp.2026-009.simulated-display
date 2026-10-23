@@ -16,8 +16,6 @@
  * - 16-bit bitmap rows;
  * - original xAdvance;
  * - original x/y offsets.
- *
- * VBZ 10 only scales bitmap rows vertically. Horizontal metrics do not move.
  */
 
 #define FIRST_CODEPOINT 0x20u
@@ -207,30 +205,12 @@ static const VbzGlyph glyphs[GLYPH_COUNT] = {
     {1136, 16, 0, 9, 1, 10}, /* 0x7E */
 };
 
-static bool ten_pixel_font(
-        const lv_font_t *font) {
-    return font == &matrix_font_vbz_10;
-}
-
-static uint8_t target_height(
-        const VbzGlyph *glyph,
-        const lv_font_t *font) {
-    if (!ten_pixel_font(font)
-            || glyph->height == 0
-            || glyph->height >= 10) {
-        return glyph->height;
-    }
-
-    return (uint8_t)(
-            (glyph->height * 10u + 4u)
-            / 9u);
-}
-
 static bool glyph_descriptor_get(
         const lv_font_t *font,
         lv_font_glyph_dsc_t *descriptor,
         uint32_t letter,
         uint32_t letter_next) {
+    LV_UNUSED(font);
     LV_UNUSED(letter_next);
 
     if (letter < FIRST_CODEPOINT
@@ -240,14 +220,10 @@ static bool glyph_descriptor_get(
 
     const VbzGlyph *glyph =
             &glyphs[letter - FIRST_CODEPOINT];
-    const uint8_t height =
-            target_height(
-                    glyph,
-                    font);
 
     descriptor->adv_w = glyph->advance;
     descriptor->box_w = glyph->width;
-    descriptor->box_h = height;
+    descriptor->box_h = glyph->height;
     descriptor->ofs_x = glyph->x_offset;
 
     /*
@@ -256,7 +232,7 @@ static bool glyph_descriptor_get(
      */
     descriptor->ofs_y =
             FONT_LINE_HEIGHT
-            - height
+            - glyph->height
             - glyph->y_offset;
 
     descriptor->stride = glyph->width;
@@ -340,20 +316,3 @@ const lv_font_t matrix_font_vbz_9 = {
     .underline_thickness = 1
 };
 
-const lv_font_t matrix_font_vbz_10 = {
-    .dsc = NULL,
-    .fallback = NULL,
-    .user_data = NULL,
-    .get_glyph_dsc = glyph_descriptor_get,
-    .get_glyph_bitmap = glyph_bitmap_get,
-    .release_glyph = NULL,
-    .line_height = FONT_LINE_HEIGHT,
-    .base_line = 0,
-    .cap_height = 10,
-    .x_height = 8,
-    .subpx = LV_FONT_SUBPX_NONE,
-    .kerning = LV_FONT_KERNING_NONE,
-    .static_bitmap = 0,
-    .underline_position = -1,
-    .underline_thickness = 1
-};
