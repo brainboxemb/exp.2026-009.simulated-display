@@ -55,32 +55,25 @@ theme.large_value.color =
         matrix_pixel_rgb565_create(255, 255, 255);
 
 theme.large_value.font.family =
-        MATRIX_FONT_MONTSERRAT;
-theme.large_value.font.size = 20;
+        MATRIX_FONT_UNSCII;
+theme.large_value.font.size = 16;
 ```
 
 The screen layout does not change.
 
 ## Pixel-exact font rendering
 
-LVGL's built-in Montserrat fonts are 4-bpp antialiased fonts. For example, Montserrat 10 has a line height of 11 pixels, while Montserrat 20 has a line height of 22 pixels. The matrix renderer therefore treats the configured font size as a nominal font choice rather than an exact visible glyph height.
+The active matrix fonts are 1-bpp bitmap fonts. No antialiasing or intermediate alpha levels are used.
 
-After LVGL renders, the 160×64 framebuffer is quantized back to the nearest configured theme color. This removes partial-coverage antialias colors so every physical matrix pixel is either the background, line color or one of the configured text colors.
+The font registry currently exposes one family:
 
-The vertical layout uses the real Montserrat 10 line height: five 11-pixel rows plus four 2-pixel gaps consume 63 of the 64 logical rows.
+| Family | Sizes | Notes |
+| --- | --- | --- |
+| `MATRIX_FONT_UNSCII` | 8, 10, 16 | All 1-bpp |
 
-## Font families and sizes
+The 8px and 16px variants are LVGL's built-in UNSCII bitmap fonts. The 10px variant is local to `matrix-display`: it keeps the UNSCII-8 width at 8 pixels and stretches its 8 bitmap rows to exactly 10 rows. Its ASCII bitmap source comes from the public-domain UNSCII project.
 
-The first font registry contains:
-
-| Family | Sizes |
-| --- | --- |
-| `MATRIX_FONT_UNSCII` | 8, 16 |
-| `MATRIX_FONT_MONTSERRAT` | 8, 10, 12, 14, 16, 18, 20 |
-
-Montserrat 10 is the default for header, left rows and footer; Montserrat 20 is the default for the four large right-side values. Five 10-pixel text rows fit the 64-pixel height with 3-pixel inter-row spacing: 50 + 12 = 62 pixels. UNSCII remains available as an alternative. Unsupported family/size combinations are rejected instead of silently choosing another font.
-
-Adding another font family only requires extending the font registry; the screen/theme API stays unchanged.
+Defaults are 10px for header, left rows and footer, and 16px for the four large right-side values. Other 1-bpp font families can later be added behind the same `MatrixFontFamily` / `MatrixFontSpec` API.
 
 ## Physical HUB75 output
 

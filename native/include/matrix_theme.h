@@ -6,8 +6,7 @@
 #include <stdint.h>
 
 typedef enum {
-    MATRIX_FONT_MONTSERRAT,
-    MATRIX_FONT_UNSCII
+    MATRIX_FONT_UNSCII = 0
 } MatrixFontFamily;
 
 typedef struct {

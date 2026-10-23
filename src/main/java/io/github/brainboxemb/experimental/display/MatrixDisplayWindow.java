@@ -204,10 +204,9 @@ final class MatrixDisplayWindow implements AutoCloseable {
     }
 
     private void configureFontControls() {
-        fontFamily.getItems().addAll(
-                "UNSCII",
-                "Montserrat");
-        fontFamily.setValue("Montserrat");
+        fontFamily.getItems().add(
+                "UNSCII");
+        fontFamily.setValue("UNSCII");
 
         refreshFontSizes();
         fontFamily.setOnAction(
@@ -216,19 +215,10 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
     private void refreshFontSizes() {
         List<Integer> sizes =
-                "Montserrat".equals(
-                        fontFamily.getValue())
-                        ? List.of(
-                                8,
-                                10,
-                                12,
-                                14,
-                                16,
-                                18,
-                                20)
-                        : List.of(
-                                8,
-                                16);
+                List.of(
+                        8,
+                        10,
+                        16);
 
         setSizes(
                 headerSize,
@@ -241,7 +231,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
         setSizes(
                 largeSize,
                 sizes,
-                20);
+                16);
         setSizes(
                 footerSize,
                 sizes,
@@ -277,10 +267,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                             rgb565(rowColor.getValue()),
                             rgb565(largeColor.getValue()),
                             rgb565(footerColor.getValue()),
-                            "Montserrat".equals(
-                                    fontFamily.getValue())
-                                    ? 0
-                                    : 1,
+                            0,
                             headerSize.getValue(),
                             rowSize.getValue(),
                             largeSize.getValue(),

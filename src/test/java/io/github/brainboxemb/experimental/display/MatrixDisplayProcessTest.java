@@ -44,11 +44,11 @@ final class MatrixDisplayProcessTest {
                             0xffff,
                             0xffff,
                             0xffff,
-                            1,
-                            8,
-                            8,
+                            0,
+                            10,
+                            10,
                             16,
-                            8));
+                            10));
 
             MatrixDisplayFrame themed =
                     frames.poll(

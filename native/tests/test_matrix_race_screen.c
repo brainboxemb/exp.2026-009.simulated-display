@@ -56,11 +56,11 @@ static void test_font_family_and_size_are_configurable(void) {
             matrix_theme_default_create();
 
     theme.header.font.family =
-            MATRIX_FONT_MONTSERRAT;
-    theme.header.font.size = 10;
+            MATRIX_FONT_UNSCII;
+    theme.header.font.size = 8;
     theme.large_value.font.family =
-            MATRIX_FONT_MONTSERRAT;
-    theme.large_value.font.size = 20;
+            MATRIX_FONT_UNSCII;
+    theme.large_value.font.size = 16;
 
     assert(
             matrix_race_screen_render(
@@ -111,7 +111,7 @@ static bool is_theme_color(
             || pixel == theme->footer.color;
 }
 
-static void test_antialiasing_is_quantized_to_theme_colors(void) {
+static void test_pixel_fonts_render_only_theme_colors(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
             matrix_theme_default_create();

@@ -29,8 +29,6 @@
 
 #define FOOTER_Y 52
 
-#define THEME_COLOR_COUNT 7u
-
 static lv_display_t *display;
 static MatrixFramebuffer *active_framebuffer;
 static bool lvgl_initialized;
@@ -126,92 +124,6 @@ static void create_line(
             line,
             LV_OPA_COVER,
             0);
-}
-
-static uint8_t red8(MatrixPixel pixel) {
-    return (uint8_t)(
-            (((pixel >> 11u) & 0x1fu) * 255u)
-            / 31u);
-}
-
-static uint8_t green8(MatrixPixel pixel) {
-    return (uint8_t)(
-            (((pixel >> 5u) & 0x3fu) * 255u)
-            / 63u);
-}
-
-static uint8_t blue8(MatrixPixel pixel) {
-    return (uint8_t)(
-            ((pixel & 0x1fu) * 255u)
-            / 31u);
-}
-
-static uint32_t color_distance(
-        MatrixPixel left,
-        MatrixPixel right) {
-    const int32_t red_delta =
-            (int32_t)red8(left)
-            - (int32_t)red8(right);
-    const int32_t green_delta =
-            (int32_t)green8(left)
-            - (int32_t)green8(right);
-    const int32_t blue_delta =
-            (int32_t)blue8(left)
-            - (int32_t)blue8(right);
-
-    return (uint32_t)(
-            red_delta * red_delta
-            + green_delta * green_delta
-            + blue_delta * blue_delta);
-}
-
-static MatrixPixel nearest_theme_color(
-        MatrixPixel pixel,
-        const MatrixTheme *theme) {
-    const MatrixPixel colors[THEME_COLOR_COUNT] = {
-        theme->background_color,
-        theme->line_color,
-        theme->header.color,
-        theme->row_number.color,
-        theme->row_time.color,
-        theme->large_value.color,
-        theme->footer.color
-    };
-
-    MatrixPixel nearest = colors[0];
-    uint32_t nearest_distance =
-            color_distance(
-                    pixel,
-                    nearest);
-
-    for (size_t index = 1;
-            index < THEME_COLOR_COUNT;
-            index++) {
-        const uint32_t distance =
-                color_distance(
-                        pixel,
-                        colors[index]);
-
-        if (distance < nearest_distance) {
-            nearest = colors[index];
-            nearest_distance = distance;
-        }
-    }
-
-    return nearest;
-}
-
-static void quantize_to_theme(
-        MatrixFramebuffer *framebuffer,
-        const MatrixTheme *theme) {
-    for (size_t index = 0;
-            index < MATRIX_DISPLAY_PIXEL_COUNT;
-            index++) {
-        framebuffer->pixels[index] =
-                nearest_theme_color(
-                        framebuffer->pixels[index],
-                        theme);
-    }
 }
 
 static void create_label(
@@ -415,15 +327,5 @@ bool matrix_race_screen_render(
 
     lv_obj_invalidate(screen);
     lv_refr_now(display);
-
-    /*
-     * LVGL's Montserrat fonts are 4-bpp antialiased. A physical LED matrix
-     * has discrete pixels, so collapse partial coverage back to the nearest
-     * configured theme color after rendering.
-     */
-    quantize_to_theme(
-            framebuffer,
-            theme);
-
     return true;
 }

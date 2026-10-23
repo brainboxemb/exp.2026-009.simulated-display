@@ -59,9 +59,9 @@ list(APPEND LVGL_MATRIX_SOURCES
 list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
     "/src/font/(binfont_loader|font_manager|freetype|imgfont|tiny_ttf)/")
 list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
-    "/src/font/lv_font_(dejavu|source_han_sans|montserrat_(22|24|26|28|30|32|34|36|38|40|42|44|46|48)).*\\.c$")
+    "/src/font/lv_font_(dejavu|source_han_sans).*\\.c$")
 list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
-    "/src/font/lv_font_montserrat_14_aligned\\.c$")
+    "/src/font/lv_font_montserrat_.*\\.c$")
 
 list(FILTER LVGL_MATRIX_SOURCES EXCLUDE REGEX
     "/src/image/svg/")
@@ -95,6 +95,7 @@ target_include_directories(legacy-display PUBLIC include)
 
 add_library(matrix-display
     src/matrix_framebuffer.c
+    src/matrix_pixel_font.c
     src/matrix_font.c
     src/matrix_theme.c
     src/matrix_race_screen.c

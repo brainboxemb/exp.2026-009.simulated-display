@@ -21,9 +21,9 @@ record MatrixDisplayThemeConfig(
         requireUnsigned16(largeColor);
         requireUnsigned16(footerColor);
 
-        if (fontFamily < 0 || fontFamily > 1) {
+        if (fontFamily != 0) {
             throw new IllegalArgumentException(
-                    "fontFamily must be 0 or 1");
+                    "only the 1-bpp UNSCII font family is enabled");
         }
 
         requireUnsigned8(headerSize);
