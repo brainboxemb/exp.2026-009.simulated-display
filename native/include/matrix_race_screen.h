@@ -25,6 +25,7 @@ typedef struct {
     const char *counter;
     bool wifi_connected;
     bool registration_server_connected;
+    bool synchronizing;
     MatrixRaceLeftRow left_rows[MATRIX_RACE_LEFT_ROW_COUNT];
     MatrixRaceRightRow right_rows[MATRIX_RACE_RIGHT_ROW_COUNT];
     const char *footer;
