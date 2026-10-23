@@ -52,6 +52,17 @@ In the legacy dispatcher, **`B` selects predefined bitmap** and **`G` selects gr
 
 Graph burst is not implemented in this PoP yet.
 
+## Command-letter note
+
+In the legacy dispatcher:
+
+- `B` = predefined bitmap;
+- `G` = graph burst.
+
+The old `Instruction.asm` contains a stale comment inside `GRAPHBURST` that still says `/Bxxbbb`. That comment is not the dispatcher mapping.
+
+Graph burst is not implemented in this PoP yet.
+
 ## Large digit bitmap
 
 ```text
