@@ -61,6 +61,14 @@ theme.large_value.font.size = 20;
 
 The screen layout does not change.
 
+## Pixel-exact font rendering
+
+LVGL's built-in Montserrat fonts are 4-bpp antialiased fonts. For example, Montserrat 10 has a line height of 11 pixels, while Montserrat 20 has a line height of 22 pixels. The matrix renderer therefore treats the configured font size as a nominal font choice rather than an exact visible glyph height.
+
+After LVGL renders, the 160×64 framebuffer is quantized back to the nearest configured theme color. This removes partial-coverage antialias colors so every physical matrix pixel is either the background, line color or one of the configured text colors.
+
+The vertical layout uses the real Montserrat 10 line height: five 11-pixel rows plus four 2-pixel gaps consume 63 of the 64 logical rows.
+
 ## Font families and sizes
 
 The first font registry contains:

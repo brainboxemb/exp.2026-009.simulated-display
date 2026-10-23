@@ -99,6 +99,39 @@ static void test_independent_line_and_text_colors_render(void) {
             == theme.line_color);
 }
 
+static bool is_theme_color(
+        MatrixPixel pixel,
+        const MatrixTheme *theme) {
+    return pixel == theme->background_color
+            || pixel == theme->line_color
+            || pixel == theme->header.color
+            || pixel == theme->row_number.color
+            || pixel == theme->row_time.color
+            || pixel == theme->large_value.color
+            || pixel == theme->footer.color;
+}
+
+static void test_antialiasing_is_quantized_to_theme_colors(void) {
+    MatrixFramebuffer framebuffer;
+    MatrixTheme theme =
+            matrix_theme_default_create();
+
+    assert(
+            matrix_race_screen_render(
+                    &framebuffer,
+                    &SAMPLE,
+                    &theme));
+
+    for (size_t index = 0;
+            index < MATRIX_DISPLAY_PIXEL_COUNT;
+            index++) {
+        assert(
+                is_theme_color(
+                        framebuffer.pixels[index],
+                        &theme));
+    }
+}
+
 static void test_unsupported_font_size_is_rejected(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
@@ -117,6 +150,7 @@ int main(void) {
     test_default_screen_renders_lines();
     test_font_family_and_size_are_configurable();
     test_independent_line_and_text_colors_render();
+    test_antialiasing_is_quantized_to_theme_colors();
     test_unsupported_font_size_is_rejected();
 
     puts("matrix_race_screen tests passed");

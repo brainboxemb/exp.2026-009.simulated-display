@@ -142,6 +142,12 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 event -> clear());
         stage.setOnHidden(
                 event -> close());
+
+        /*
+         * Keep the visible controls and the native renderer in sync from
+         * the first frame onward.
+         */
+        applyStyle();
     }
 
     void show() {
