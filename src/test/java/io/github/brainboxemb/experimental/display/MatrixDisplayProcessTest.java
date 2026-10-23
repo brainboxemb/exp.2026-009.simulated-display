@@ -93,11 +93,25 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     registrations,
                     "matrix host did not render registrations layout");
-            assertEquals(0, registrations.red(81, 51));
-            assertEquals(0, registrations.green(81, 51));
-            assertEquals(0, registrations.blue(81, 51));
+            assertEquals(0, registrations.red(159, 52));
+            assertEquals(255, registrations.green(159, 52));
+            assertEquals(0, registrations.blue(159, 52));
 
             process.layout(1);
+
+            MatrixDisplayFrame registrationOverflow =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+
+            assertNotNull(
+                    registrationOverflow,
+                    "matrix host did not render registration overflow");
+            assertEquals(0, registrationOverflow.red(0, 52));
+            assertEquals(0, registrationOverflow.green(0, 52));
+            assertEquals(0, registrationOverflow.blue(0, 52));
+
+            process.layout(2);
 
             MatrixDisplayFrame mixed =
                     frames.poll(
@@ -107,25 +121,34 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     mixed,
                     "matrix host did not restore mixed layout");
-            assertEquals(0, mixed.red(81, 51));
-            assertEquals(255, mixed.green(81, 51));
-            assertEquals(0, mixed.blue(81, 51));
+            assertEquals(0, mixed.red(159, 52));
+            assertEquals(255, mixed.green(159, 52));
+            assertEquals(0, mixed.blue(159, 52));
+            assertEquals(0, mixed.red(81, 53));
+            assertEquals(0, mixed.green(81, 53));
+            assertEquals(0, mixed.blue(81, 53));
 
-            process.layout(2);
+            process.layout(3);
 
-            MatrixDisplayFrame compactMixed =
+            MatrixDisplayFrame readyOverflow =
                     frames.poll(
                             5,
                             TimeUnit.SECONDS);
 
             assertNotNull(
-                    compactMixed,
-                    "matrix host did not render compact mixed layout");
-            assertEquals(0, compactMixed.red(0, 54));
-            assertEquals(255, compactMixed.green(0, 54));
-            assertEquals(0, compactMixed.blue(0, 54));
+                    readyOverflow,
+                    "matrix host did not render ready-team overflow");
+            assertEquals(0, readyOverflow.red(0, 52));
+            assertEquals(255, readyOverflow.green(0, 52));
+            assertEquals(0, readyOverflow.blue(0, 52));
+            assertEquals(0, readyOverflow.red(100, 52));
+            assertEquals(0, readyOverflow.green(100, 52));
+            assertEquals(0, readyOverflow.blue(100, 52));
+            assertEquals(0, readyOverflow.red(81, 53));
+            assertEquals(255, readyOverflow.green(81, 53));
+            assertEquals(0, readyOverflow.blue(81, 53));
 
-            process.layout(1);
+            process.layout(2);
             frames.poll(
                     5,
                     TimeUnit.SECONDS);
