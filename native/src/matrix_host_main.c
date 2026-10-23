@@ -258,7 +258,7 @@ int main(void) {
                 }
 
                 animation_frame =
-                        (uint8_t)((animation_frame + 1u) % 6u);
+                        (uint8_t)((animation_frame + 1u) % 12u);
 
                 if (!draw_demo_screen(
                         &framebuffer,
