@@ -7,15 +7,21 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 include(FetchContent)
 
-set(LV_BUILD_CONF_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/lv_conf.h
+# LVGL is configured from its own empty defconfig plus the small set of
+# features used by the 160x64 matrix renderer. Unspecified LVGL defaults are
+# intentionally not used.
+set(FETCHCONTENT_BASE_DIR
+    "${CMAKE_BINARY_DIR}/_deps"
     CACHE PATH "" FORCE)
+set(LV_BUILD_CONF_PATH "" CACHE PATH "" FORCE)
+set(LV_BUILD_USE_KCONFIG ON CACHE BOOL "" FORCE)
+set(LV_BUILD_DEFCONFIG_STRICT ON CACHE BOOL "" FORCE)
+set(LV_BUILD_DEFCONFIG_PATH
+    "${FETCHCONTENT_BASE_DIR}/lvgl-src/configs/defconfigs/empty.defconfig;${CMAKE_CURRENT_SOURCE_DIR}/lvgl-matrix.defconfig"
+    CACHE STRING "" FORCE)
 set(LV_BUILD_INSTALL OFF CACHE BOOL "" FORCE)
 set(LV_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(LV_FETCH_DEPENDENCIES OFF CACHE BOOL "" FORCE)
-set(CONFIG_LV_BUILD_DEMOS OFF CACHE BOOL "" FORCE)
-set(CONFIG_LV_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(CONFIG_LV_USE_THORVG OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
     lvgl
