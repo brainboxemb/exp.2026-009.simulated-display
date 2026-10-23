@@ -8,7 +8,6 @@
 
 #define MATRIX_RACE_LEFT_ROW_COUNT 3u
 #define MATRIX_RACE_RIGHT_ROW_COUNT 2u
-#define MATRIX_RACE_FOOTER_COUNT 4u
 
 typedef struct {
     const char *number;
@@ -26,7 +25,7 @@ typedef struct {
     const char *counter;
     MatrixRaceLeftRow left_rows[MATRIX_RACE_LEFT_ROW_COUNT];
     MatrixRaceRightRow right_rows[MATRIX_RACE_RIGHT_ROW_COUNT];
-    const char *footer[MATRIX_RACE_FOOTER_COUNT];
+    const char *footer;
 } MatrixRaceScreenData;
 
 bool matrix_race_screen_render(
