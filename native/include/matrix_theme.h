@@ -1,0 +1,35 @@
+#ifndef MATRIX_THEME_H
+#define MATRIX_THEME_H
+
+#include "matrix_framebuffer.h"
+
+#include <stdint.h>
+
+typedef enum {
+    MATRIX_FONT_MONTSERRAT,
+    MATRIX_FONT_UNSCII
+} MatrixFontFamily;
+
+typedef struct {
+    MatrixFontFamily family;
+    uint8_t size;
+} MatrixFontSpec;
+
+typedef struct {
+    MatrixFontSpec font;
+    MatrixPixel color;
+} MatrixTextStyle;
+
+typedef struct {
+    MatrixPixel background_color;
+    MatrixPixel line_color;
+    MatrixTextStyle header;
+    MatrixTextStyle row_number;
+    MatrixTextStyle row_time;
+    MatrixTextStyle large_value;
+    MatrixTextStyle footer;
+} MatrixTheme;
+
+MatrixTheme matrix_theme_default_create(void);
+
+#endif

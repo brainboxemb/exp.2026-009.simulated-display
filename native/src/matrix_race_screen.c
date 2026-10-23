@@ -1,0 +1,283 @@
+#include "matrix_race_screen.h"
+
+#include "matrix_font.h"
+#include "lvgl.h"
+
+#include <stddef.h>
+#include <stdint.h>
+
+#define HEADER_LINE_Y 10
+#define COLUMN_LINE_X 90
+#define FOOTER_LINE_Y 53
+
+static lv_display_t *display;
+static MatrixFramebuffer *active_framebuffer;
+static bool lvgl_initialized;
+
+static lv_color_t lv_color_from_pixel(MatrixPixel pixel) {
+    const uint8_t red =
+            (uint8_t)((((pixel >> 11u) & 0x1fu) * 255u) / 31u);
+    const uint8_t green =
+            (uint8_t)((((pixel >> 5u) & 0x3fu) * 255u) / 63u);
+    const uint8_t blue =
+            (uint8_t)(((pixel & 0x1fu) * 255u) / 31u);
+
+    return lv_color_make(red, green, blue);
+}
+
+static void display_flush(
+        lv_display_t *display_to_flush,
+        const lv_area_t *area,
+        uint8_t *pixels) {
+    LV_UNUSED(area);
+    LV_UNUSED(pixels);
+    lv_display_flush_ready(display_to_flush);
+}
+
+static void ensure_display(MatrixFramebuffer *framebuffer) {
+    if (!lvgl_initialized) {
+        lv_init();
+        lvgl_initialized = true;
+
+        display =
+                lv_display_create(
+                        MATRIX_DISPLAY_WIDTH,
+                        MATRIX_DISPLAY_HEIGHT);
+        lv_display_set_color_format(
+                display,
+                LV_COLOR_FORMAT_RGB565);
+        lv_display_set_flush_cb(
+                display,
+                display_flush);
+    }
+
+    if (active_framebuffer != framebuffer) {
+        active_framebuffer = framebuffer;
+        lv_display_set_buffers(
+                display,
+                framebuffer->pixels,
+                NULL,
+                sizeof(framebuffer->pixels),
+                LV_DISPLAY_RENDER_MODE_DIRECT);
+    }
+
+    lv_display_set_default(display);
+}
+
+static void style_screen(
+        lv_obj_t *screen,
+        const MatrixTheme *theme) {
+    lv_obj_remove_style_all(screen);
+    lv_obj_set_style_bg_color(
+            screen,
+            lv_color_from_pixel(theme->background_color),
+            0);
+    lv_obj_set_style_bg_opa(
+            screen,
+            LV_OPA_COVER,
+            0);
+    lv_obj_set_style_pad_all(
+            screen,
+            0,
+            0);
+    lv_obj_clear_flag(
+            screen,
+            LV_OBJ_FLAG_SCROLLABLE);
+}
+
+static void create_line(
+        lv_obj_t *screen,
+        int32_t x,
+        int32_t y,
+        int32_t width,
+        int32_t height,
+        MatrixPixel color) {
+    lv_obj_t *line = lv_obj_create(screen);
+
+    lv_obj_remove_style_all(line);
+    lv_obj_set_pos(line, x, y);
+    lv_obj_set_size(line, width, height);
+    lv_obj_set_style_bg_color(
+            line,
+            lv_color_from_pixel(color),
+            0);
+    lv_obj_set_style_bg_opa(
+            line,
+            LV_OPA_COVER,
+            0);
+}
+
+static void create_label(
+        lv_obj_t *screen,
+        const char *text,
+        int32_t x,
+        int32_t y,
+        int32_t width,
+        lv_text_align_t alignment,
+        const MatrixTextStyle *style,
+        const lv_font_t *font) {
+    lv_obj_t *label = lv_label_create(screen);
+
+    lv_obj_remove_style_all(label);
+    lv_obj_set_pos(label, x, y);
+    lv_obj_set_width(label, width);
+    lv_obj_set_style_text_font(label, font, 0);
+    lv_obj_set_style_text_color(
+            label,
+            lv_color_from_pixel(style->color),
+            0);
+    lv_obj_set_style_text_align(
+            label,
+            alignment,
+            0);
+    lv_label_set_text(
+            label,
+            text != NULL ? text : "");
+}
+
+bool matrix_race_screen_render(
+        MatrixFramebuffer *framebuffer,
+        const MatrixRaceScreenData *data,
+        const MatrixTheme *theme) {
+    if (framebuffer == NULL
+            || data == NULL
+            || theme == NULL) {
+        return false;
+    }
+
+    const lv_font_t *header_font =
+            matrix_font_resolve(theme->header.font);
+    const lv_font_t *row_number_font =
+            matrix_font_resolve(theme->row_number.font);
+    const lv_font_t *row_time_font =
+            matrix_font_resolve(theme->row_time.font);
+    const lv_font_t *large_value_font =
+            matrix_font_resolve(theme->large_value.font);
+    const lv_font_t *footer_font =
+            matrix_font_resolve(theme->footer.font);
+
+    if (header_font == NULL
+            || row_number_font == NULL
+            || row_time_font == NULL
+            || large_value_font == NULL
+            || footer_font == NULL) {
+        return false;
+    }
+
+    ensure_display(framebuffer);
+
+    lv_obj_t *screen = lv_screen_active();
+    lv_obj_clean(screen);
+    style_screen(screen, theme);
+
+    create_line(
+            screen,
+            0,
+            HEADER_LINE_Y,
+            MATRIX_DISPLAY_WIDTH,
+            1,
+            theme->line_color);
+    create_line(
+            screen,
+            COLUMN_LINE_X,
+            HEADER_LINE_Y,
+            1,
+            MATRIX_DISPLAY_HEIGHT - HEADER_LINE_Y,
+            theme->line_color);
+    create_line(
+            screen,
+            0,
+            FOOTER_LINE_Y,
+            COLUMN_LINE_X,
+            1,
+            theme->line_color);
+
+    create_label(
+            screen, data->location,
+            4, 1, 35,
+            LV_TEXT_ALIGN_LEFT,
+            &theme->header,
+            header_font);
+    create_label(
+            screen, data->clock,
+            46, 1, 68,
+            LV_TEXT_ALIGN_CENTER,
+            &theme->header,
+            header_font);
+    create_label(
+            screen, data->counter,
+            132, 1, 24,
+            LV_TEXT_ALIGN_RIGHT,
+            &theme->header,
+            header_font);
+
+    static const int32_t left_row_y[] = {14, 25, 36};
+
+    for (size_t index = 0;
+            index < MATRIX_RACE_LEFT_ROW_COUNT;
+            index++) {
+        create_label(
+                screen,
+                data->left_rows[index].number,
+                3,
+                left_row_y[index],
+                29,
+                LV_TEXT_ALIGN_RIGHT,
+                &theme->row_number,
+                row_number_font);
+        create_label(
+                screen,
+                data->left_rows[index].time,
+                35,
+                left_row_y[index],
+                52,
+                LV_TEXT_ALIGN_LEFT,
+                &theme->row_time,
+                row_time_font);
+    }
+
+    static const int32_t right_row_y[] = {15, 35};
+
+    for (size_t index = 0;
+            index < MATRIX_RACE_RIGHT_ROW_COUNT;
+            index++) {
+        create_label(
+                screen,
+                data->right_rows[index].left,
+                94,
+                right_row_y[index],
+                30,
+                LV_TEXT_ALIGN_CENTER,
+                &theme->large_value,
+                large_value_font);
+        create_label(
+                screen,
+                data->right_rows[index].right,
+                128,
+                right_row_y[index],
+                30,
+                LV_TEXT_ALIGN_CENTER,
+                &theme->large_value,
+                large_value_font);
+    }
+
+    static const int32_t footer_x[] = {3, 25, 47, 69};
+
+    for (size_t index = 0;
+            index < MATRIX_RACE_FOOTER_COUNT;
+            index++) {
+        create_label(
+                screen,
+                data->footer[index],
+                footer_x[index],
+                55,
+                19,
+                LV_TEXT_ALIGN_CENTER,
+                &theme->footer,
+                footer_font);
+    }
+
+    lv_obj_invalidate(screen);
+    lv_refr_now(display);
+    return true;
+}

@@ -1,4 +1,6 @@
 #include "matrix_framebuffer.h"
+#include "matrix_race_screen.h"
+#include "matrix_theme.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -9,8 +11,24 @@
 #include <io.h>
 #endif
 
-#define MATRIX_HOST_REQUEST_TEST_PATTERN 0u
+#define MATRIX_HOST_REQUEST_DEMO_SCREEN 0u
 #define MATRIX_HOST_REQUEST_CLEAR 1u
+
+static const MatrixRaceScreenData DEMO_SCREEN = {
+    .location = "WP-50",
+    .clock = "02:05:67",
+    .counter = "200",
+    .left_rows = {
+        {"1", "99:99:99"},
+        {"520", "99:99:99"},
+        {"65", "99:99:99"}
+    },
+    .right_rows = {
+        {"527", "527"},
+        {"527", "527"}
+    },
+    .footer = {"520", "234", "346", "12"}
+};
 
 static void write_u16_be(uint16_t value) {
     fputc((value >> 8) & 0xff, stdout);
@@ -27,7 +45,8 @@ static void write_u32_be(uint32_t value) {
 static bool read_u32_be(uint32_t *value) {
     uint8_t bytes[4];
 
-    if (fread(bytes, 1, sizeof(bytes), stdin) != sizeof(bytes)) {
+    if (fread(bytes, 1, sizeof(bytes), stdin)
+            != sizeof(bytes)) {
         return false;
     }
 
@@ -36,7 +55,6 @@ static bool read_u32_be(uint32_t *value) {
             | ((uint32_t)bytes[1] << 16)
             | ((uint32_t)bytes[2] << 8)
             | (uint32_t)bytes[3];
-
     return true;
 }
 
@@ -49,8 +67,12 @@ static void write_frame(
     write_u16_be(MATRIX_DISPLAY_HEIGHT);
     write_u32_be(MATRIX_DISPLAY_PIXEL_COUNT * 2u);
 
-    for (uint16_t y = 0; y < MATRIX_DISPLAY_HEIGHT; y++) {
-        for (uint16_t x = 0; x < MATRIX_DISPLAY_WIDTH; x++) {
+    for (uint16_t y = 0;
+            y < MATRIX_DISPLAY_HEIGHT;
+            y++) {
+        for (uint16_t x = 0;
+                x < MATRIX_DISPLAY_WIDTH;
+                x++) {
             write_u16_be(
                     matrix_framebuffer_get(
                             framebuffer,
@@ -62,31 +84,15 @@ static void write_frame(
     fflush(stdout);
 }
 
-static void draw_test_pattern(
+static bool draw_demo_screen(
         MatrixFramebuffer *framebuffer) {
-    static const MatrixPixel colors[] = {
-        0xf800u,
-        0x07e0u,
-        0x001fu,
-        0xffe0u,
-        0x07ffu,
-        0xf81fu,
-        0xffffu,
-        0x8410u
-    };
+    MatrixTheme theme =
+            matrix_theme_default_create();
 
-    for (uint16_t y = 0; y < MATRIX_DISPLAY_HEIGHT; y++) {
-        for (uint16_t x = 0; x < MATRIX_DISPLAY_WIDTH; x++) {
-            const size_t color_index =
-                    ((size_t)x * 8u) / MATRIX_DISPLAY_WIDTH;
-
-            matrix_framebuffer_set(
-                    framebuffer,
-                    x,
-                    y,
-                    colors[color_index]);
-        }
-    }
+    return matrix_race_screen_render(
+            framebuffer,
+            &DEMO_SCREEN,
+            &theme);
 }
 
 int main(void) {
@@ -101,7 +107,11 @@ int main(void) {
 #endif
 
     MatrixFramebuffer framebuffer;
-    draw_test_pattern(&framebuffer);
+
+    if (!draw_demo_screen(&framebuffer)) {
+        return 6;
+    }
+
     write_frame(&framebuffer);
 
     for (;;) {
@@ -112,8 +122,10 @@ int main(void) {
         }
 
         switch (request) {
-            case MATRIX_HOST_REQUEST_TEST_PATTERN:
-                draw_test_pattern(&framebuffer);
+            case MATRIX_HOST_REQUEST_DEMO_SCREEN:
+                if (!draw_demo_screen(&framebuffer)) {
+                    return 6;
+                }
                 write_frame(&framebuffer);
                 break;
 
