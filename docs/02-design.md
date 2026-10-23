@@ -50,6 +50,8 @@ This keeps the native code executable and testable by itself, avoids a Java/nati
 
 At 90×35, an unpacked output frame is only 3150 bytes. Full frames are therefore preferable to premature dirty-rectangle complexity in the first slice.
 
+The 160×64 matrix PoP uses a second desktop host. It emits `SDF2` frames containing big-endian RGB565 pixels. Its current Clear/Test Pattern requests are host-only qualification controls; they are deliberately not presented as the future synchronized application-data protocol.
+
 ## Experimental invariants
 
 1. Rendering a byte sequence does not depend on how it is divided into reads.

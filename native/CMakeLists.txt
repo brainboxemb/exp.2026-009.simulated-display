@@ -29,6 +29,9 @@ endif()
 add_executable(display-host src/host_main.c)
 target_link_libraries(display-host PRIVATE legacy-display)
 
+add_executable(matrix-display-host src/matrix_host_main.c)
+target_link_libraries(matrix-display-host PRIVATE matrix-display)
+
 include(CTest)
 if(BUILD_TESTING)
     add_executable(test-serial-lcd tests/test_serial_lcd.c)

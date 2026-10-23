@@ -20,6 +20,7 @@ public final class SimulatedDisplayFxApplication extends Application {
     private static final int HEIGHT = 35;
 
     private NativeDisplayProcess nativeProcess;
+    private MatrixDisplayWindow matrixDisplayWindow;
     private LedMatrixView display;
     private Label status;
 
@@ -31,7 +32,7 @@ public final class SimulatedDisplayFxApplication extends Application {
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(12));
         root.setCenter(display);
-        root.setBottom(createControls());
+        root.setBottom(createControls(stage));
 
         stage.setTitle(
                 "Experiment 009 — 90×35 Serial LED Display");
@@ -68,9 +69,13 @@ public final class SimulatedDisplayFxApplication extends Application {
         if (nativeProcess != null) {
             nativeProcess.close();
         }
+
+        if (matrixDisplayWindow != null) {
+            matrixDisplayWindow.close();
+        }
     }
 
-    private VBox createControls() {
+    private VBox createControls(Stage owner) {
         TextField text =
                 new TextField("HELLO WORLD");
         text.setPrefColumnCount(22);
@@ -164,17 +169,46 @@ public final class SimulatedDisplayFxApplication extends Application {
                         protocol,
                         sendProtocol);
 
+        Button openMatrix =
+                new Button("160×64 RGB matrix");
+        openMatrix.setOnAction(
+                event -> openMatrixDisplay(owner));
+
+        HBox matrixControls =
+                new HBox(
+                        8,
+                        openMatrix);
+
         VBox controls =
                 new VBox(
                         8,
                         textControls,
                         spriteControls,
                         protocolControls,
+                        matrixControls,
                         status);
         controls.setPadding(
                 new Insets(12, 0, 0, 0));
 
         return controls;
+    }
+
+    private void openMatrixDisplay(Stage owner) {
+        if (matrixDisplayWindow != null
+                && matrixDisplayWindow.isShowing()) {
+            matrixDisplayWindow.toFront();
+            return;
+        }
+
+        try {
+            matrixDisplayWindow =
+                    new MatrixDisplayWindow(owner);
+            matrixDisplayWindow.show();
+        } catch (IOException exception) {
+            status.setText(
+                    "Matrix display: "
+                            + exception.getMessage());
+        }
     }
 
     private void send(byte[] bytes) {

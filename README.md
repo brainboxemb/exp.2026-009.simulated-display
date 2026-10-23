@@ -39,10 +39,12 @@ JavaFX red LED matrix
 
 JavaFX does not interpret display commands or rasterize characters. It launches the native process, sends raw serial chunks and paints the pixels returned by C.
 
-The native side now has two explicit libraries:
+The native side now has two explicit libraries and two desktop host processes:
 
 - `legacy-display`: 90×35 bit-packed monochrome plus legacy protocol/renderer;
-- `matrix-display`: 160×64 RGB565 logical framebuffer foundation.
+- `matrix-display`: 160×64 RGB565 logical framebuffer foundation;
+- `display-host`: legacy 90×35 serial display host;
+- `matrix-display-host`: RGB565 matrix host used by the JavaFX matrix window.
 
 The matrix framebuffer is intentionally independent of the five-panel physical HUB75 topology. Panel order, scan pattern and multiplexing belong in the later hardware adapter.
 
@@ -65,7 +67,7 @@ cmake --build native/build --config Release
 ctest --test-dir native/build -C Release --output-on-failure
 ```
 
-Then open the repository root as a Maven project in NetBeans and use **Run Project**. From a terminal with Maven available:
+Then open the repository root as a Maven project in NetBeans and use **Run Project**. The 90×35 window contains a **160×64 RGB matrix** button that opens the second native matrix simulator. From a terminal with Maven available:
 
 ```powershell
 mvn javafx:run

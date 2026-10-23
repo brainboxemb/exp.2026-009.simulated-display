@@ -26,7 +26,7 @@ Verify split/combined input buffers, invalid slash commands, clipping, cursor wr
 
 - [x] split native code into explicit `legacy-display` and `matrix-display` libraries;
 - [x] add a 160×64 RGB565 logical framebuffer with C tests;
-- [ ] add a matrix-native host process and RGB JavaFX view;
+- [x] add a matrix-native host process and RGB JavaFX view with a C-generated test pattern;
 - [ ] design the synchronized application-data input model;
 - [ ] implement the matrix interpreter / renderer;
 - [ ] evaluate a small C renderer against LVGL on a representative layout;
