@@ -16,14 +16,21 @@
 #define HEADER_LOCATION_WIDTH 38
 #define HEADER_CLOCK_X 40
 #define HEADER_CLOCK_WIDTH 80
-#define HEADER_COUNTER_X 121
-#define HEADER_COUNTER_WIDTH 38
-
-#define FINISH_FLAG_X 123
+#define FINISH_FLAG_X 121
 #define FINISH_FLAG_Y 2
-#define FINISH_FLAG_WIDTH 10u
-#define FINISH_FLAG_HEIGHT 8u
-#define FINISH_FLAG_FRAME_COUNT 4u
+#define FINISH_FLAG_WIDTH 7u
+#define FINISH_FLAG_HEIGHT 7u
+
+#define HEADER_COUNTER_X 128
+#define HEADER_COUNTER_WIDTH 21
+
+#define WIFI_WARNING_X 149
+#define SERVER_WARNING_X 155
+#define WARNING_Y 2
+#define WARNING_WIDTH 5u
+#define WARNING_HEIGHT 8u
+#define WARNING_GLYPH_WIDTH 3u
+#define WARNING_GLYPH_HEIGHT 5u
 
 #define LEFT_SPRITE_X 1
 #define LEFT_NUMBER_X 12
@@ -44,79 +51,52 @@ static MatrixFramebuffer *active_framebuffer;
 static bool lvgl_initialized;
 
 /*
- * Small checkered finish flag shown next to the finished-team counter.
- * There is deliberately no pole: only the cloth is visible. Two-pixel checker
- * blocks keep the flag readable at this size. The left part of the cloth stays
- * stable while only the trailing columns change across four restrained wave
- * frames.
+ * Static one-pixel checker flag. At this resolution a literal 1x1 checker
+ * remains clearer than a simulated wave.
  */
-static const uint16_t FINISH_FLAG[
-        FINISH_FLAG_FRAME_COUNT][FINISH_FLAG_HEIGHT] = {
-    {
-        0x333,
-        0x333,
-        0x0cc,
-        0x0cc,
-        0x333,
-        0x333,
-        0x0cc,
-        0x0cc
-    },
-    {
-        0x330,
-        0x333,
-        0x0c3,
-        0x0cc,
-        0x33c,
-        0x333,
-        0x0c3,
-        0x0cc
-    },
-    {
-        0x330,
-        0x330,
-        0x0c3,
-        0x0c3,
-        0x33c,
-        0x33c,
-        0x0c3,
-        0x0c3
-    },
-    {
-        0x333,
-        0x330,
-        0x0cc,
-        0x0c3,
-        0x333,
-        0x330,
-        0x0cc,
-        0x0c3
-    }
+static const uint8_t FINISH_FLAG[FINISH_FLAG_HEIGHT] = {
+    0x55,
+    0x2a,
+    0x55,
+    0x2a,
+    0x55,
+    0x2a,
+    0x55
+};
+
+static const uint8_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
+    0x5,
+    0x5,
+    0x5,
+    0x7,
+    0x5
+};
+
+static const uint8_t WARNING_SERVER[WARNING_GLYPH_HEIGHT] = {
+    0x7,
+    0x4,
+    0x7,
+    0x1,
+    0x7
 };
 
 static void draw_finish_flag(
         MatrixFramebuffer *framebuffer,
-        uint8_t frame,
         MatrixPixel color) {
-    const uint16_t *rows =
-            FINISH_FLAG[
-                    frame
-                    % FINISH_FLAG_FRAME_COUNT];
-
     for (uint16_t row = 0;
             row < FINISH_FLAG_HEIGHT;
             row++) {
         for (uint16_t column = 0;
                 column < FINISH_FLAG_WIDTH;
                 column++) {
-            const uint16_t mask =
-                    (uint16_t)(
+            const uint8_t mask =
+                    (uint8_t)(
                             1u
                             << (FINISH_FLAG_WIDTH
                                     - 1u
                                     - column));
 
-            if ((rows[row] & mask) == 0) {
+            if ((FINISH_FLAG[row] & mask) == 0) {
                 continue;
             }
 
@@ -125,6 +105,51 @@ static void draw_finish_flag(
                     (uint16_t)(FINISH_FLAG_X + column),
                     (uint16_t)(FINISH_FLAG_Y + row),
                     color);
+        }
+    }
+}
+
+static void draw_warning_block(
+        MatrixFramebuffer *framebuffer,
+        uint16_t x,
+        const uint8_t glyph[WARNING_GLYPH_HEIGHT],
+        const MatrixTheme *theme) {
+    for (uint16_t row = 0;
+            row < WARNING_HEIGHT;
+            row++) {
+        for (uint16_t column = 0;
+                column < WARNING_WIDTH;
+                column++) {
+            matrix_framebuffer_set(
+                    framebuffer,
+                    (uint16_t)(x + column),
+                    (uint16_t)(WARNING_Y + row),
+                    theme->warning_background_color);
+        }
+    }
+
+    for (uint16_t row = 0;
+            row < WARNING_GLYPH_HEIGHT;
+            row++) {
+        for (uint16_t column = 0;
+                column < WARNING_GLYPH_WIDTH;
+                column++) {
+            const uint8_t mask =
+                    (uint8_t)(
+                            1u
+                            << (WARNING_GLYPH_WIDTH
+                                    - 1u
+                                    - column));
+
+            if ((glyph[row] & mask) == 0) {
+                continue;
+            }
+
+            matrix_framebuffer_set(
+                    framebuffer,
+                    (uint16_t)(x + 1u + column),
+                    (uint16_t)(WARNING_Y + 1u + row),
+                    theme->warning_text_color);
         }
     }
 }
@@ -421,8 +446,23 @@ bool matrix_race_screen_render(
 
     draw_finish_flag(
             framebuffer,
-            (uint8_t)(animation_frame / 2u),
-            theme->sprite_color);
+            theme->flag_color);
+
+    if (!data->wifi_connected) {
+        draw_warning_block(
+                framebuffer,
+                WIFI_WARNING_X,
+                WARNING_WIFI,
+                theme);
+    }
+
+    if (!data->registration_server_connected) {
+        draw_warning_block(
+                framebuffer,
+                SERVER_WARNING_X,
+                WARNING_SERVER,
+                theme);
+    }
 
     matrix_sprite_draw(
             framebuffer,
