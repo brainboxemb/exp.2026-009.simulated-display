@@ -1,4 +1,5 @@
 #include "matrix_race_screen.h"
+#include "matrix_sprite.h"
 #include "matrix_numeric_font.h"
 #include "matrix_vbz_font.h"
 
@@ -409,6 +410,73 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
 }
 
 
+
+static void test_runner_arm_swing_uses_extra_matrix_pixels(void) {
+    MatrixFramebuffer frame0;
+    MatrixFramebuffer frame2;
+    const MatrixPixel color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    255,
+                    255);
+
+    matrix_framebuffer_clear(&frame0);
+    matrix_framebuffer_clear(&frame2);
+
+    matrix_sprite_draw(
+            &frame0,
+            MATRIX_SPRITE_RUNNER,
+            0,
+            0,
+            0,
+            color);
+    matrix_sprite_draw(
+            &frame2,
+            MATRIX_SPRITE_RUNNER,
+            2,
+            0,
+            0,
+            color);
+
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    7,
+                    4)
+            == color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    2,
+                    6)
+            == color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    8,
+                    6)
+            != color);
+
+    assert(
+            matrix_framebuffer_get(
+                    &frame2,
+                    2,
+                    4)
+            == color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame2,
+                    8,
+                    6)
+            == color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame2,
+                    2,
+                    6)
+            != color);
+}
+
 static void test_runner_and_warmup_animate_in_their_status_columns(void) {
     MatrixFramebuffer frame0;
     MatrixFramebuffer frame2;
@@ -509,6 +577,7 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
+    test_runner_arm_swing_uses_extra_matrix_pixels();
     test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
 
