@@ -114,6 +114,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
         input.writeShort(config.flagColor());
         input.writeShort(config.warningBackgroundColor());
         input.writeShort(config.warningTextColor());
+        input.writeShort(config.warningStrikeColor());
         input.writeByte(config.fontFamily());
         input.writeByte(config.headerSize());
         input.writeByte(config.rowSize());
