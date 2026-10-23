@@ -157,3 +157,188 @@ const lv_font_t matrix_font_numeric_12 = {
     .underline_position = -1,
     .underline_thickness = 1
 };
+
+
+#define NUMERIC_14_HEIGHT 14u
+
+typedef struct {
+    uint32_t codepoint;
+    uint8_t width;
+    uint8_t advance;
+    uint16_t rows[NUMERIC_14_HEIGHT];
+} NumericGlyph14;
+
+/*
+ * Hand-drawn 9x14 numeric glyphs for the large-value fields.
+ *
+ * They are intentionally designed at 14 pixels rather than scaling the 12px
+ * set, so two-pixel horizontal strokes remain explicit.
+ */
+static const NumericGlyph14 glyphs_14[] = {
+    {' ', 0, 4, {0}},
+    {'-', 9, 10, {
+        0x000, 0x000, 0x000, 0x000,
+        0x000, 0x0fe, 0x0fe, 0x000,
+        0x000, 0x000, 0x000, 0x000,
+        0x000, 0x000
+    }},
+    {'0', 9, 10, {
+        0x0fe, 0x0fe, 0x183, 0x183,
+        0x183, 0x183, 0x183, 0x183,
+        0x183, 0x183, 0x183, 0x183,
+        0x0fe, 0x0fe
+    }},
+    {'1', 9, 10, {
+        0x018, 0x038, 0x078, 0x018,
+        0x018, 0x018, 0x018, 0x018,
+        0x018, 0x018, 0x018, 0x018,
+        0x0fe, 0x0fe
+    }},
+    {'2', 9, 10, {
+        0x0fe, 0x0fe, 0x003, 0x003,
+        0x006, 0x00c, 0x018, 0x030,
+        0x060, 0x0c0, 0x180, 0x180,
+        0x1ff, 0x1ff
+    }},
+    {'3', 9, 10, {
+        0x0fe, 0x0fe, 0x003, 0x003,
+        0x003, 0x01e, 0x01e, 0x003,
+        0x003, 0x003, 0x003, 0x003,
+        0x0fe, 0x0fe
+    }},
+    {'4', 9, 10, {
+        0x183, 0x183, 0x183, 0x183,
+        0x183, 0x1ff, 0x1ff, 0x003,
+        0x003, 0x003, 0x003, 0x003,
+        0x003, 0x003
+    }},
+    {'5', 9, 10, {
+        0x1ff, 0x1ff, 0x180, 0x180,
+        0x180, 0x1fc, 0x1fc, 0x003,
+        0x003, 0x003, 0x003, 0x003,
+        0x0fe, 0x0fe
+    }},
+    {'6', 9, 10, {
+        0x0fe, 0x0fe, 0x180, 0x180,
+        0x180, 0x1fc, 0x1fc, 0x183,
+        0x183, 0x183, 0x183, 0x183,
+        0x0fe, 0x0fe
+    }},
+    {'7', 9, 10, {
+        0x1ff, 0x1ff, 0x003, 0x006,
+        0x00c, 0x018, 0x030, 0x060,
+        0x0c0, 0x180, 0x180, 0x180,
+        0x180, 0x180
+    }},
+    {'8', 9, 10, {
+        0x0fe, 0x0fe, 0x183, 0x183,
+        0x183, 0x183, 0x0fe, 0x0fe,
+        0x183, 0x183, 0x183, 0x183,
+        0x0fe, 0x0fe
+    }},
+    {'9', 9, 10, {
+        0x0fe, 0x0fe, 0x183, 0x183,
+        0x183, 0x183, 0x07f, 0x07f,
+        0x003, 0x003, 0x003, 0x003,
+        0x0fe, 0x0fe
+    }}
+};
+
+#define GLYPH_14_COUNT (sizeof(glyphs_14) / sizeof(glyphs_14[0]))
+
+static int32_t glyph_14_index_find(uint32_t letter) {
+    for (uint32_t index = 0; index < GLYPH_14_COUNT; index++) {
+        if (glyphs_14[index].codepoint == letter) {
+            return (int32_t)index;
+        }
+    }
+
+    return -1;
+}
+
+static bool glyph_14_descriptor_get(
+        const lv_font_t *font,
+        lv_font_glyph_dsc_t *descriptor,
+        uint32_t letter,
+        uint32_t letter_next) {
+    LV_UNUSED(font);
+    LV_UNUSED(letter_next);
+
+    const int32_t index =
+            glyph_14_index_find(letter);
+    if (index < 0) {
+        return false;
+    }
+
+    const NumericGlyph14 *glyph =
+            &glyphs_14[index];
+
+    descriptor->adv_w = glyph->advance;
+    descriptor->box_w = glyph->width;
+    descriptor->box_h =
+            glyph->width == 0
+                    ? 0
+                    : NUMERIC_14_HEIGHT;
+    descriptor->ofs_x = 0;
+    descriptor->ofs_y = 0;
+    descriptor->stride = glyph->width;
+    descriptor->format = LV_FONT_GLYPH_FORMAT_A8;
+    descriptor->is_placeholder = false;
+    descriptor->gid.index = (uint32_t)index;
+
+    return true;
+}
+
+static const void *glyph_14_bitmap_get(
+        lv_font_glyph_dsc_t *descriptor,
+        lv_draw_buf_t *draw_buffer) {
+    if (descriptor->gid.index >= GLYPH_14_COUNT
+            || draw_buffer == NULL) {
+        return NULL;
+    }
+
+    const NumericGlyph14 *glyph =
+            &glyphs_14[descriptor->gid.index];
+
+    memset(
+            draw_buffer->data,
+            0,
+            draw_buffer->data_size);
+
+    for (uint32_t y = 0;
+            y < NUMERIC_14_HEIGHT;
+            y++) {
+        for (uint32_t x = 0;
+                x < glyph->width;
+                x++) {
+            draw_buffer->data[
+                    y * draw_buffer->header.stride
+                    + x] =
+                    (glyph->rows[y]
+                            & (1u << (glyph->width - 1u - x)))
+                    != 0
+                    ? 0xffu
+                    : 0x00u;
+        }
+    }
+
+    return draw_buffer;
+}
+
+const lv_font_t matrix_font_numeric_14 = {
+    .dsc = NULL,
+    .fallback = NULL,
+    .user_data = NULL,
+    .get_glyph_dsc = glyph_14_descriptor_get,
+    .get_glyph_bitmap = glyph_14_bitmap_get,
+    .release_glyph = NULL,
+    .line_height = NUMERIC_14_HEIGHT,
+    .base_line = 0,
+    .cap_height = NUMERIC_14_HEIGHT,
+    .x_height = NUMERIC_14_HEIGHT,
+    .subpx = LV_FONT_SUBPX_NONE,
+    .kerning = LV_FONT_KERNING_NONE,
+    .static_bitmap = 0,
+    .underline_position = -1,
+    .underline_thickness = 1
+};
