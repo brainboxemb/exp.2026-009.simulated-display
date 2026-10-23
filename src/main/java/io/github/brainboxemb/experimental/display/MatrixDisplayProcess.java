@@ -62,7 +62,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
 
     synchronized void requestDemoScreen()
             throws IOException {
-        sendRequest(REQUEST_TEST_PATTERN);
+        sendRequest(REQUEST_DEMO_SCREEN);
     }
 
     synchronized void clear()
