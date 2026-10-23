@@ -7,7 +7,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 add_library(display-core
     src/display_framebuffer.c
-    src/font5x7.c
+    src/custom_character_map.c
     src/serial_lcd.c
 )
 target_include_directories(display-core PUBLIC include)

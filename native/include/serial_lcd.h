@@ -7,6 +7,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define SERIAL_LCD_TEXT_HISTORY_CAPACITY \
+    (DISPLAY_WIDTH * ((DISPLAY_HEIGHT + 7u) / 8u))
+
 typedef enum {
     SERIAL_LCD_TEXT,
     SERIAL_LCD_COMMAND,
@@ -14,17 +17,26 @@ typedef enum {
 } SerialLcdParserState;
 
 typedef struct {
+    uint8_t x;
+    uint8_t y;
+    uint8_t clear_width;
+} SerialLcdTextEntry;
+
+typedef struct {
     DisplayFramebuffer framebuffer;
     uint8_t text_origin_x;
     uint8_t text_origin_y;
     uint8_t cursor_x;
     uint8_t cursor_y;
+    SerialLcdTextEntry text_history[SERIAL_LCD_TEXT_HISTORY_CAPACITY];
     uint16_t text_length;
     SerialLcdParserState parser_state;
     uint8_t command;
     uint8_t parameters[5];
     uint8_t parameter_count;
     uint8_t parameter_expected;
+    uint8_t sprite_frame;
+    bool pending_sprite_marker;
     bool dirty;
 } SerialLcd;
 
