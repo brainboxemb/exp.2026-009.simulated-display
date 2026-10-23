@@ -1,4 +1,5 @@
 #include "matrix_race_screen.h"
+#include "matrix_numeric_font.h"
 #include "matrix_vbz_font.h"
 
 #include <assert.h>
@@ -294,6 +295,58 @@ static void test_vbz_9_and_10_render_as_distinct_pixel_fonts(void) {
             != 0);
 }
 
+
+static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
+    lv_font_glyph_dsc_t glyph = {0};
+
+    assert(
+            matrix_font_numeric_12.get_glyph_dsc(
+                    &matrix_font_numeric_12,
+                    &glyph,
+                    '0',
+                    0));
+
+    lv_draw_buf_t *draw_buffer =
+            lv_draw_buf_create(
+                    glyph.box_w,
+                    glyph.box_h,
+                    LV_COLOR_FORMAT_A8,
+                    LV_STRIDE_AUTO);
+
+    assert(draw_buffer != NULL);
+
+    assert(
+            matrix_font_numeric_12.get_glyph_bitmap(
+                    &glyph,
+                    draw_buffer)
+            == draw_buffer);
+
+    for (uint32_t x = 1;
+            x <= 6;
+            x++) {
+        assert(
+                draw_buffer->data[x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        10u * draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        11u * draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+    }
+
+    lv_draw_buf_destroy(draw_buffer);
+}
+
 static void test_unsupported_font_size_is_rejected(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
@@ -316,6 +369,7 @@ int main(void) {
     test_pixel_fonts_render_only_theme_colors();
     test_vbz_metrics_match_source_font();
     test_vbz_zero_bitmap_matches_source_rows();
+    test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_vbz_9_and_10_render_as_distinct_pixel_fonts();
     test_unsupported_font_size_is_rejected();
 
