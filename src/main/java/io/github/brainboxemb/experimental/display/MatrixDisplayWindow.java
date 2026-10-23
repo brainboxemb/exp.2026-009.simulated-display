@@ -63,11 +63,17 @@ final class MatrixDisplayWindow implements AutoCloseable {
             new ColorPicker(Color.WHITE);
     private final ColorPicker warningStrikeColor =
             new ColorPicker(Color.RED);
+    private final ColorPicker syncBackgroundColor =
+            new ColorPicker(Color.web("#00A048"));
+    private final ColorPicker syncIconColor =
+            new ColorPicker(Color.WHITE);
 
     private final CheckBox wifiConnected =
             new CheckBox("WiFi connected");
     private final CheckBox registrationServerConnected =
             new CheckBox("Registration server connected");
+    private final CheckBox synchronizing =
+            new CheckBox("Synchronizing");
 
     private final ComboBox<String> fontFamily =
             new ComboBox<>();
@@ -114,6 +120,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
         wifiConnected.setSelected(true);
         registrationServerConnected.setSelected(true);
+        synchronizing.setSelected(false);
 
         scale2x.setOnAction(
                 event -> {
@@ -145,7 +152,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new HBox(
                         12,
                         wifiConnected,
-                        registrationServerConnected);
+                        registrationServerConnected,
+                        synchronizing);
 
         Button applyStyle =
                 new Button("Apply style");
@@ -199,6 +207,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
         wifiConnected.setOnAction(
                 event -> sendConnectionStatus());
         registrationServerConnected.setOnAction(
+                event -> sendConnectionStatus());
+        synchronizing.setOnAction(
                 event -> sendConnectionStatus());
         stage.setOnHidden(
                 event -> close());
@@ -297,7 +307,13 @@ final class MatrixDisplayWindow implements AutoCloseable {
         grid.add(new Label("Warning slash"), 2, 4);
         grid.add(warningStrikeColor, 3, 4);
 
-        grid.add(applyStyle, 6, 4);
+        grid.add(new Label("Sync bg"), 4, 4);
+        grid.add(syncBackgroundColor, 5, 4);
+
+        grid.add(new Label("Sync icon"), 0, 5);
+        grid.add(syncIconColor, 1, 5);
+
+        grid.add(applyStyle, 6, 5);
         return grid;
     }
 
@@ -400,6 +416,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
                             rgb565(warningBackgroundColor.getValue()),
                             rgb565(warningTextColor.getValue()),
                             rgb565(warningStrikeColor.getValue()),
+                            rgb565(syncBackgroundColor.getValue()),
+                            rgb565(syncIconColor.getValue()),
                             "VBZ".equals(
                                     fontFamily.getValue())
                                     ? 1
@@ -510,7 +528,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
         try {
             process.connectionStatus(
                     wifiConnected.isSelected(),
-                    registrationServerConnected.isSelected());
+                    registrationServerConnected.isSelected(),
+                    synchronizing.isSelected());
         } catch (IOException exception) {
             status.setText(
                     "Matrix status failed: "
