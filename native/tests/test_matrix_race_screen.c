@@ -22,6 +22,30 @@ static const MatrixRaceScreenData SAMPLE = {
     .footer = "520 234 346 12"
 };
 
+
+static void test_default_theme_uses_vbz_and_independent_sprite_color(void) {
+    MatrixTheme theme =
+            matrix_theme_default_create();
+
+    assert(theme.header.font.family == MATRIX_FONT_VBZ);
+    assert(theme.header.font.size == 9);
+    assert(theme.row_number.font.family == MATRIX_FONT_VBZ);
+    assert(theme.row_number.font.size == 9);
+    assert(theme.row_time.font.family == MATRIX_FONT_VBZ);
+    assert(theme.row_time.font.size == 9);
+    assert(theme.large_value.font.family == MATRIX_FONT_VBZ);
+    assert(theme.large_value.font.size == 12);
+    assert(theme.footer.font.family == MATRIX_FONT_VBZ);
+    assert(theme.footer.font.size == 9);
+
+    assert(
+            theme.sprite_color
+            == matrix_pixel_rgb565_create(
+                    255,
+                    0,
+                    0));
+}
+
 static void test_default_screen_renders_lines(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
@@ -81,7 +105,7 @@ static void test_vbz_9_and_numeric_12_render(void) {
 
     theme.header.font.family =
             MATRIX_FONT_VBZ;
-    theme.header.font.size = 10;
+    theme.header.font.size = 9;
     theme.row_number.font.family =
             MATRIX_FONT_VBZ;
     theme.row_number.font.size = 9;
@@ -396,12 +420,6 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
                     0,
                     255,
                     0);
-    const MatrixPixel warmup_color =
-            matrix_pixel_rgb565_create(
-                    0,
-                    0,
-                    255);
-
     theme.sprite_color = runner_color;
 
     assert(
@@ -470,7 +488,7 @@ static void test_unsupported_font_size_is_rejected(void) {
     MatrixTheme theme =
             matrix_theme_default_create();
 
-    theme.header.font.size = 9;
+    theme.header.font.size = 10;
 
     assert(
             !matrix_race_screen_render(
@@ -481,6 +499,7 @@ static void test_unsupported_font_size_is_rejected(void) {
 }
 
 int main(void) {
+    test_default_theme_uses_vbz_and_independent_sprite_color();
     test_default_screen_renders_lines();
     test_font_family_and_size_are_configurable();
     test_vbz_9_and_numeric_12_render();
