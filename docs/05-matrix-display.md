@@ -65,15 +65,16 @@ The screen layout does not change.
 
 The active matrix fonts are 1-bpp bitmap fonts. No antialiasing or intermediate alpha levels are used.
 
-The font registry currently exposes one family:
+The font registry currently exposes two 1-bpp families:
 
 | Family | Sizes | Notes |
 | --- | --- | --- |
-| `MATRIX_FONT_UNSCII` | 8, 10, 16 | All 1-bpp |
+| `MATRIX_FONT_UNSCII` | 8, 10, 16 | LVGL UNSCII 8/16 plus local 10px variant |
+| `MATRIX_FONT_VBZ` | 9, 10 | Original VBZ pixel glyphs plus derived 10px variant |
 
-The 8px and 16px variants are LVGL's built-in UNSCII bitmap fonts. The 10px variant is local to `matrix-display`: it keeps the UNSCII-8 width at 8 pixels and stretches its 8 bitmap rows to exactly 10 rows. Its ASCII bitmap source comes from the public-domain UNSCII project.
+The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. The 10px variant uses the same glyph shapes with nearest-neighbor vertical expansion and remains strictly 1-bpp.
 
-Defaults are 10px for header, left rows and footer, and 16px for the four large right-side values. Other 1-bpp font families can later be added behind the same `MatrixFontFamily` / `MatrixFontSpec` API.
+The JavaFX simulator exposes both families so the same race screen can be compared visually before a default is chosen.
 
 ## Physical HUB75 output
 
