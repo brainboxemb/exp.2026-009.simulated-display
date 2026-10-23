@@ -31,6 +31,7 @@ typedef struct {
 bool matrix_race_screen_render(
         MatrixFramebuffer *framebuffer,
         const MatrixRaceScreenData *data,
-        const MatrixTheme *theme);
+        const MatrixTheme *theme,
+        uint8_t animation_frame);
 
 #endif
