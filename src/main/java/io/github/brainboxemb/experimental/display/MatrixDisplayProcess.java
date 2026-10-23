@@ -87,7 +87,8 @@ final class MatrixDisplayProcess implements AutoCloseable {
 
     synchronized void connectionStatus(
             boolean wifiConnected,
-            boolean registrationServerConnected)
+            boolean registrationServerConnected,
+            boolean synchronizing)
             throws IOException {
         input.writeInt(REQUEST_CONNECTION_STATUS);
         input.writeByte(wifiConnected ? 1 : 0);
@@ -95,6 +96,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
                 registrationServerConnected
                         ? 1
                         : 0);
+        input.writeByte(synchronizing ? 1 : 0);
         input.flush();
     }
 
@@ -115,6 +117,8 @@ final class MatrixDisplayProcess implements AutoCloseable {
         input.writeShort(config.warningBackgroundColor());
         input.writeShort(config.warningTextColor());
         input.writeShort(config.warningStrikeColor());
+        input.writeShort(config.syncBackgroundColor());
+        input.writeShort(config.syncIconColor());
         input.writeByte(config.fontFamily());
         input.writeByte(config.headerSize());
         input.writeByte(config.rowSize());
