@@ -16,18 +16,18 @@
 #define HEADER_LOCATION_WIDTH 38
 #define HEADER_CLOCK_X 40
 #define HEADER_CLOCK_WIDTH 80
-#define FINISH_FLAG_Y 2
+#define FINISH_FLAG_Y 1
 #define FINISH_FLAG_WIDTH 7u
 #define FINISH_FLAG_HEIGHT 7u
 
 #define HEADER_COUNTER_WIDTH 21u
 
-#define WARNING_Y 2
-#define WARNING_WIDTH 5u
+#define WARNING_Y 1
+#define WARNING_WIDTH 9u
 #define WARNING_GAP 1u
-#define WARNING_HEIGHT 8u
-#define WARNING_GLYPH_WIDTH 3u
-#define WARNING_GLYPH_HEIGHT 5u
+#define WARNING_HEIGHT 9u
+#define WARNING_GLYPH_WIDTH 7u
+#define WARNING_GLYPH_HEIGHT 7u
 
 #define LEFT_SPRITE_X 1
 #define LEFT_NUMBER_X 12
@@ -61,20 +61,33 @@ static const uint8_t FINISH_FLAG[FINISH_FLAG_HEIGHT] = {
     0x55
 };
 
+/*
+ * WiFi unavailable: a broad signal bar, a narrower bar below it and one
+ * diagonal strike-through.
+ */
 static const uint8_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
-    0x5,
-    0x5,
-    0x5,
-    0x7,
-    0x5
+    0x3f,
+    0x02,
+    0x1c,
+    0x08,
+    0x18,
+    0x20,
+    0x40
 };
 
-static const uint8_t WARNING_SERVER[WARNING_GLYPH_HEIGHT] = {
-    0x7,
-    0x4,
-    0x7,
-    0x1,
-    0x7
+/*
+ * Registration server unavailable: two linked loops with the same diagonal
+ * strike-through. The icon is intentionally a connection/link symbol rather
+ * than a letter or server pictogram.
+ */
+static const uint8_t WARNING_LINK[WARNING_GLYPH_HEIGHT] = {
+    0x0f,
+    0x13,
+    0x36,
+    0x1c,
+    0x36,
+    0x64,
+    0x78
 };
 
 static void draw_finish_flag(
@@ -498,7 +511,7 @@ bool matrix_race_screen_render(
         draw_warning_block(
                 framebuffer,
                 warning_x,
-                WARNING_SERVER,
+                WARNING_LINK,
                 theme);
     }
 
