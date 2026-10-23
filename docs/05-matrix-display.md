@@ -20,7 +20,7 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 
 The current demo screen follows the supplied layout reference:
 
-- header with location, clock and counter;
+- header with location, clock, animated finish flag and counter;
 - three passed-runner rows on the left;
 - two large-value rows on the right;
 - a 10×12 runner sprite at the far left of the first passed-runner row;
@@ -30,6 +30,11 @@ The current demo screen follows the supplied layout reference:
 - no `Prepare` text.
 
 The current values are demo data in `matrix_host_main.c`. They will later come from the synchronized application-data model.
+
+The finished-team counter in the upper-right header is preceded by a small
+8×7 checkered finish-flag cloth. It deliberately has no pole. Four native
+frames move only the cloth pattern/trailing edge, producing a restrained wave
+at half the runner animation rate. The flag uses `sprite_color`.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
 sprite, so its number starts at x=12. The runner uses the original six-frame
