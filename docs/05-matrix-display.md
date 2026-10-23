@@ -18,18 +18,24 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 
 ## First race screen
 
-The current demo screen follows the supplied layout reference:
+The current demo screen supports three preview layouts:
 
-- header with location, adaptive clock, static finish flag, counter and conditional connection/sync statuses;
-- three passed-runner rows on the left;
-- two large-value rows on the right;
-- a 10×12 runner sprite at the far left of the first passed-runner row;
-- a 10×12 warmup/stretch sprite before the first ready-runner value on the right;
-- one footer text line;
-- configurable separator lines;
-- no `Prepare` text.
+- `Registraties`: full-width registration rows with team number, main time,
+  hundredths and ranking. The ranking suffix is a separate raised VBZ `e`;
+- `Registraties + klaarstaan`: three compact incoming-team rows on the left
+  and ready-team values on the right;
+- `Registraties + klaarstaan (>4)`: five 8px compact incoming-team rows and
+  a smaller footer zone.
 
-The current values are demo data in `matrix_host_main.c`. They will later come from the synchronized application-data model.
+The two mixed layouts show the runner and warmup sprites. The registrations-only
+layout has no middle divider and no sprites. All layouts keep the header with
+location, adaptive clock, static finish flag, counter and conditional
+connection/sync statuses. There is no `Prepare` text.
+
+The current values are demo data in `matrix_host_main.c`. Because the real
+race-data feed is not connected yet, JavaFX exposes a temporary `Layout`
+dropdown for selecting these three preview modes. Later the same native layout
+selection will be derived from the real registration and ready-team counts.
 
 The main vertical divider is at x=81. This keeps the 160-pixel display visually centered while assigning the one-pixel separator itself to the middle boundary. Layout coordinates for mixed-mode content are derived from this divider instead of from the previous x=90 split.
 
@@ -66,8 +72,9 @@ legacy SpriteMap1 gait, nearest-neighbour scaled from 7×7 to 10×12. No extra
 arm layer or independently designed gait is added; preserving the recognizable
 legacy running motion is the current priority.
 
-The first ready-runner row reserves the first 10 pixels after the vertical
-divider for the warmup sprite. Its body and legs stay fixed while the arms move
+The first ready-runner row starts immediately after the divider: x=81 is the
+separator itself and x=82 is the first usable pixel on the right. The first 10
+pixels there are reserved for the warmup sprite. Its body and legs stay fixed while the arms move
 through the stretch cycle; the warmup animation advances at half the runner
 rate.
 
