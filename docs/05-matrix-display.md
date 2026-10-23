@@ -23,11 +23,22 @@ The current demo screen follows the supplied layout reference:
 - header with location, clock and counter;
 - three rows on the left;
 - two large-value rows on the right;
+- a 10×12 runner sprite in the upper right-hand row;
+- a 10×12 warmup/stretch sprite in the lower right-hand row;
 - one footer text line;
 - configurable separator lines;
 - no `Prepare` text.
 
 The current values are demo data in `matrix_host_main.c`. They will later come from the synchronized application-data model.
+
+The right-hand rows reserve the first 10 pixels after the vertical divider for
+an animated sprite. The first numeric value therefore starts farther to the
+right than before. The upper sprite loops through running poses. The lower
+sprite loops more slowly through warmup/stretch poses.
+
+Sprite bitmaps, frame selection and drawing remain native C responsibilities.
+JavaFX only sends a periodic animation tick to the native host and displays the
+resulting RGB565 frame.
 
 ## Theme configuration
 
