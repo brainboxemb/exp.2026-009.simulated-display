@@ -858,6 +858,29 @@ static void test_ready_overflow_keeps_left_half_footer(void) {
                     81,
                     53)
             == theme.line_color);
+
+    /*
+     * Ready overflow keeps the normal first-row baseline and uses the free
+     * pixels at the bottom for the third row.
+     */
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    86,
+                    14)
+            == theme.sprite_color);
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    86,
+                    13)
+            != theme.sprite_color);
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    95,
+                    48)
+            == theme.large_value.color);
 }
 
 static void test_runner_and_warmup_animate_in_their_status_columns(void) {
