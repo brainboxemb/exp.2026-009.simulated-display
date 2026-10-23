@@ -38,6 +38,8 @@ typedef struct {
     SerialLcdSprite sprites[SERIAL_LCD_SPRITE_CAPACITY];
     uint16_t sprite_count;
     uint8_t sprite_frame;
+    uint8_t sprite_interval_ticks;
+    uint8_t sprite_elapsed_ticks;
     SerialLcdParserState parser_state;
     uint8_t command;
     uint8_t parameters[4];
@@ -49,7 +51,7 @@ typedef struct {
 
 void serial_lcd_init(SerialLcd *lcd);
 void serial_lcd_feed(SerialLcd *lcd, const uint8_t *data, size_t size);
-void serial_lcd_update_sprites(SerialLcd *lcd);
+void serial_lcd_general_timer_tick(SerialLcd *lcd);
 bool serial_lcd_dirty(const SerialLcd *lcd);
 void serial_lcd_mark_clean(SerialLcd *lcd);
 

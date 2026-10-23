@@ -89,6 +89,53 @@ static void test_sprite_marker_bit_is_not_visible(void) {
     }
 }
 
+static void test_sprite_default_velocity_is_four(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    assert(lcd.sprite_interval_ticks == 8);
+}
+
+static void test_sprite_velocity_command_sets_two_times_v(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    feed_text(&lcd, "/NV2");
+    assert(lcd.sprite_interval_ticks == 4);
+
+    feed_text(&lcd, "/NV9");
+    assert(lcd.sprite_interval_ticks == 18);
+}
+
+static void test_sprite_velocity_rejects_invalid_value(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    feed_text(&lcd, "/NV0");
+    assert(lcd.sprite_interval_ticks == 8);
+
+    feed_text(&lcd, "/NVX");
+    assert(lcd.sprite_interval_ticks == 8);
+}
+
+static void test_sprite_waits_for_configured_timer_interval(void) {
+    SerialLcd lcd;
+    serial_lcd_init(&lcd);
+
+    const uint8_t sprite[] = {0xfe, 0xfe};
+    serial_lcd_feed(&lcd, sprite, sizeof(sprite));
+    feed_text(&lcd, "/NV2");
+
+    for (uint8_t tick = 0; tick < 3; tick++) {
+        serial_lcd_general_timer_tick(&lcd);
+    }
+
+    assert(lcd.sprite_frame == 0);
+
+    serial_lcd_general_timer_tick(&lcd);
+    assert(lcd.sprite_frame == 1);
+}
+
 static void test_sprite_update_repaints_same_position(void) {
     SerialLcd lcd;
     serial_lcd_init(&lcd);
@@ -102,7 +149,10 @@ static void test_sprite_update_repaints_same_position(void) {
             5));
 
     serial_lcd_mark_clean(&lcd);
-    serial_lcd_update_sprites(&lcd);
+
+    for (uint8_t tick = 0; tick < 8; tick++) {
+        serial_lcd_general_timer_tick(&lcd);
+    }
 
     assert(lcd.sprite_frame == 1);
     assert(lcd.cursor_x == 8);
@@ -120,10 +170,12 @@ static void test_sprite_update_cycles_all_frames(void) {
     const uint8_t input[] = {0xfe, 0xfe};
     serial_lcd_feed(&lcd, input, sizeof(input));
 
-    for (uint8_t frame = 1;
-            frame <= CUSTOM_SPRITE_FRAME_COUNT;
+    for (uint8_t frame = 0;
+            frame < CUSTOM_SPRITE_FRAME_COUNT;
             frame++) {
-        serial_lcd_update_sprites(&lcd);
+        for (uint8_t tick = 0; tick < 8; tick++) {
+            serial_lcd_general_timer_tick(&lcd);
+        }
     }
 
     assert(lcd.sprite_frame == 0);
@@ -143,7 +195,7 @@ static void test_clear_removes_sprite_animation_state(void) {
     assert(lcd.sprite_count == 0);
 
     serial_lcd_mark_clean(&lcd);
-    serial_lcd_update_sprites(&lcd);
+    serial_lcd_general_timer_tick(&lcd);
 
     assert(!serial_lcd_dirty(&lcd));
 }
@@ -313,6 +365,10 @@ int main(void) {
     test_full_custom_character_range_is_available();
     test_sprite_marker_can_be_split_across_reads();
     test_sprite_marker_bit_is_not_visible();
+    test_sprite_default_velocity_is_four();
+    test_sprite_velocity_command_sets_two_times_v();
+    test_sprite_velocity_rejects_invalid_value();
+    test_sprite_waits_for_configured_timer_interval();
     test_sprite_update_repaints_same_position();
     test_sprite_update_cycles_all_frames();
     test_clear_removes_sprite_animation_state();

@@ -9,9 +9,11 @@
 #define CMD_BITMAP ((uint8_t)'B')
 #define CMD_CLEAR ((uint8_t)'C')
 #define CMD_POSITION ((uint8_t)'L')
+#define CMD_SPRITE ((uint8_t)'N')
 
 #define CHARACTER_HEIGHT 7u
 #define SPRITE_ADVANCE 8u
+#define SPRITE_DEFAULT_VELOCITY 4u
 
 static void set_pixel(SerialLcd *lcd, int x, int y, bool on) {
     if (x < 0 || y < 0 || x >= (int)DISPLAY_WIDTH || y >= (int)DISPLAY_HEIGHT) {
@@ -40,6 +42,7 @@ static void reset_text_history(SerialLcd *lcd) {
 static void reset_sprites(SerialLcd *lcd) {
     lcd->sprite_count = 0;
     lcd->sprite_frame = 0;
+    lcd->sprite_elapsed_ticks = 0;
 }
 
 static void clear_screen(SerialLcd *lcd) {
@@ -255,6 +258,9 @@ static uint8_t command_parameter_count(uint8_t command) {
         case CMD_CLEAR:
             return 1;
 
+        case CMD_SPRITE:
+            return 2;
+
         case CMD_POSITION:
             return 4;
 
@@ -268,6 +274,7 @@ static bool command_known(uint8_t command) {
         case CMD_BITMAP:
         case CMD_CLEAR:
         case CMD_POSITION:
+        case CMD_SPRITE:
             return true;
 
         default:
@@ -302,6 +309,25 @@ static void execute_position(SerialLcd *lcd) {
     reset_text_history(lcd);
 }
 
+static void execute_sprite_command(SerialLcd *lcd) {
+    const uint8_t subcommand = lcd->parameters[0];
+    const uint8_t velocity = lcd->parameters[1];
+
+    if (subcommand != (uint8_t)'V'
+            && subcommand != (uint8_t)'v') {
+        return;
+    }
+
+    if (velocity < (uint8_t)'1'
+            || velocity > (uint8_t)'9') {
+        return;
+    }
+
+    lcd->sprite_interval_ticks =
+            (uint8_t)(2u * (velocity - (uint8_t)'0'));
+    lcd->sprite_elapsed_ticks = 0;
+}
+
 static void execute_command(SerialLcd *lcd) {
     switch (lcd->command) {
         case CMD_CLEAR:
@@ -314,6 +340,10 @@ static void execute_command(SerialLcd *lcd) {
 
         case CMD_BITMAP:
             draw_bitmap_digit(lcd, lcd->parameters[0]);
+            break;
+
+        case CMD_SPRITE:
+            execute_sprite_command(lcd);
             break;
 
         default:
@@ -368,6 +398,9 @@ void serial_lcd_init(SerialLcd *lcd) {
     lcd->text_length = 0;
     lcd->sprite_count = 0;
     lcd->sprite_frame = 0;
+    lcd->sprite_interval_ticks =
+            (uint8_t)(2u * SPRITE_DEFAULT_VELOCITY);
+    lcd->sprite_elapsed_ticks = 0;
     lcd->parser_state = SERIAL_LCD_TEXT;
     lcd->command = 0;
     lcd->parameter_count = 0;
@@ -414,11 +447,18 @@ void serial_lcd_feed(
     }
 }
 
-void serial_lcd_update_sprites(SerialLcd *lcd) {
+void serial_lcd_general_timer_tick(SerialLcd *lcd) {
     if (lcd->sprite_count == 0) {
         return;
     }
 
+    lcd->sprite_elapsed_ticks++;
+
+    if (lcd->sprite_elapsed_ticks < lcd->sprite_interval_ticks) {
+        return;
+    }
+
+    lcd->sprite_elapsed_ticks = 0;
     lcd->sprite_frame =
             (uint8_t)((lcd->sprite_frame + 1u)
                     % CUSTOM_SPRITE_FRAME_COUNT);
