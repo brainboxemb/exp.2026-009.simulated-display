@@ -21,7 +21,6 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 The current demo screen follows the supplied layout reference:
 
 - header with location, clock and counter;
-- three rows on the left;
 - three passed-runner rows on the left;
 - two large-value rows on the right;
 - a 10×12 runner sprite at the far left of the first passed-runner row;
@@ -57,7 +56,7 @@ Each text role has its own `MatrixTextStyle`:
 - `large_value`;
 - `footer`.
 
-A style contains both a color and a font specification. The theme separately owns `background_color` and `line_color`.
+A style contains both a color and a font specification. The theme separately owns `background_color`, `line_color` and `sprite_color`. Runner and warmup sprites share `sprite_color` and are independent of all text colors.
 
 Example:
 
@@ -90,7 +89,7 @@ The font registry currently exposes two 1-bpp families:
 
 The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. Large numeric values can use a separate hand-drawn 12px bitmap font; it is intentionally numeric-only rather than a mechanically stretched general-purpose VBZ font.
 
-The JavaFX simulator exposes both families so the same race screen can be compared visually before a default is chosen.
+The JavaFX simulator exposes both families for comparison. VBZ is the default: 9px for header, rows and footer, with the dedicated 12px numeric font for large values.
 
 ## Physical HUB75 output
 
