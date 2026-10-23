@@ -63,6 +63,8 @@ final class MatrixDisplayProcessTest {
                             0x001f,
                             0xffff,
                             0xf800,
+                            0x07e0,
+                            0xffff,
                             0,
                             10,
                             10,
@@ -83,25 +85,32 @@ final class MatrixDisplayProcessTest {
 
             process.connectionStatus(
                     false,
-                    false);
+                    false,
+                    true);
 
-            MatrixDisplayFrame warnings =
+            MatrixDisplayFrame statuses =
                     frames.poll(
                             5,
                             TimeUnit.SECONDS);
 
             assertNotNull(
-                    warnings,
-                    "matrix host did not render connection warnings");
-            assertEquals(0, warnings.red(137, 10));
-            assertEquals(0, warnings.green(137, 10));
-            assertEquals(255, warnings.blue(137, 10));
-            assertEquals(0, warnings.red(109, 1));
-            assertEquals(255, warnings.green(109, 1));
-            assertEquals(0, warnings.blue(109, 1));
-            assertEquals(255, warnings.red(137, 0));
-            assertEquals(0, warnings.green(137, 0));
-            assertEquals(0, warnings.blue(137, 0));
+                    statuses,
+                    "matrix host did not render header statuses");
+            assertEquals(0, statuses.red(125, 10));
+            assertEquals(0, statuses.green(125, 10));
+            assertEquals(255, statuses.blue(125, 10));
+            assertEquals(0, statuses.red(97, 1));
+            assertEquals(255, statuses.green(97, 1));
+            assertEquals(0, statuses.blue(97, 1));
+            assertEquals(255, statuses.red(125, 0));
+            assertEquals(0, statuses.green(125, 0));
+            assertEquals(0, statuses.blue(125, 0));
+            assertEquals(0, statuses.red(149, 0));
+            assertEquals(255, statuses.green(149, 0));
+            assertEquals(0, statuses.blue(149, 0));
+            assertEquals(255, statuses.red(152, 1));
+            assertEquals(255, statuses.green(152, 1));
+            assertEquals(255, statuses.blue(152, 1));
 
             process.clear();
 
