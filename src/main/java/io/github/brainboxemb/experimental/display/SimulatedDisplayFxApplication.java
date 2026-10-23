@@ -42,9 +42,15 @@ public final class SimulatedDisplayFxApplication extends Application {
             nativeProcess = new NativeDisplayProcess(
                     frame -> Platform.runLater(() -> {
                         display.render(frame);
-                        status.setText("Native C display: " + frame.width() + "×" + frame.height());
+                        status.setText(
+                                "Native C display: "
+                                        + frame.width()
+                                        + "×"
+                                        + frame.height());
                     }),
-                    error -> Platform.runLater(() -> status.setText("Native error: " + error)));
+                    error -> Platform.runLater(
+                            () -> status.setText("Native error: " + error)));
+
             send(SerialBytes.clear());
             send("HELLO WORLD".getBytes(StandardCharsets.US_ASCII));
         } catch (IOException exception) {
@@ -62,14 +68,19 @@ public final class SimulatedDisplayFxApplication extends Application {
     private VBox createControls() {
         TextField text = new TextField("HELLO WORLD");
         text.setPrefColumnCount(22);
+
         Button sendText = new Button("Send text");
-        sendText.setOnAction(event -> send(text.getText().getBytes(StandardCharsets.US_ASCII)));
+        sendText.setOnAction(
+                event -> send(
+                        text.getText().getBytes(StandardCharsets.US_ASCII)));
         text.setOnAction(event -> sendText.fire());
 
         Button home = new Button("Home");
         home.setOnAction(event -> send(SerialBytes.home()));
+
         Button clear = new Button("Clear");
         clear.setOnAction(event -> send(SerialBytes.clear()));
+
         Button corners = new Button("Corner pixels");
         corners.setOnAction(event -> {
             send(SerialBytes.pixel(0, 0, true));
@@ -91,8 +102,29 @@ public final class SimulatedDisplayFxApplication extends Application {
                 corners,
                 sprite);
 
+        TextField protocol = new TextField(
+                "|\\x00|\\x18\\x0A|\\x19\\x05HELLO|\\x1A7");
+        protocol.setPrefColumnCount(45);
+
+        Button sendProtocol = new Button("Send protocol");
+        sendProtocol.setOnAction(event -> {
+            try {
+                send(SerialBytes.parseProtocolText(protocol.getText()));
+            } catch (IllegalArgumentException exception) {
+                status.setText("Protocol input: " + exception.getMessage());
+            }
+        });
+        protocol.setOnAction(event -> sendProtocol.fire());
+
+        HBox protocolControls = new HBox(
+                8,
+                new Label("Protocol:"),
+                protocol,
+                sendProtocol);
+
         TextField hex = new TextField("7C 10 0A 05 01");
         hex.setPrefColumnCount(25);
+
         Button sendHex = new Button("Send bytes");
         sendHex.setOnAction(event -> {
             try {
@@ -102,10 +134,21 @@ public final class SimulatedDisplayFxApplication extends Application {
             }
         });
         hex.setOnAction(event -> sendHex.fire());
-        HBox byteControls = new HBox(8, new Label("Hex:"), hex, sendHex, status);
 
-        VBox controls = new VBox(8, textControls, byteControls);
+        HBox byteControls = new HBox(
+                8,
+                new Label("Hex:"),
+                hex,
+                sendHex,
+                status);
+
+        VBox controls = new VBox(
+                8,
+                textControls,
+                protocolControls,
+                byteControls);
         controls.setPadding(new Insets(12, 0, 0, 0));
+
         return controls;
     }
 
@@ -114,11 +157,11 @@ public final class SimulatedDisplayFxApplication extends Application {
             status.setText("Native display process is not running");
             return;
         }
+
         try {
             nativeProcess.send(bytes);
         } catch (IOException exception) {
             status.setText("Send failed: " + exception.getMessage());
         }
     }
-
 }

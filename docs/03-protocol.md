@@ -11,9 +11,10 @@ References:
 
 | Bytes after `0x7C` | Parameters | Experiment behavior |
 | --- | ---: | --- |
-| `00` | 0 | Clear framebuffer and reset cursor to text origin |
-| `18` | 1 | Set text X origin and cursor |
-| `19` | 1 | Set text Y origin and cursor |
+| `00` | 0 | Clear framebuffer and reset cursor to `(0,0)` |
+| `18` | 1 | Set cursor X (`0..89`) |
+| `19` | 1 | Set cursor Y (`0..34`) |
+| `1A` | 1 | **Experiment extension:** draw large 13×18 digit bitmap; parameter is ASCII `0`..`9` |
 | `10` | 3 | Set/reset pixel: `x y value` |
 | `0C` | 5 | Draw/erase line: `x0 y0 x1 y1 value` |
 | `03` | 4 | Draw/erase circle: `x y radius value` |
@@ -33,7 +34,7 @@ The simulator uses the legacy `CharMap1` supplied for this experiment rather tha
 - backspace returns to the previous proportional character position;
 - `0x7C` remains the serial command prefix and therefore cannot be emitted as an ordinary character byte in this protocol.
 
-Only `CharMap1` and `SpriteMap1` were converted from the supplied legacy include file. `Bitmap_Batavieren` and all other `Bitmap_*` data were deliberately excluded.
+`CharMap1`, `SpriteMap1` and `Bitmap_0..Bitmap_9` were converted from the supplied legacy include file. `Bitmap_Batavieren` and the other legacy `Bitmap_*` tables remain deliberately excluded.
 
 ## Sprite marker
 
@@ -42,6 +43,28 @@ Two consecutive bytes `FE FE` render a sprite at the current text cursor. The si
 The marker detection is streaming: `FE FE` still works when the two bytes arrive in separate host chunks. A single `FE` followed by another byte falls back to legacy character 254 before the following byte is processed.
 
 Stepping to the next sprite appearance on every `FE FE` is the deterministic simulator behavior for this PoP.
+
+## Large digit bitmap command
+
+The original large numeric bitmaps are exposed through an experiment-specific command while retaining SparkFun framing:
+
+```text
+7C 1A <ASCII digit>
+```
+
+For example, `7C 1A 37` draws the old 13×18 bitmap for digit `7` at the current cursor position. The command clips naturally at the framebuffer edge and does not move the cursor.
+
+## JavaFX protocol text input
+
+The JavaFX **Protocol** field is a convenience editor for the raw serial stream. Ordinary ASCII is emitted unchanged and `\\xNN` inserts one byte. This makes control-byte commands readable without inventing a second display protocol.
+
+Example:
+
+```text
+|\\x00|\\x18\\x0A|\\x19\\x05HELLO|\\x1A7
+```
+
+Here `|` is the literal SparkFun command prefix `0x7C`; only the non-printable command/value bytes need escaping.
 
 ## 90×35 geometry
 
