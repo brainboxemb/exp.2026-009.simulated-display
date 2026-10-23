@@ -16,6 +16,7 @@
 #define HEADER_LOCATION_WIDTH 38
 #define HEADER_CLOCK_X 40
 #define HEADER_CLOCK_WIDTH 80
+#define HEADER_CLOCK_GAP 1u
 #define FINISH_FLAG_Y 1
 #define FINISH_FLAG_WIDTH 7u
 #define FINISH_FLAG_HEIGHT 7u
@@ -116,6 +117,24 @@ static const uint16_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
     0x003
 };
 
+/*
+ * Synchronizing: two circular arrows. This status is positive/active rather
+ * than a warning, so it uses the sync colors and no strike-through.
+ */
+static const uint16_t STATUS_SYNC[WARNING_GLYPH_HEIGHT] = {
+    0x000,
+    0x0f8,
+    0x104,
+    0x202,
+    0x207,
+    0x603,
+    0x702,
+    0x202,
+    0x104,
+    0x0f8,
+    0x000
+};
+
 static void draw_finish_flag(
         MatrixFramebuffer *framebuffer,
         uint16_t x,
@@ -146,11 +165,14 @@ static void draw_finish_flag(
     }
 }
 
-static void draw_warning_block(
+static void draw_status_block(
         MatrixFramebuffer *framebuffer,
         uint16_t x,
         const uint16_t glyph[WARNING_GLYPH_HEIGHT],
-        const MatrixTheme *theme) {
+        MatrixPixel background_color,
+        MatrixPixel icon_color,
+        bool strike,
+        MatrixPixel strike_color) {
     for (uint16_t row = 0;
             row < WARNING_HEIGHT;
             row++) {
@@ -161,7 +183,7 @@ static void draw_warning_block(
                     framebuffer,
                     (uint16_t)(x + column),
                     (uint16_t)(WARNING_Y + row),
-                    theme->warning_background_color);
+                    background_color);
         }
     }
 
@@ -183,15 +205,16 @@ static void draw_warning_block(
                         framebuffer,
                         (uint16_t)(x + column),
                         (uint16_t)(WARNING_Y + row),
-                        theme->warning_text_color);
+                        icon_color);
             }
 
-            if ((WARNING_STRIKE[row] & mask) != 0) {
+            if (strike
+                    && (WARNING_STRIKE[row] & mask) != 0) {
                 matrix_framebuffer_set(
                         framebuffer,
                         (uint16_t)(x + column),
                         (uint16_t)(WARNING_Y + row),
-                        theme->warning_strike_color);
+                        strike_color);
             }
         }
     }
@@ -387,35 +410,30 @@ bool matrix_race_screen_render(
             LV_TEXT_ALIGN_LEFT,
             &theme->header,
             header_font);
-    create_label(
-            screen,
-            data->clock,
-            HEADER_CLOCK_X,
-            HEADER_TEXT_Y,
-            HEADER_CLOCK_WIDTH,
-            LV_TEXT_ALIGN_CENTER,
-            &theme->header,
-            header_font);
-    uint16_t warning_count = 0;
+    uint16_t status_count = 0;
 
     if (!data->wifi_connected) {
-        warning_count++;
+        status_count++;
     }
 
     if (!data->registration_server_connected) {
-        warning_count++;
+        status_count++;
     }
 
-    const uint16_t warning_group_width =
-            warning_count == 0u
+    if (data->synchronizing) {
+        status_count++;
+    }
+
+    const uint16_t status_group_width =
+            status_count == 0u
                     ? 0u
                     : (uint16_t)(
-                            warning_count * WARNING_WIDTH
-                            + (warning_count - 1u) * WARNING_GAP);
+                            status_count * WARNING_WIDTH
+                            + (status_count - 1u) * WARNING_GAP);
     const uint16_t counter_right =
             (uint16_t)(
                     MATRIX_DISPLAY_WIDTH
-                    - warning_group_width);
+                    - status_group_width);
     const uint16_t counter_x =
             (uint16_t)(
                     counter_right
@@ -424,7 +442,27 @@ bool matrix_race_screen_render(
             (uint16_t)(
                     counter_x
                     - FINISH_FLAG_WIDTH);
+    const uint16_t clock_available_width =
+            finish_flag_x > HEADER_CLOCK_X + HEADER_CLOCK_GAP
+                    ? (uint16_t)(
+                            finish_flag_x
+                            - HEADER_CLOCK_X
+                            - HEADER_CLOCK_GAP)
+                    : 0u;
+    const uint16_t clock_width =
+            clock_available_width < HEADER_CLOCK_WIDTH
+                    ? clock_available_width
+                    : HEADER_CLOCK_WIDTH;
 
+    create_label(
+            screen,
+            data->clock,
+            HEADER_CLOCK_X,
+            HEADER_TEXT_Y,
+            clock_width,
+            LV_TEXT_ALIGN_CENTER,
+            &theme->header,
+            header_font);
     create_label(
             screen,
             data->counter,
@@ -521,30 +559,52 @@ bool matrix_race_screen_render(
             finish_flag_x,
             theme->flag_color);
 
-    uint16_t warning_x =
+    uint16_t status_x =
             (uint16_t)(
                     MATRIX_DISPLAY_WIDTH
-                    - warning_group_width);
+                    - status_group_width);
 
     if (!data->wifi_connected) {
-        draw_warning_block(
+        draw_status_block(
                 framebuffer,
-                warning_x,
+                status_x,
                 WARNING_WIFI,
-                theme);
-        warning_x =
+                theme->warning_background_color,
+                theme->warning_text_color,
+                true,
+                theme->warning_strike_color);
+        status_x =
                 (uint16_t)(
-                        warning_x
+                        status_x
                         + WARNING_WIDTH
                         + WARNING_GAP);
     }
 
     if (!data->registration_server_connected) {
-        draw_warning_block(
+        draw_status_block(
                 framebuffer,
-                warning_x,
+                status_x,
                 WARNING_LINK,
-                theme);
+                theme->warning_background_color,
+                theme->warning_text_color,
+                true,
+                theme->warning_strike_color);
+        status_x =
+                (uint16_t)(
+                        status_x
+                        + WARNING_WIDTH
+                        + WARNING_GAP);
+    }
+
+    if (data->synchronizing) {
+        draw_status_block(
+                framebuffer,
+                status_x,
+                STATUS_SYNC,
+                theme->sync_background_color,
+                theme->sync_icon_color,
+                false,
+                theme->sync_icon_color);
     }
 
     matrix_sprite_draw(
