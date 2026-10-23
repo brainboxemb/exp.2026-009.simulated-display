@@ -35,6 +35,7 @@ static MatrixRaceScreenData DEMO_SCREEN = {
     },
     .right_rows = {
         {"999", "999"},
+        {"999", "999"},
         {"999", "999"}
     },
     .footer = "520 234 346 12"
@@ -310,7 +311,7 @@ int main(void) {
                 uint8_t layout = 0;
 
                 if (!read_u8(&layout)
-                        || layout > MATRIX_RACE_LAYOUT_MIXED_COMPACT_FOOTER) {
+                        || layout > MATRIX_RACE_LAYOUT_MIXED_READY_OVERFLOW) {
                     return 6;
                 }
 
