@@ -904,6 +904,29 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
             == runner_color);
 
     /*
+     * The ready-team number starts after a deliberate two-pixel gap following
+     * the 10-pixel warmup sprite.
+     */
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    92,
+                    14)
+            != theme.large_value.color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    93,
+                    14)
+            != theme.large_value.color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    95,
+                    14)
+            == theme.large_value.color);
+
+    /*
      * Frame 2 changes both animations without moving either body to another
      * screen location.
      */
