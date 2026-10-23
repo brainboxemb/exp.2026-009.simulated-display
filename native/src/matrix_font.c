@@ -1,6 +1,6 @@
 #include "matrix_font.h"
 
-#include "matrix_pixel_font.h"
+#include "matrix_numeric_font.h"\n#include "matrix_pixel_font.h"
 #include "matrix_vbz_font.h"
 
 const lv_font_t *matrix_font_resolve(
@@ -36,4 +36,14 @@ const lv_font_t *matrix_font_resolve(
         default:
             return NULL;
     }
+}
+
+const lv_font_t *matrix_large_font_resolve(
+        MatrixFontSpec font) {
+    if (font.family == MATRIX_FONT_VBZ
+            && font.size == 12) {
+        return &matrix_font_numeric_12;
+    }
+
+    return matrix_font_resolve(font);
 }
