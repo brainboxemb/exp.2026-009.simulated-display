@@ -16,11 +16,13 @@
 #define MATRIX_HOST_REQUEST_THEME 2u
 #define MATRIX_HOST_REQUEST_ANIMATION_FRAME 3u
 #define MATRIX_HOST_REQUEST_CONNECTION_STATUS 4u
+#define MATRIX_HOST_REQUEST_LAYOUT 5u
 
 static MatrixRaceScreenData DEMO_SCREEN = {
     .location = "WP-99",
     .clock = "99:99:99",
     .counter = "999",
+    .layout = MATRIX_RACE_LAYOUT_MIXED,
     .wifi_connected = true,
     .registration_server_connected = true,
     .synchronizing = false,
@@ -299,6 +301,30 @@ int main(void) {
                 }
 
                 write_frame(&framebuffer);
+                break;
+            }
+
+            case MATRIX_HOST_REQUEST_LAYOUT: {
+                uint8_t layout = 0;
+
+                if (!read_u8(&layout)
+                        || layout > MATRIX_RACE_LAYOUT_MIXED_COMPACT_FOOTER) {
+                    return 6;
+                }
+
+                DEMO_SCREEN.layout =
+                        (MatrixRaceLayout)layout;
+
+                if (demo_visible) {
+                    if (!draw_demo_screen(
+                            &framebuffer,
+                            &theme,
+                            animation_frame)) {
+                        return 6;
+                    }
+
+                    write_frame(&framebuffer);
+                }
                 break;
             }
 
