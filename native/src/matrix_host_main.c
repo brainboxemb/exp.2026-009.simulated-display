@@ -121,6 +121,7 @@ static bool draw_demo_screen(
 }
 
 static bool read_theme(MatrixTheme *theme) {
+    uint16_t background_color = 0;
     uint16_t line_color = 0;
     uint16_t header_color = 0;
     uint16_t row_color = 0;
@@ -132,7 +133,8 @@ static bool read_theme(MatrixTheme *theme) {
     uint8_t large_size = 0;
     uint8_t footer_size = 0;
 
-    if (!read_u16_be(&line_color)
+    if (!read_u16_be(&background_color)
+            || !read_u16_be(&line_color)
             || !read_u16_be(&header_color)
             || !read_u16_be(&row_color)
             || !read_u16_be(&large_color)
@@ -149,6 +151,7 @@ static bool read_theme(MatrixTheme *theme) {
         return false;
     }
 
+    theme->background_color = background_color;
     theme->line_color = line_color;
     theme->header.color = header_color;
     theme->row_number.color = row_color;

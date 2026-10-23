@@ -6,20 +6,38 @@ import javafx.scene.paint.Color;
 
 final class RgbMatrixView extends Canvas {
 
-    private static final double PITCH = 4.0;
-    private static final double LED_DIAMETER = 3.0;
+    private static final double BASE_PITCH = 4.0;
+    private static final double BASE_LED_DIAMETER = 3.0;
     private static final Color BACKGROUND = Color.rgb(8, 8, 8);
 
+    private final int logicalWidth;
+    private final int logicalHeight;
+
+    private int displayScale = 1;
+    private MatrixDisplayFrame lastFrame;
+
     RgbMatrixView(int width, int height) {
-        super(width * PITCH, height * PITCH);
+        logicalWidth = width;
+        logicalHeight = height;
+        updateCanvasSize();
+    }
+
+    void setDisplayScale(int scale) {
+        if (scale != 1 && scale != 2) {
+            throw new IllegalArgumentException(
+                    "display scale must be 1 or 2");
+        }
+
+        displayScale = scale;
+        updateCanvasSize();
+
+        if (lastFrame != null) {
+            render(lastFrame);
+        }
     }
 
     void render(MatrixDisplayFrame frame) {
-        if (getWidth() != frame.width() * PITCH
-                || getHeight() != frame.height() * PITCH) {
-            setWidth(frame.width() * PITCH);
-            setHeight(frame.height() * PITCH);
-        }
+        lastFrame = frame;
 
         GraphicsContext graphics =
                 getGraphicsContext2D();
@@ -31,8 +49,12 @@ final class RgbMatrixView extends Canvas {
                 getWidth(),
                 getHeight());
 
+        double pitch =
+                BASE_PITCH * displayScale;
+        double ledDiameter =
+                BASE_LED_DIAMETER * displayScale;
         double inset =
-                (PITCH - LED_DIAMETER) / 2.0;
+                (pitch - ledDiameter) / 2.0;
 
         for (int y = 0; y < frame.height(); y++) {
             for (int x = 0; x < frame.width(); x++) {
@@ -43,11 +65,22 @@ final class RgbMatrixView extends Canvas {
                                 frame.blue(x, y)));
 
                 graphics.fillOval(
-                        x * PITCH + inset,
-                        y * PITCH + inset,
-                        LED_DIAMETER,
-                        LED_DIAMETER);
+                        x * pitch + inset,
+                        y * pitch + inset,
+                        ledDiameter,
+                        ledDiameter);
             }
         }
+    }
+
+    private void updateCanvasSize() {
+        setWidth(
+                logicalWidth
+                        * BASE_PITCH
+                        * displayScale);
+        setHeight(
+                logicalHeight
+                        * BASE_PITCH
+                        * displayScale);
     }
 }

@@ -1,13 +1,20 @@
 package io.github.brainboxemb.experimental.display;
 
 import java.io.IOException;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -20,6 +27,30 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final RgbMatrixView view;
     private final Label status;
     private final MatrixDisplayProcess process;
+
+    private final ColorPicker backgroundColor =
+            new ColorPicker(Color.BLACK);
+    private final ColorPicker lineColor =
+            new ColorPicker(Color.RED);
+    private final ColorPicker headerColor =
+            new ColorPicker(Color.RED);
+    private final ColorPicker rowColor =
+            new ColorPicker(Color.RED);
+    private final ColorPicker largeColor =
+            new ColorPicker(Color.RED);
+    private final ColorPicker footerColor =
+            new ColorPicker(Color.RED);
+
+    private final ComboBox<String> fontFamily =
+            new ComboBox<>();
+    private final ComboBox<Integer> headerSize =
+            new ComboBox<>();
+    private final ComboBox<Integer> rowSize =
+            new ComboBox<>();
+    private final ComboBox<Integer> largeSize =
+            new ComboBox<>();
+    private final ComboBox<Integer> footerSize =
+            new ComboBox<>();
 
     MatrixDisplayWindow(Window owner)
             throws IOException {
@@ -36,17 +67,46 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new Label(
                         "Starting native matrix display...");
 
+        configureFontControls();
+
         Button demoScreen =
                 new Button("Demo screen");
         Button clear =
                 new Button("Clear");
+        ToggleButton scale2x =
+                new ToggleButton("2×");
 
-        HBox controls =
+        scale2x.setOnAction(
+                event -> {
+                    view.setDisplayScale(
+                            scale2x.isSelected()
+                                    ? 2
+                                    : 1);
+                    stage.sizeToScene();
+                });
+
+        HBox displayControls =
                 new HBox(
                         8,
                         demoScreen,
                         clear,
+                        scale2x,
                         status);
+
+        Button applyStyle =
+                new Button("Apply style");
+        applyStyle.setOnAction(
+                event -> applyStyle());
+
+        GridPane styleControls =
+                createStyleControls(
+                        applyStyle);
+
+        VBox controls =
+                new VBox(
+                        8,
+                        displayControls,
+                        styleControls);
         controls.setPadding(
                 new Insets(12, 0, 0, 0));
 
@@ -100,6 +160,146 @@ final class MatrixDisplayWindow implements AutoCloseable {
     @Override
     public void close() {
         process.close();
+    }
+
+    private GridPane createStyleControls(
+            Button applyStyle) {
+        GridPane grid = new GridPane();
+        grid.setHgap(8);
+        grid.setVgap(6);
+
+        grid.add(new Label("Font"), 0, 0);
+        grid.add(fontFamily, 1, 0);
+
+        grid.add(new Label("Background"), 2, 0);
+        grid.add(backgroundColor, 3, 0);
+
+        grid.add(new Label("Lines"), 4, 0);
+        grid.add(lineColor, 5, 0);
+
+        grid.add(new Label("Header"), 0, 1);
+        grid.add(headerSize, 1, 1);
+        grid.add(headerColor, 2, 1);
+
+        grid.add(new Label("Rows"), 3, 1);
+        grid.add(rowSize, 4, 1);
+        grid.add(rowColor, 5, 1);
+
+        grid.add(new Label("Large"), 0, 2);
+        grid.add(largeSize, 1, 2);
+        grid.add(largeColor, 2, 2);
+
+        grid.add(new Label("Footer"), 3, 2);
+        grid.add(footerSize, 4, 2);
+        grid.add(footerColor, 5, 2);
+
+        grid.add(applyStyle, 6, 2);
+        return grid;
+    }
+
+    private void configureFontControls() {
+        fontFamily.getItems().addAll(
+                "UNSCII",
+                "Montserrat");
+        fontFamily.setValue("UNSCII");
+
+        refreshFontSizes();
+        fontFamily.setOnAction(
+                event -> refreshFontSizes());
+    }
+
+    private void refreshFontSizes() {
+        List<Integer> sizes =
+                "Montserrat".equals(
+                        fontFamily.getValue())
+                        ? List.of(
+                                8,
+                                10,
+                                12,
+                                14,
+                                16,
+                                18,
+                                20)
+                        : List.of(
+                                8,
+                                16);
+
+        setSizes(
+                headerSize,
+                sizes,
+                8);
+        setSizes(
+                rowSize,
+                sizes,
+                8);
+        setSizes(
+                largeSize,
+                sizes,
+                16);
+        setSizes(
+                footerSize,
+                sizes,
+                8);
+    }
+
+    private static void setSizes(
+            ComboBox<Integer> control,
+            List<Integer> sizes,
+            int preferred) {
+        Integer previous =
+                control.getValue();
+
+        control.getItems().setAll(sizes);
+
+        if (previous != null
+                && sizes.contains(previous)) {
+            control.setValue(previous);
+        } else if (sizes.contains(preferred)) {
+            control.setValue(preferred);
+        } else {
+            control.setValue(sizes.get(0));
+        }
+    }
+
+    private void applyStyle() {
+        try {
+            process.applyTheme(
+                    new MatrixDisplayThemeConfig(
+                            rgb565(backgroundColor.getValue()),
+                            rgb565(lineColor.getValue()),
+                            rgb565(headerColor.getValue()),
+                            rgb565(rowColor.getValue()),
+                            rgb565(largeColor.getValue()),
+                            rgb565(footerColor.getValue()),
+                            "Montserrat".equals(
+                                    fontFamily.getValue())
+                                    ? 0
+                                    : 1,
+                            headerSize.getValue(),
+                            rowSize.getValue(),
+                            largeSize.getValue(),
+                            footerSize.getValue()));
+        } catch (IOException exception) {
+            status.setText(
+                    "Matrix style failed: "
+                            + exception.getMessage());
+        }
+    }
+
+    private static int rgb565(Color color) {
+        int red =
+                (int)Math.round(
+                        color.getRed() * 255.0);
+        int green =
+                (int)Math.round(
+                        color.getGreen() * 255.0);
+        int blue =
+                (int)Math.round(
+                        color.getBlue() * 255.0);
+
+        return ((red >> 3) << 11)
+                | ((green >> 2) << 5)
+                | (blue >> 3);
     }
 
     private void sendDemoScreen() {

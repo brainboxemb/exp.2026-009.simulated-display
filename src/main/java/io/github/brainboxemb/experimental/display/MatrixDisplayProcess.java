@@ -17,6 +17,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
     private static final byte[] MAGIC = {'S', 'D', 'F', '2'};
     private static final int REQUEST_DEMO_SCREEN = 0;
     private static final int REQUEST_CLEAR = 1;
+    private static final int REQUEST_THEME = 2;
     private static final int MAX_PIXELS = 1_000_000;
 
     private final Process process;
@@ -68,6 +69,26 @@ final class MatrixDisplayProcess implements AutoCloseable {
     synchronized void clear()
             throws IOException {
         sendRequest(REQUEST_CLEAR);
+    }
+
+    synchronized void applyTheme(
+            MatrixDisplayThemeConfig config)
+            throws IOException {
+        Objects.requireNonNull(config);
+
+        input.writeInt(REQUEST_THEME);
+        input.writeShort(config.backgroundColor());
+        input.writeShort(config.lineColor());
+        input.writeShort(config.headerColor());
+        input.writeShort(config.rowColor());
+        input.writeShort(config.largeColor());
+        input.writeShort(config.footerColor());
+        input.writeByte(config.fontFamily());
+        input.writeByte(config.headerSize());
+        input.writeByte(config.rowSize());
+        input.writeByte(config.largeSize());
+        input.writeByte(config.footerSize());
+        input.flush();
     }
 
     @Override

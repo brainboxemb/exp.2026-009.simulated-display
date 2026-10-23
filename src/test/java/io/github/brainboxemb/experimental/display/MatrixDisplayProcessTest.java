@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 final class MatrixDisplayProcessTest {
 
     @Test
-    void receivesLvglDemoScreenFromNativeHost()
+    void receivesLvglDemoScreenAndAppliesTheme()
             throws Exception {
         var frames =
                 new LinkedBlockingQueue<MatrixDisplayFrame>();
@@ -36,6 +36,32 @@ final class MatrixDisplayProcessTest {
             assertEquals(0, frame.green(0, 10));
             assertEquals(0, frame.blue(0, 10));
 
+            process.applyTheme(
+                    new MatrixDisplayThemeConfig(
+                            0x0000,
+                            0x07e0,
+                            0xffff,
+                            0xffff,
+                            0xffff,
+                            0xffff,
+                            1,
+                            8,
+                            8,
+                            16,
+                            8));
+
+            MatrixDisplayFrame themed =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+
+            assertNotNull(
+                    themed,
+                    "matrix host did not emit themed frame");
+            assertEquals(0, themed.red(0, 10));
+            assertEquals(255, themed.green(0, 10));
+            assertEquals(0, themed.blue(0, 10));
+
             process.clear();
 
             MatrixDisplayFrame cleared =
@@ -60,7 +86,7 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     restored,
                     "matrix host did not restore demo screen");
-            assertEquals(255, restored.red(90, 30));
+            assertEquals(255, restored.green(90, 30));
         }
     }
 }
