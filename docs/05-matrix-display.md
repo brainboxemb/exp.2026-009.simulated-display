@@ -23,7 +23,7 @@ The current demo screen follows the supplied layout reference:
 - header with location, clock and counter;
 - three rows on the left;
 - two large-value rows on the right;
-- four footer values;
+- one footer text line;
 - configurable separator lines;
 - no `Prepare` text.
 
@@ -70,9 +70,9 @@ The font registry currently exposes two 1-bpp families:
 | Family | Sizes | Notes |
 | --- | --- | --- |
 | `MATRIX_FONT_UNSCII` | 8, 10, 16 | LVGL UNSCII 8/16 plus local 10px variant |
-| `MATRIX_FONT_VBZ` | 9, 10 | Original VBZ pixel glyphs plus derived 10px variant |
+| `MATRIX_FONT_VBZ` | 9; 12 for `large_value` | Original VBZ 9px glyphs plus a dedicated 12px numeric font for large values |
 
-The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. The 10px variant uses the same glyph shapes with nearest-neighbor vertical expansion and remains strictly 1-bpp.
+The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. Large numeric values can use a separate hand-drawn 12px bitmap font; it is intentionally numeric-only rather than a mechanically stretched general-purpose VBZ font.
 
 The JavaFX simulator exposes both families so the same race screen can be compared visually before a default is chosen.
 
