@@ -85,17 +85,17 @@ static const uint16_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
  * forming two vertically stacked loops.
  */
 static const uint16_t WARNING_LINK[WARNING_GLYPH_HEIGHT] = {
-    0x00c,
-    0x012,
+    0x00e,
+    0x011,
     0x021,
-    0x041,
-    0x082,
-    0x0c4,
-    0x118,
-    0x208,
-    0x408,
-    0x410,
-    0x220
+    0x042,
+    0x074,
+    0x090,
+    0x170,
+    0x210,
+    0x420,
+    0x440,
+    0x380
 };
 
 /*
@@ -171,8 +171,8 @@ static void draw_warning_block(
         for (uint16_t column = 0;
                 column < WARNING_GLYPH_WIDTH;
                 column++) {
-            const uint8_t mask =
-                    (uint8_t)(
+            const uint16_t mask =
+                    (uint16_t)(
                             1u
                             << (WARNING_GLYPH_WIDTH
                                     - 1u
