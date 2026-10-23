@@ -61,6 +61,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
             new ColorPicker(Color.web("#0060FF"));
     private final ColorPicker warningTextColor =
             new ColorPicker(Color.WHITE);
+    private final ColorPicker warningStrikeColor =
+            new ColorPicker(Color.RED);
 
     private final CheckBox wifiConnected =
             new CheckBox("WiFi connected");
@@ -292,6 +294,9 @@ final class MatrixDisplayWindow implements AutoCloseable {
         grid.add(new Label("Warning text"), 0, 4);
         grid.add(warningTextColor, 1, 4);
 
+        grid.add(new Label("Warning slash"), 2, 4);
+        grid.add(warningStrikeColor, 3, 4);
+
         grid.add(applyStyle, 6, 4);
         return grid;
     }
@@ -394,6 +399,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                             rgb565(flagColor.getValue()),
                             rgb565(warningBackgroundColor.getValue()),
                             rgb565(warningTextColor.getValue()),
+                            rgb565(warningStrikeColor.getValue()),
                             "VBZ".equals(
                                     fontFamily.getValue())
                                     ? 1
