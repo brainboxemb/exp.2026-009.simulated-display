@@ -30,17 +30,29 @@
 #define WARNING_GLYPH_WIDTH 11u
 #define WARNING_GLYPH_HEIGHT 11u
 
-#define LEFT_SPRITE_X 1
-#define LEFT_NUMBER_X 12
-#define LEFT_NUMBER_WIDTH 21
-#define LEFT_TIME_X 33
-#define LEFT_TIME_WIDTH 55
+#define MIXED_LEFT_SPRITE_X 1
+#define MIXED_LEFT_NUMBER_X 12
+#define MIXED_LEFT_NUMBER_WIDTH 18
+#define MIXED_LEFT_TIME_X 31
+#define MIXED_LEFT_TIME_WIDTH 48
 
-#define RIGHT_SPRITE_X 92
-#define RIGHT_VALUE_X 103
-#define RIGHT_VALUE_WIDTH 27
-#define RIGHT_READY_X 133
-#define RIGHT_READY_WIDTH 27
+#define MIXED_RIGHT_SPRITE_X 83
+#define MIXED_RIGHT_VALUE_X 94
+#define MIXED_RIGHT_VALUE_WIDTH 27
+#define MIXED_RIGHT_READY_X 123
+#define MIXED_RIGHT_READY_WIDTH 36
+
+#define REGISTRATION_NUMBER_X 2
+#define REGISTRATION_NUMBER_WIDTH 28
+#define REGISTRATION_TIME_X 34
+#define REGISTRATION_TIME_WIDTH 43
+#define REGISTRATION_HUNDREDTH_SEPARATOR_X 80
+#define REGISTRATION_HUNDREDTH_X 85
+#define REGISTRATION_HUNDREDTH_WIDTH 20
+#define REGISTRATION_RANK_X 128
+#define REGISTRATION_RANK_WIDTH 16
+#define REGISTRATION_RANK_SUFFIX_X 146
+#define REGISTRATION_RANK_SUFFIX_WIDTH 12
 
 #define FOOTER_Y 54
 
@@ -223,6 +235,32 @@ static void draw_status_block(
     }
 }
 
+static void create_registration_rank(
+        lv_obj_t *screen,
+        const MatrixRaceLeftRow *row,
+        int32_t y,
+        const MatrixTextStyle *style,
+        const lv_font_t *font) {
+    create_label(
+            screen,
+            row->rank,
+            REGISTRATION_RANK_X,
+            y,
+            REGISTRATION_RANK_WIDTH,
+            LV_TEXT_ALIGN_RIGHT,
+            style,
+            font);
+    create_label(
+            screen,
+            "e",
+            REGISTRATION_RANK_SUFFIX_X,
+            y - 2,
+            REGISTRATION_RANK_SUFFIX_WIDTH,
+            LV_TEXT_ALIGN_LEFT,
+            style,
+            font);
+}
+
 static lv_color_t lv_color_from_pixel(MatrixPixel pixel) {
     const uint8_t red =
             (uint8_t)((((pixel >> 11u) & 0x1fu) * 255u) / 31u);
@@ -353,7 +391,8 @@ bool matrix_race_screen_render(
         uint8_t animation_frame) {
     if (framebuffer == NULL
             || data == NULL
-            || theme == NULL) {
+            || theme == NULL
+            || data->layout > MATRIX_RACE_LAYOUT_MIXED_COMPACT_FOOTER) {
         return false;
     }
 
@@ -382,6 +421,11 @@ bool matrix_race_screen_render(
     lv_obj_clean(screen);
     style_screen(screen, theme);
 
+    const bool mixed_layout =
+            data->layout != MATRIX_RACE_LAYOUT_REGISTRATIONS;
+    const bool compact_mixed =
+            data->layout == MATRIX_RACE_LAYOUT_MIXED_COMPACT_FOOTER;
+
     create_line(
             screen,
             0,
@@ -389,18 +433,24 @@ bool matrix_race_screen_render(
             MATRIX_DISPLAY_WIDTH,
             1,
             theme->line_color);
-    create_line(
-            screen,
-            MAIN_COLUMN_X,
-            HEADER_LINE_Y,
-            1,
-            MATRIX_DISPLAY_HEIGHT - HEADER_LINE_Y,
-            theme->line_color);
+
+    if (mixed_layout) {
+        create_line(
+                screen,
+                MAIN_COLUMN_X,
+                HEADER_LINE_Y,
+                1,
+                MATRIX_DISPLAY_HEIGHT - HEADER_LINE_Y,
+                theme->line_color);
+    }
+
     create_line(
             screen,
             0,
             FOOTER_LINE_Y,
-            MAIN_COLUMN_X,
+            mixed_layout
+                    ? MAIN_COLUMN_X
+                    : MATRIX_DISPLAY_WIDTH,
             1,
             theme->line_color);
 
@@ -476,63 +526,138 @@ bool matrix_race_screen_render(
             &theme->header,
             header_font);
 
-    static const int32_t left_row_y[] = {
-        13,
-        26,
-        39
-    };
+    if (!mixed_layout) {
+        static const int32_t registration_row_y[] = {
+            12,
+            22,
+            32,
+            42
+        };
 
-    for (size_t index = 0;
-            index < MATRIX_RACE_LEFT_ROW_COUNT;
-            index++) {
-        create_label(
-                screen,
-                data->left_rows[index].number,
-                LEFT_NUMBER_X,
-                left_row_y[index],
-                LEFT_NUMBER_WIDTH,
-                LV_TEXT_ALIGN_RIGHT,
-                &theme->row_number,
-                row_number_font);
+        for (size_t index = 0;
+                index < MATRIX_RACE_LEFT_ROW_COUNT;
+                index++) {
+            const MatrixRaceLeftRow *row =
+                    &data->left_rows[index];
+            const int32_t y =
+                    registration_row_y[index];
 
-        create_label(
-                screen,
-                data->left_rows[index].time,
-                LEFT_TIME_X,
-                left_row_y[index],
-                LEFT_TIME_WIDTH,
-                LV_TEXT_ALIGN_RIGHT,
-                &theme->row_time,
-                row_time_font);
-    }
+            create_label(
+                    screen,
+                    row->number,
+                    REGISTRATION_NUMBER_X,
+                    y,
+                    REGISTRATION_NUMBER_WIDTH,
+                    LV_TEXT_ALIGN_RIGHT,
+                    &theme->row_number,
+                    row_number_font);
+            create_label(
+                    screen,
+                    row->time,
+                    REGISTRATION_TIME_X,
+                    y,
+                    REGISTRATION_TIME_WIDTH,
+                    LV_TEXT_ALIGN_RIGHT,
+                    &theme->row_time,
+                    row_time_font);
+            create_label(
+                    screen,
+                    ".",
+                    REGISTRATION_HUNDREDTH_SEPARATOR_X,
+                    y,
+                    4,
+                    LV_TEXT_ALIGN_LEFT,
+                    &theme->row_time,
+                    row_time_font);
+            create_label(
+                    screen,
+                    row->hundredths,
+                    REGISTRATION_HUNDREDTH_X,
+                    y,
+                    REGISTRATION_HUNDREDTH_WIDTH,
+                    LV_TEXT_ALIGN_LEFT,
+                    &theme->row_time,
+                    row_time_font);
+            create_registration_rank(
+                    screen,
+                    row,
+                    y,
+                    &theme->row_number,
+                    row_number_font);
+        }
+    } else {
+        static const int32_t normal_row_y[] = {
+            13,
+            26,
+            39
+        };
+        static const int32_t compact_row_y[] = {
+            12,
+            22,
+            32,
+            42
+        };
+        const size_t visible_left_rows =
+                compact_mixed
+                        ? MATRIX_RACE_LEFT_ROW_COUNT
+                        : 3u;
 
-    static const int32_t right_row_y[] = {
-        14,
-        36
-    };
+        for (size_t index = 0;
+                index < visible_left_rows;
+                index++) {
+            const int32_t y =
+                    compact_mixed
+                            ? compact_row_y[index]
+                            : normal_row_y[index];
 
-    for (size_t index = 0;
-            index < MATRIX_RACE_RIGHT_ROW_COUNT;
-            index++) {
-        create_label(
-                screen,
-                data->right_rows[index].left,
-                RIGHT_VALUE_X,
-                right_row_y[index],
-                RIGHT_VALUE_WIDTH,
-                LV_TEXT_ALIGN_CENTER,
-                &theme->large_value,
-                large_value_font);
+            create_label(
+                    screen,
+                    data->left_rows[index].number,
+                    MIXED_LEFT_NUMBER_X,
+                    y,
+                    MIXED_LEFT_NUMBER_WIDTH,
+                    LV_TEXT_ALIGN_RIGHT,
+                    &theme->row_number,
+                    row_number_font);
+            create_label(
+                    screen,
+                    data->left_rows[index].time,
+                    MIXED_LEFT_TIME_X,
+                    y,
+                    MIXED_LEFT_TIME_WIDTH,
+                    LV_TEXT_ALIGN_RIGHT,
+                    &theme->row_time,
+                    row_time_font);
+        }
 
-        create_label(
-                screen,
-                data->right_rows[index].right,
-                RIGHT_READY_X,
-                right_row_y[index],
-                RIGHT_READY_WIDTH,
-                LV_TEXT_ALIGN_CENTER,
-                &theme->large_value,
-                large_value_font);
+        static const int32_t right_row_y[] = {
+            14,
+            36
+        };
+
+        for (size_t index = 0;
+                index < MATRIX_RACE_RIGHT_ROW_COUNT;
+                index++) {
+            create_label(
+                    screen,
+                    data->right_rows[index].left,
+                    MIXED_RIGHT_VALUE_X,
+                    right_row_y[index],
+                    MIXED_RIGHT_VALUE_WIDTH,
+                    LV_TEXT_ALIGN_CENTER,
+                    &theme->large_value,
+                    large_value_font);
+
+            create_label(
+                    screen,
+                    data->right_rows[index].right,
+                    MIXED_RIGHT_READY_X,
+                    right_row_y[index],
+                    MIXED_RIGHT_READY_WIDTH,
+                    LV_TEXT_ALIGN_CENTER,
+                    &theme->large_value,
+                    large_value_font);
+        }
     }
 
     lv_obj_t *footer =
@@ -541,7 +666,9 @@ bool matrix_race_screen_render(
                     data->footer,
                     1,
                     FOOTER_Y,
-                    MAIN_COLUMN_X - 2,
+                    mixed_layout
+                            ? MAIN_COLUMN_X - 2
+                            : MATRIX_DISPLAY_WIDTH - 2,
                     LV_TEXT_ALIGN_LEFT,
                     &theme->footer,
                     footer_font);
@@ -610,20 +737,27 @@ bool matrix_race_screen_render(
                 theme->sync_icon_color);
     }
 
-    matrix_sprite_draw(
-            framebuffer,
-            MATRIX_SPRITE_RUNNER,
-            animation_frame,
-            LEFT_SPRITE_X,
-            left_row_y[0],
-            theme->sprite_color);
-    matrix_sprite_draw(
-            framebuffer,
-            MATRIX_SPRITE_WARMUP,
-            (uint8_t)(animation_frame / 2u),
-            RIGHT_SPRITE_X,
-            right_row_y[0],
-            theme->sprite_color);
+    if (mixed_layout) {
+        const uint16_t runner_y =
+                compact_mixed
+                        ? 12u
+                        : 13u;
+
+        matrix_sprite_draw(
+                framebuffer,
+                MATRIX_SPRITE_RUNNER,
+                animation_frame,
+                MIXED_LEFT_SPRITE_X,
+                runner_y,
+                theme->sprite_color);
+        matrix_sprite_draw(
+                framebuffer,
+                MATRIX_SPRITE_WARMUP,
+                (uint8_t)(animation_frame / 2u),
+                MIXED_RIGHT_SPRITE_X,
+                14u,
+                theme->sprite_color);
+    }
 
     return true;
 }
