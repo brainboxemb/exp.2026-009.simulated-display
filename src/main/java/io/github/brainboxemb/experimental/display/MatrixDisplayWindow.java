@@ -45,6 +45,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
             new ColorPicker(Color.RED);
     private final ColorPicker footerColor =
             new ColorPicker(Color.RED);
+    private final ColorPicker spriteColor =
+            new ColorPicker(Color.RED);
 
     private final ComboBox<String> fontFamily =
             new ComboBox<>();
@@ -214,7 +216,10 @@ final class MatrixDisplayWindow implements AutoCloseable {
         grid.add(footerSize, 4, 2);
         grid.add(footerColor, 5, 2);
 
-        grid.add(applyStyle, 6, 2);
+        grid.add(new Label("Sprites"), 0, 3);
+        grid.add(spriteColor, 1, 3);
+
+        grid.add(applyStyle, 6, 3);
         return grid;
     }
 
@@ -222,7 +227,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
         fontFamily.getItems().addAll(
                 "UNSCII",
                 "VBZ");
-        fontFamily.setValue("UNSCII");
+        fontFamily.setValue("VBZ");
 
         refreshFontSizes();
         fontFamily.setOnAction(
@@ -312,6 +317,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                             rgb565(rowColor.getValue()),
                             rgb565(largeColor.getValue()),
                             rgb565(footerColor.getValue()),
+                            rgb565(spriteColor.getValue()),
                             "VBZ".equals(
                                     fontFamily.getValue())
                                     ? 1
