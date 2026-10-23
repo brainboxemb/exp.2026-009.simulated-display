@@ -9,6 +9,32 @@ On Windows it is perfectly reasonable to use **NetBeans for the JavaFX applicati
 
 ## Recommended Windows setup
 
+## Fastest Windows installation with Chocolatey
+
+If Chocolatey is already installed, open **PowerShell as Administrator** and install the native toolchain explicitly:
+
+```powershell
+choco install visualstudio2026buildtools -y
+choco install visualstudio2026-workload-vctools -y
+choco install cmake -y
+```
+
+The important second package is `visualstudio2026-workload-vctools`: the Build Tools package by itself installs only the basic build-tools product, while the VCTools workload adds the Visual C/C++ compiler and recommended native build components.
+
+Optionally install VS Code through Chocolatey as well:
+
+```powershell
+choco install vscode -y
+```
+
+After installation, close and reopen VS Code and PowerShell. Verify:
+
+```powershell
+cmake --version
+```
+
+You do not need `cl` to work from an ordinary PowerShell prompt for VS Code/CMake Tools to use MSVC. CMake Tools can activate the Visual Studio developer environment itself.
+
 ### Java side
 
 Install:
@@ -38,7 +64,7 @@ The extensions provide editing, code navigation, configuration and build integra
 
 ### C compiler and CMake
 
-The recommended Windows compiler is **MSVC**, installed through **Visual Studio Build Tools**.
+The recommended Windows compiler is **MSVC**, installed through **Visual Studio Build Tools**. The Chocolatey commands above are the recommended installation route for this experiment. The Visual Studio Installer route below is the equivalent manual alternative.
 
 In the Visual Studio Installer, select the workload:
 
