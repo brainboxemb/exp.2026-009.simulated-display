@@ -44,6 +44,7 @@ final class MatrixDisplayProcessTest {
                             0xffff,
                             0xffff,
                             0xffff,
+                            0xf800,
                             0,
                             10,
                             10,
