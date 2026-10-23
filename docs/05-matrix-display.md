@@ -42,8 +42,14 @@ through the stretch cycle; the warmup animation advances at half the runner
 rate.
 
 Sprite bitmaps, frame selection and drawing remain native C responsibilities.
-JavaFX only sends a periodic animation tick to the native host and displays the
-resulting RGB565 frame.
+JavaFX sends the exact master animation frame to the native host and displays
+the resulting RGB565 frame.
+
+For visual sprite debugging, JavaFX exposes manual frame controls. The automatic
+animation can be paused and stepped one master frame backward or forward. The
+status label shows the corresponding runner and warmup frame numbers, making
+arm/leg phase and accidental pixel thickening inspectable on the real 160×64
+layout.
 
 ## Theme configuration
 
