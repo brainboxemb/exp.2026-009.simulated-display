@@ -671,6 +671,13 @@ static void test_registration_layout_uses_full_width_without_sprites(void) {
                     0,
                     0,
                     255);
+    theme.row_number.color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    255,
+                    0);
+    theme.row_time.color =
+            theme.row_number.color;
 
     assert(
             matrix_race_screen_render(
@@ -697,6 +704,18 @@ static void test_registration_layout_uses_full_width_without_sprites(void) {
                     4,
                     13)
             != theme.sprite_color);
+
+    /*
+     * The normal registration preview shows three rows. The fourth row at
+     * y=42 is reserved for real data later and is not part of the default
+     * preview.
+     */
+    assert(
+            !row_contains_color(
+                    &framebuffer,
+                    45,
+                    theme.row_number.color,
+                    MATRIX_DISPLAY_WIDTH));
 }
 
 static void test_registration_overflow_removes_footer(void) {
