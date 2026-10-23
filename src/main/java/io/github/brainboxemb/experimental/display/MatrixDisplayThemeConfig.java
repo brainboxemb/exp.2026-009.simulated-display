@@ -7,6 +7,7 @@ record MatrixDisplayThemeConfig(
         int rowColor,
         int largeColor,
         int footerColor,
+        int spriteColor,
         int fontFamily,
         int headerSize,
         int rowSize,
@@ -20,6 +21,7 @@ record MatrixDisplayThemeConfig(
         requireUnsigned16(rowColor);
         requireUnsigned16(largeColor);
         requireUnsigned16(footerColor);
+        requireUnsigned16(spriteColor);
 
         if (fontFamily < 0 || fontFamily > 1) {
             throw new IllegalArgumentException(
