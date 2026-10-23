@@ -31,7 +31,8 @@ static void test_default_screen_renders_lines(void) {
             matrix_race_screen_render(
                     &framebuffer,
                     &SAMPLE,
-                    &theme));
+                    &theme,
+                    0));
 
     assert(
             matrix_framebuffer_get(
@@ -69,7 +70,8 @@ static void test_font_family_and_size_are_configurable(void) {
             matrix_race_screen_render(
                     &framebuffer,
                     &SAMPLE,
-                    &theme));
+                    &theme,
+                    0));
 }
 
 static void test_vbz_9_and_numeric_12_render(void) {
@@ -97,7 +99,8 @@ static void test_vbz_9_and_numeric_12_render(void) {
             matrix_race_screen_render(
                     &framebuffer,
                     &SAMPLE,
-                    &theme));
+                    &theme,
+                    0));
 }
 
 static void test_independent_line_and_text_colors_render(void) {
@@ -120,7 +123,8 @@ static void test_independent_line_and_text_colors_render(void) {
             matrix_race_screen_render(
                     &framebuffer,
                     &SAMPLE,
-                    &theme));
+                    &theme,
+                    0));
 
     assert(
             matrix_framebuffer_get(
@@ -151,7 +155,8 @@ static void test_pixel_fonts_render_only_theme_colors(void) {
             matrix_race_screen_render(
                     &framebuffer,
                     &SAMPLE,
-                    &theme));
+                    &theme,
+                    0));
 
     for (size_t index = 0;
             index < MATRIX_DISPLAY_PIXEL_COUNT;
@@ -291,7 +296,8 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
             matrix_race_screen_render(
                     &framebuffer,
                     &SAMPLE,
-                    &theme));
+                    &theme,
+                    0));
 
     assert(
             row_contains_color(
@@ -377,6 +383,67 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
     lv_draw_buf_destroy(draw_buffer);
 }
 
+
+static void test_race_sprites_animate_in_right_hand_rows(void) {
+    MatrixFramebuffer frame0;
+    MatrixFramebuffer frame2;
+    MatrixTheme theme =
+            matrix_theme_default_create();
+
+    const MatrixPixel sprite_color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    255,
+                    255);
+    theme.large_value.color = sprite_color;
+
+    assert(
+            matrix_race_screen_render(
+                    &frame0,
+                    &SAMPLE,
+                    &theme,
+                    0));
+    assert(
+            matrix_race_screen_render(
+                    &frame2,
+                    &SAMPLE,
+                    &theme,
+                    2));
+
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    96,
+                    14)
+            == sprite_color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    96,
+                    36)
+            == sprite_color);
+
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    92,
+                    40)
+            != sprite_color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame2,
+                    92,
+                    40)
+            == sprite_color);
+
+    assert(
+            memcmp(
+                    frame0.pixels,
+                    frame2.pixels,
+                    sizeof(frame0.pixels))
+            != 0);
+}
+
 static void test_unsupported_font_size_is_rejected(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
@@ -388,7 +455,8 @@ static void test_unsupported_font_size_is_rejected(void) {
             !matrix_race_screen_render(
                     &framebuffer,
                     &SAMPLE,
-                    &theme));
+                    &theme,
+                    0));
 }
 
 int main(void) {
@@ -401,6 +469,7 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
+    test_race_sprites_animate_in_right_hand_rows();
     test_unsupported_font_size_is_rejected();
 
     puts("matrix_race_screen tests passed");
