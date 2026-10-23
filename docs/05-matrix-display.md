@@ -20,9 +20,9 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 
 The current demo screen supports four preview layouts:
 
-- `Registraties`: up to four full-width registration rows with team number,
-  main time, hundredths and ranking. The ranking suffix is a separate raised
-  VBZ `e`; the footer spans the full 160-pixel width;
+- `Registraties`: the default preview shows three full-width registration
+  rows with team number, main time, hundredths and ranking. The ranking suffix
+  is a separate raised VBZ `e`; the footer spans the full 160-pixel width;
 - `Registraties (>4)`: a fifth registration uses the footer area and the
   footer disappears completely;
 - `Registraties + klaarstaan`: three compact incoming-team rows on the left
@@ -71,7 +71,8 @@ pixel lower at y=1. When the status group grows into the normal clock area, the
 clock field shrinks from the right and its centered text therefore moves left.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
-sprite, so its number starts at x=12. The runner uses the original six-frame
+sprite. Its number starts at x=12 with a 21-pixel field, so three-digit values
+such as `999` fit before the time field starts at x=33. The runner uses the original six-frame
 legacy SpriteMap1 gait, nearest-neighbour scaled from 7×7 to 10×12. No extra
 arm layer or independently designed gait is added; preserving the recognizable
 legacy running motion is the current priority.
