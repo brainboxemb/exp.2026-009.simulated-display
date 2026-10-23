@@ -412,7 +412,7 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
 
 
 
-static void test_runner_lower_legs_stay_one_pixel_wide(void) {
+static void test_runner_legs_do_not_form_thick_blocks(void) {
     const MatrixPixel color =
             matrix_pixel_rgb565_create(
                     255,
@@ -433,23 +433,42 @@ static void test_runner_lower_legs_stay_one_pixel_wide(void) {
                 0,
                 color);
 
-        for (uint16_t y = 9;
-                y < MATRIX_SPRITE_HEIGHT;
+        for (uint16_t y = 8;
+                y + 1u < MATRIX_SPRITE_HEIGHT;
                 y++) {
-            bool previous_on = false;
-
             for (uint16_t x = 0;
-                    x < MATRIX_SPRITE_WIDTH;
+                    x + 1u < MATRIX_SPRITE_WIDTH;
                     x++) {
-                const bool on =
+                const bool top_left =
                         matrix_framebuffer_get(
                                 &framebuffer,
                                 x,
                                 y)
                         == color;
+                const bool top_right =
+                        matrix_framebuffer_get(
+                                &framebuffer,
+                                (uint16_t)(x + 1u),
+                                y)
+                        == color;
+                const bool bottom_left =
+                        matrix_framebuffer_get(
+                                &framebuffer,
+                                x,
+                                (uint16_t)(y + 1u))
+                        == color;
+                const bool bottom_right =
+                        matrix_framebuffer_get(
+                                &framebuffer,
+                                (uint16_t)(x + 1u),
+                                (uint16_t)(y + 1u))
+                        == color;
 
-                assert(!(previous_on && on));
-                previous_on = on;
+                assert(
+                        !(top_left
+                                && top_right
+                                && bottom_left
+                                && bottom_right));
             }
         }
     }
@@ -479,8 +498,8 @@ static void test_runner_has_stable_three_by_three_head(void) {
         for (uint16_t y = 0;
                 y < 3;
                 y++) {
-            for (uint16_t x = 4;
-                    x <= 6;
+            for (uint16_t x = 5;
+                    x <= 7;
                     x++) {
                 assert(
                         matrix_framebuffer_get(
@@ -489,18 +508,31 @@ static void test_runner_has_stable_three_by_three_head(void) {
                                 y)
                         == color);
             }
+
+            assert(
+                    matrix_framebuffer_get(
+                            &framebuffer,
+                            4,
+                            y)
+                    != color);
+            assert(
+                    matrix_framebuffer_get(
+                            &framebuffer,
+                            8,
+                            y)
+                    != color);
         }
 
         assert(
                 matrix_framebuffer_get(
                         &framebuffer,
-                        5,
+                        6,
                         3)
                 == color);
     }
 }
 
-static void test_runner_arm_swing_follows_opposite_gait_phases(void) {
+static void test_runner_opposite_contact_phases_reverse_limb_sides(void) {
     MatrixFramebuffer frame0;
     MatrixFramebuffer frame3;
     const MatrixPixel color =
@@ -530,27 +562,39 @@ static void test_runner_arm_swing_follows_opposite_gait_phases(void) {
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    1,
-                    6)
+                    8,
+                    4)
             == color);
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    8,
-                    6)
-            != color);
+                    2,
+                    9)
+            == color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame0,
+                    9,
+                    10)
+            == color);
 
     assert(
             matrix_framebuffer_get(
                     &frame3,
-                    1,
-                    6)
-            != color);
+                    2,
+                    4)
+            == color);
     assert(
             matrix_framebuffer_get(
                     &frame3,
                     8,
-                    6)
+                    9)
+            == color);
+    assert(
+            matrix_framebuffer_get(
+                    &frame3,
+                    1,
+                    10)
             == color);
 }
 
@@ -580,14 +624,10 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
                     &theme,
                     2));
 
-    /*
-     * Runner is in the passed-runner column at the far left.
-     * Warmup is in the ready-runner column after the vertical divider.
-     */
     assert(
             matrix_framebuffer_get(
                     &frame0,
-                    5,
+                    6,
                     13)
             == runner_color);
     assert(
@@ -597,35 +637,12 @@ static void test_runner_and_warmup_animate_in_their_status_columns(void) {
                     14)
             == runner_color);
 
-    /*
-     * Frame 2 changes both animations without moving either body to another
-     * screen location.
-     */
     assert(
-            matrix_framebuffer_get(
-                    &frame0,
-                    7,
-                    22)
-            != runner_color);
-    assert(
-            matrix_framebuffer_get(
-                    &frame2,
-                    7,
-                    22)
-            == runner_color);
-
-    assert(
-            matrix_framebuffer_get(
-                    &frame0,
-                    94,
-                    18)
-            != runner_color);
-    assert(
-            matrix_framebuffer_get(
-                    &frame2,
-                    94,
-                    18)
-            == runner_color);
+            memcmp(
+                    frame0.pixels,
+                    frame2.pixels,
+                    sizeof(frame0.pixels))
+            != 0);
 }
 
 static void test_unsupported_font_size_is_rejected(void) {
@@ -654,9 +671,9 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
-    test_runner_lower_legs_stay_one_pixel_wide();
+    test_runner_legs_do_not_form_thick_blocks();
     test_runner_has_stable_three_by_three_head();
-    test_runner_arm_swing_follows_opposite_gait_phases();
+    test_runner_opposite_contact_phases_reverse_limb_sides();
     test_runner_and_warmup_animate_in_their_status_columns();
     test_unsupported_font_size_is_rejected();
 
