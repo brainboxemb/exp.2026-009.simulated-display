@@ -32,8 +32,9 @@ The current demo screen follows the supplied layout reference:
 The current values are demo data in `matrix_host_main.c`. They will later come from the synchronized application-data model.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
-sprite, so its number starts at x=12. The runner uses the original six-frame
-legacy SpriteMap1 gait, nearest-neighbour scaled from 7×7 to 10×12.
+sprite, so its number starts at x=12. The runner keeps the original six-frame
+legacy SpriteMap1 gait for body and legs, scaled from 7×7 to 10×12. The extra
+matrix pixels add an explicit arm swing that reverses through the gait cycle.
 
 The first ready-runner row reserves the first 10 pixels after the vertical
 divider for the warmup sprite. Its body and legs stay fixed while the arms move
