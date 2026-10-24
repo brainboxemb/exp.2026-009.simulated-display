@@ -310,7 +310,7 @@ int main(void) {
                 uint8_t layout = 0;
 
                 if (!read_u8(&layout)
-                        || layout > MATRIX_RACE_LAYOUT_MIXED_READY_OVERFLOW) {
+                        || layout > MATRIX_RACE_LAYOUT_FONT_TEST) {
                     return 6;
                 }
 
