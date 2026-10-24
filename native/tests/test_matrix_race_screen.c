@@ -485,14 +485,16 @@ static void test_numeric_14_nine_curves_at_bottom(void) {
     lv_draw_buf_destroy(draw_buffer);
 }
 
-static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
+static uint8_t numeric_12_row_mask(
+        char digit,
+        uint32_t row) {
     lv_font_glyph_dsc_t glyph = {0};
 
     assert(
             matrix_font_numeric_12.get_glyph_dsc(
                     &matrix_font_numeric_12,
                     &glyph,
-                    '0',
+                    (uint32_t)digit,
                     0));
 
     lv_draw_buf_t *draw_buffer =
@@ -503,37 +505,65 @@ static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
                     LV_STRIDE_AUTO);
 
     assert(draw_buffer != NULL);
-
     assert(
             matrix_font_numeric_12.get_glyph_bitmap(
                     &glyph,
                     draw_buffer)
             == draw_buffer);
 
-    for (uint32_t x = 1;
-            x <= 6;
+    uint8_t mask = 0;
+
+    for (uint32_t x = 0;
+            x < glyph.box_w;
             x++) {
-        assert(
-                draw_buffer->data[x]
-                == 0xffu);
-        assert(
-                draw_buffer->data[
-                        draw_buffer->header.stride
-                        + x]
-                == 0xffu);
-        assert(
-                draw_buffer->data[
-                        10u * draw_buffer->header.stride
-                        + x]
-                == 0xffu);
-        assert(
-                draw_buffer->data[
-                        11u * draw_buffer->header.stride
-                        + x]
-                == 0xffu);
+        if (draw_buffer->data[
+                row * draw_buffer->header.stride
+                + x] != 0) {
+            mask |=
+                    (uint8_t)(0x80u >> x);
+        }
     }
 
     lv_draw_buf_destroy(draw_buffer);
+    return mask;
+}
+
+static void test_numeric_12_preserves_original_vbz_shapes(void) {
+    /*
+     * These rows preserve the characteristic details from the original VBZ
+     * 9px digits instead of replacing them with generic seven-segment-like
+     * shapes.
+     */
+
+    /* 2: diagonal exit into side pixels before the bottom bar. */
+    assert(numeric_12_row_mask('2', 9) == 0xcc);
+    assert(numeric_12_row_mask('2', 10) == 0xfc);
+
+    /* 3: the middle transition is a narrow diagonal, not a thick block. */
+    assert(numeric_12_row_mask('3', 5) == 0x18);
+    assert(numeric_12_row_mask('3', 6) == 0x18);
+    assert(numeric_12_row_mask('3', 7) == 0x0c);
+
+    /* 4: left stem first, then the inner/right stem and crossbar. */
+    assert(numeric_12_row_mask('4', 0) == 0xc0);
+    assert(numeric_12_row_mask('4', 3) == 0xd8);
+    assert(numeric_12_row_mask('4', 6) == 0xfc);
+    assert(numeric_12_row_mask('4', 8) == 0x18);
+
+    /* 5 and 6: bottom curve closes through side pixels into .####. */
+    assert(numeric_12_row_mask('5', 9) == 0xcc);
+    assert(numeric_12_row_mask('5', 10) == 0x78);
+    assert(numeric_12_row_mask('6', 2) == 0xcc);
+    assert(numeric_12_row_mask('6', 10) == 0x78);
+
+    /* 8: one compact middle waist rather than a four-row solid bridge. */
+    assert(numeric_12_row_mask('8', 5) == 0x78);
+    assert(numeric_12_row_mask('8', 6) == 0xcc);
+
+    /* 9: smaller upper loop and a rounded lower return. */
+    assert(numeric_12_row_mask('9', 4) == 0x7c);
+    assert(numeric_12_row_mask('9', 8) == 0xcc);
+    assert(numeric_12_row_mask('9', 10) == 0x78);
 }
 
 
@@ -1178,7 +1208,7 @@ int main(void) {
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_14_uses_two_pixel_horizontal_strokes();
     test_numeric_14_nine_curves_at_bottom();
-    test_numeric_12_uses_two_pixel_horizontal_strokes();
+    test_numeric_12_preserves_original_vbz_shapes();
     test_header_statuses_shift_content_and_clock();
     test_font_test_layout_aligns_all_three_font_sizes();
     test_registration_layout_uses_full_width_without_sprites();
