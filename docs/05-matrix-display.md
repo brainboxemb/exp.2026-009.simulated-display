@@ -18,7 +18,7 @@ The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native
 
 ## First race screen
 
-The current demo screen supports four preview layouts:
+The current demo screen supports five preview layouts:
 
 - `Registraties`: the default preview shows three full-width registration
   rows with the same roomy 13-pixel vertical cadence as the mixed left side.
@@ -34,7 +34,11 @@ The current demo screen supports four preview layouts:
   footer area for additional ready teams. The footer remains only on the left
   and is therefore 81 pixels wide. The three right-side rows keep the first
   row at y=14 and use y=31 and y=48 for the extra rows, consuming the free
-  pixels at the bottom instead of shifting the whole group upward.
+  pixels at the bottom instead of shifting the whole group upward;
+- `Font test`: a dedicated non-race screen that shows `0123456789` once in
+  the 12px numeric font and once in the 14px numeric font. It deliberately
+  omits the race header, footer and sprites so individual glyphs can be judged
+  directly.
 
 The two mixed layouts show the runner and warmup sprites. Registration-only
 layouts have no middle divider and no sprites. All layouts keep the header with
@@ -43,7 +47,7 @@ connection/sync statuses. There is no `Prepare` text.
 
 The current values are demo data in `matrix_host_main.c`. Because the real
 race-data feed is not connected yet, JavaFX exposes a temporary `Layout`
-dropdown for selecting these four preview modes. Later the same native layout
+dropdown for selecting these five preview modes. Later the same native layout
 selection will be derived from the real registration and ready-team counts.
 
 The location label starts at x=0 so values such as `WP-99` use the full left edge of the header.
@@ -156,7 +160,10 @@ The font registry currently exposes two 1-bpp families:
 
 The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. Large numeric values can use separate hand-drawn 12px or 14px bitmap fonts; both are intentionally numeric-only rather than mechanically stretched general-purpose VBZ fonts.
 
-The JavaFX simulator exposes both families for comparison. VBZ is the default: 9px for header, rows and footer, with the dedicated 14px numeric font for large values. The 12px numeric variant remains selectable for comparison.
+The JavaFX simulator exposes both families for comparison. VBZ is the default: 9px for header, rows and footer, with the dedicated 14px numeric font for large values. The 12px numeric variant remains selectable for comparison. The dedicated
+`Font test` layout shows both numeric sizes at the same time, which is the
+preferred visual check when adjusting individual glyphs such as the lower curve
+of the 14px `9`.
 
 ## Physical HUB75 output
 
