@@ -40,7 +40,7 @@ static void test_default_theme_uses_vbz_and_independent_sprite_color(void) {
     assert(theme.row_time.font.family == MATRIX_FONT_VBZ);
     assert(theme.row_time.font.size == 9);
     assert(theme.large_value.font.family == MATRIX_FONT_VBZ);
-    assert(theme.large_value.font.size == 14);
+    assert(theme.large_value.font.size == 15);
     assert(theme.footer.font.family == MATRIX_FONT_VBZ);
     assert(theme.footer.font.size == 9);
 
@@ -391,17 +391,17 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
                     81));
 }
 
-static void test_numeric_14_uses_two_pixel_horizontal_strokes(void) {
+static void test_numeric_15_uses_two_pixel_horizontal_strokes(void) {
     lv_font_glyph_dsc_t glyph = {0};
 
     assert(
-            matrix_font_numeric_14.get_glyph_dsc(
-                    &matrix_font_numeric_14,
+            matrix_font_numeric_15.get_glyph_dsc(
+                    &matrix_font_numeric_15,
                     &glyph,
                     '0',
                     0));
     assert(glyph.box_w == 9);
-    assert(glyph.box_h == 14);
+    assert(glyph.box_h == 15);
     assert(glyph.adv_w == 10);
 
     lv_draw_buf_t *draw_buffer =
@@ -413,7 +413,7 @@ static void test_numeric_14_uses_two_pixel_horizontal_strokes(void) {
 
     assert(draw_buffer != NULL);
     assert(
-            matrix_font_numeric_14.get_glyph_bitmap(
+            matrix_font_numeric_15.get_glyph_bitmap(
                     &glyph,
                     draw_buffer)
             == draw_buffer);
@@ -434,7 +434,7 @@ static void test_numeric_14_uses_two_pixel_horizontal_strokes(void) {
                 == 0xffu);
         assert(
                 draw_buffer->data[
-                        13u * draw_buffer->header.stride
+                        14u * draw_buffer->header.stride
                         + x]
                 == 0xffu);
     }
@@ -442,12 +442,12 @@ static void test_numeric_14_uses_two_pixel_horizontal_strokes(void) {
     lv_draw_buf_destroy(draw_buffer);
 }
 
-static void test_numeric_14_nine_curves_at_bottom(void) {
+static void test_numeric_15_nine_curves_at_bottom(void) {
     lv_font_glyph_dsc_t glyph = {0};
 
     assert(
-            matrix_font_numeric_14.get_glyph_dsc(
-                    &matrix_font_numeric_14,
+            matrix_font_numeric_15.get_glyph_dsc(
+                    &matrix_font_numeric_15,
                     &glyph,
                     '9',
                     0));
@@ -461,14 +461,14 @@ static void test_numeric_14_nine_curves_at_bottom(void) {
 
     assert(draw_buffer != NULL);
     assert(
-            matrix_font_numeric_14.get_glyph_bitmap(
+            matrix_font_numeric_15.get_glyph_bitmap(
                     &glyph,
                     draw_buffer)
             == draw_buffer);
 
     assert(
             draw_buffer->data[
-                    12u * draw_buffer->header.stride
+                    14u * draw_buffer->header.stride
                     + 2u]
             == 0xffu);
     assert(
@@ -478,7 +478,7 @@ static void test_numeric_14_nine_curves_at_bottom(void) {
             == 0xffu);
     assert(
             draw_buffer->data[
-                    13u * draw_buffer->header.stride
+                    14u * draw_buffer->header.stride
                     + 7u]
             == 0x00u);
 
@@ -1176,8 +1176,8 @@ int main(void) {
     test_vbz_metrics_match_source_font();
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
-    test_numeric_14_uses_two_pixel_horizontal_strokes();
-    test_numeric_14_nine_curves_at_bottom();
+    test_numeric_15_uses_two_pixel_horizontal_strokes();
+    test_numeric_15_nine_curves_at_bottom();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_header_statuses_shift_content_and_clock();
     test_font_test_layout_aligns_all_three_font_sizes();
