@@ -391,12 +391,12 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
                     81));
 }
 
-static void assert_scaled_numeric_digit(
+static uint16_t numeric_row_mask(
         const lv_font_t *font,
         char digit,
+        uint32_t row,
         uint8_t expected_width,
-        uint8_t expected_height,
-        const uint8_t source_rows[9]) {
+        uint8_t expected_height) {
     lv_font_glyph_dsc_t glyph = {0};
 
     assert(
@@ -423,110 +423,103 @@ static void assert_scaled_numeric_digit(
                     draw_buffer)
             == draw_buffer);
 
-    for (uint32_t y = 0;
-            y < expected_height;
-            y++) {
-        const uint32_t source_y =
-                (y * 9u)
-                / expected_height;
+    uint16_t mask = 0;
 
-        for (uint32_t x = 0;
-                x < expected_width;
-                x++) {
-            const uint32_t source_x =
-                    (x * 7u)
-                    / expected_width;
-            const uint8_t source_mask =
-                    (uint8_t)(
+    for (uint32_t x = 0;
+            x < glyph.box_w;
+            x++) {
+        if (draw_buffer->data[
+                row * draw_buffer->header.stride
+                + x] != 0) {
+            mask |=
+                    (uint16_t)(
                             1u
-                            << (6u - source_x));
-            const bool expected_on =
-                    (source_rows[source_y]
-                            & source_mask)
-                    != 0;
-            const bool actual_on =
-                    draw_buffer->data[
-                            y * draw_buffer->header.stride
-                            + x]
-                    != 0;
-
-            assert(actual_on == expected_on);
+                            << (glyph.box_w - 1u - x));
         }
     }
 
     lv_draw_buf_destroy(draw_buffer);
+    return mask;
 }
 
-static void test_numeric_fonts_scale_original_vbz_shapes(void) {
-    static const uint8_t source_digits[10][9] = {
-        {
-            0x3c, 0x66, 0x66,
-            0x66, 0x66, 0x66,
-            0x66, 0x66, 0x3c
-        },
-        {
-            0x18, 0x38, 0x78,
-            0x18, 0x18, 0x18,
-            0x18, 0x18, 0x18
-        },
-        {
-            0x3c, 0x66, 0x66,
-            0x06, 0x0c, 0x18,
-            0x30, 0x66, 0x7e
-        },
-        {
-            0x3c, 0x66, 0x66,
-            0x06, 0x0c, 0x06,
-            0x66, 0x66, 0x3c
-        },
-        {
-            0x60, 0x60, 0x60,
-            0x6c, 0x6c, 0x7e,
-            0x0c, 0x0c, 0x0c
-        },
-        {
-            0x7e, 0x66, 0x60,
-            0x60, 0x7c, 0x06,
-            0x06, 0x66, 0x3c
-        },
-        {
-            0x3c, 0x66, 0x60,
-            0x60, 0x7c, 0x66,
-            0x66, 0x66, 0x3c
-        },
-        {
-            0x7e, 0x66, 0x06,
-            0x0c, 0x18, 0x30,
-            0x60, 0x60, 0x60
-        },
-        {
-            0x3c, 0x66, 0x66,
-            0x66, 0x3c, 0x66,
-            0x66, 0x66, 0x3c
-        },
-        {
-            0x3c, 0x66, 0x66,
-            0x66, 0x3e, 0x06,
-            0x06, 0x66, 0x3c
-        }
-    };
+static void test_numeric_fonts_use_fixed_symmetric_glyphs(void) {
+    /*
+     * The larger variants are authored at their final size. In particular,
+     * round digits keep two-pixel side stems instead of the asymmetric
+     * two/three-pixel stems produced by automatic 7->9/10 scaling.
+     */
+    assert(
+            numeric_row_mask(
+                    &matrix_font_numeric_12,
+                    '0',
+                    2,
+                    9u,
+                    12u)
+            == 0x183u);
+    assert(
+            numeric_row_mask(
+                    &matrix_font_numeric_14,
+                    '0',
+                    2,
+                    10u,
+                    14u)
+            == 0x303u);
 
-    for (uint32_t digit = 0;
-            digit < 10u;
-            digit++) {
-        assert_scaled_numeric_digit(
-                &matrix_font_numeric_12,
-                (char)('0' + digit),
-                9u,
-                12u,
-                source_digits[digit]);
-        assert_scaled_numeric_digit(
-                &matrix_font_numeric_14,
-                (char)('0' + digit),
-                10u,
-                14u,
-                source_digits[digit]);
-    }
+    /*
+     * Top and bottom curves are centered, and the 8 keeps a narrow waist.
+     */
+    assert(
+            numeric_row_mask(
+                    &matrix_font_numeric_12,
+                    '0',
+                    0,
+                    9u,
+                    12u)
+            == 0x07cu);
+    assert(
+            numeric_row_mask(
+                    &matrix_font_numeric_12,
+                    '0',
+                    11,
+                    9u,
+                    12u)
+            == 0x07cu);
+    assert(
+            numeric_row_mask(
+                    &matrix_font_numeric_14,
+                    '8',
+                    6,
+                    10u,
+                    14u)
+            == 0x0fcu);
+
+    /*
+     * Characteristic VBZ details remain present in 2, 4 and 9.
+     */
+    assert(
+            numeric_row_mask(
+                    &matrix_font_numeric_12,
+                    '2',
+                    9,
+                    9u,
+                    12u)
+            == 0x186u);
+    assert(
+            numeric_row_mask(
+                    &matrix_font_numeric_12,
+                    '4',
+                    3,
+                    9u,
+                    12u)
+            == 0x198u);
+    assert(
+            numeric_row_mask(
+                    &matrix_font_numeric_14,
+                    '9',
+                    13,
+                    10u,
+                    14u)
+            == 0x0fcu);
 }
 
 static int first_header_pixel_x(
@@ -1168,7 +1161,7 @@ int main(void) {
     test_vbz_metrics_match_source_font();
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
-    test_numeric_fonts_scale_original_vbz_shapes();
+    test_numeric_fonts_use_fixed_symmetric_glyphs();
     test_header_statuses_shift_content_and_clock();
     test_font_test_layout_aligns_all_three_font_sizes();
     test_registration_layout_uses_full_width_without_sprites();
