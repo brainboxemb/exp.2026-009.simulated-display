@@ -757,7 +757,7 @@ static void test_header_statuses_shift_content_and_clock(void) {
     assert(all_status_clock_x < connected_clock_x);
 }
 
-static void test_font_test_layout_shows_both_numeric_fonts(void) {
+static void test_font_test_layout_aligns_all_three_font_sizes(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
             matrix_theme_default_create();
@@ -787,15 +787,75 @@ static void test_font_test_layout_shows_both_numeric_fonts(void) {
     assert(
             row_contains_color(
                     &framebuffer,
-                    2,
+                    1,
                     theme.large_value.color,
                     MATRIX_DISPLAY_WIDTH));
     assert(
             row_contains_color(
                     &framebuffer,
-                    29,
+                    14,
                     theme.large_value.color,
                     MATRIX_DISPLAY_WIDTH));
+    assert(
+            row_contains_color(
+                    &framebuffer,
+                    30,
+                    theme.large_value.color,
+                    MATRIX_DISPLAY_WIDTH));
+
+    /*
+     * Every font row uses ten fixed 14-pixel digit cells starting at x=18.
+     * Each cell must contain its corresponding glyph, so 0..9 stay vertically
+     * aligned while still retaining visible spacing between cells.
+     */
+    for (uint16_t digit = 0;
+            digit < 10u;
+            digit++) {
+        const uint16_t cell_x =
+                (uint16_t)(18u + digit * 14u);
+        bool row9_has_digit = false;
+        bool row12_has_digit = false;
+        bool row14_has_digit = false;
+
+        for (uint16_t x = cell_x;
+                x < cell_x + 14u;
+                x++) {
+            for (uint16_t y = 1u;
+                    y < 10u;
+                    y++) {
+                row9_has_digit |=
+                        matrix_framebuffer_get(
+                                &framebuffer,
+                                x,
+                                y)
+                        == theme.large_value.color;
+            }
+            for (uint16_t y = 14u;
+                    y < 26u;
+                    y++) {
+                row12_has_digit |=
+                        matrix_framebuffer_get(
+                                &framebuffer,
+                                x,
+                                y)
+                        == theme.large_value.color;
+            }
+            for (uint16_t y = 30u;
+                    y < 44u;
+                    y++) {
+                row14_has_digit |=
+                        matrix_framebuffer_get(
+                                &framebuffer,
+                                x,
+                                y)
+                        == theme.large_value.color;
+            }
+        }
+
+        assert(row9_has_digit);
+        assert(row12_has_digit);
+        assert(row14_has_digit);
+    }
     assert(
             !row_contains_color(
                     &framebuffer,
@@ -1120,7 +1180,7 @@ int main(void) {
     test_numeric_14_nine_curves_at_bottom();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_header_statuses_shift_content_and_clock();
-    test_font_test_layout_shows_both_numeric_fonts();
+    test_font_test_layout_aligns_all_three_font_sizes();
     test_registration_layout_uses_full_width_without_sprites();
     test_registration_overflow_removes_footer();
     test_ready_overflow_keeps_left_half_footer();
