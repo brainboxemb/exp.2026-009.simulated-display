@@ -76,7 +76,7 @@ static const NumericGlyph glyphs[] = {
         0x7c, 0x0c, 0x0c, 0x0c,
         0xcc, 0xcc, 0x78, 0x78
     }}
-}
+};
 
 #define GLYPH_COUNT (sizeof(glyphs) / sizeof(glyphs[0]))
 
