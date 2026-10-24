@@ -358,6 +358,48 @@ static lv_obj_t *create_label(
     return label;
 }
 
+static void create_font_test_row(
+        lv_obj_t *screen,
+        const char *label,
+        int32_t y,
+        const MatrixTextStyle *style,
+        const lv_font_t *label_font,
+        const lv_font_t *digit_font) {
+    static const char digits[] = "0123456789";
+    const int32_t digit_start_x = 18;
+    const int32_t digit_cell_width = 14;
+
+    create_label(
+            screen,
+            label,
+            0,
+            y,
+            16,
+            LV_TEXT_ALIGN_LEFT,
+            style,
+            label_font);
+
+    for (size_t index = 0;
+            index < 10u;
+            index++) {
+        char digit_text[2] = {
+            digits[index],
+            '\0'
+        };
+
+        create_label(
+                screen,
+                digit_text,
+                digit_start_x
+                        + (int32_t)index * digit_cell_width,
+                y,
+                digit_cell_width,
+                LV_TEXT_ALIGN_CENTER,
+                style,
+                digit_font);
+    }
+}
+
 static void create_registration_rank(
         lv_obj_t *screen,
         const MatrixRaceLeftRow *row,
@@ -422,6 +464,10 @@ bool matrix_race_screen_render(
     style_screen(screen, theme);
 
     if (data->layout == MATRIX_RACE_LAYOUT_FONT_TEST) {
+        const MatrixFontSpec original_9_spec = {
+            MATRIX_FONT_VBZ,
+            9
+        };
         const MatrixFontSpec numeric_12_spec = {
             MATRIX_FONT_VBZ,
             12
@@ -430,6 +476,9 @@ bool matrix_race_screen_render(
             MATRIX_FONT_VBZ,
             14
         };
+        const lv_font_t *original_9_font =
+                matrix_font_resolve(
+                        original_9_spec);
         const lv_font_t *numeric_12_font =
                 matrix_large_font_resolve(
                         numeric_12_spec);
@@ -437,47 +486,32 @@ bool matrix_race_screen_render(
                 matrix_large_font_resolve(
                         numeric_14_spec);
 
-        if (numeric_12_font == NULL
+        if (original_9_font == NULL
+                || numeric_12_font == NULL
                 || numeric_14_font == NULL) {
             return false;
         }
 
-        create_label(
+        create_font_test_row(
+                screen,
+                "9",
+                1,
+                &theme->large_value,
+                row_number_font,
+                original_9_font);
+        create_font_test_row(
                 screen,
                 "12",
-                0,
-                3,
-                16,
-                LV_TEXT_ALIGN_LEFT,
-                &theme->row_number,
-                row_number_font);
-        create_label(
-                screen,
-                "0123456789",
-                18,
-                2,
-                140,
-                LV_TEXT_ALIGN_LEFT,
+                14,
                 &theme->large_value,
+                row_number_font,
                 numeric_12_font);
-
-        create_label(
+        create_font_test_row(
                 screen,
                 "14",
-                0,
-                32,
-                16,
-                LV_TEXT_ALIGN_LEFT,
-                &theme->row_number,
-                row_number_font);
-        create_label(
-                screen,
-                "0123456789",
-                18,
-                29,
-                140,
-                LV_TEXT_ALIGN_LEFT,
+                30,
                 &theme->large_value,
+                row_number_font,
                 numeric_14_font);
 
         lv_refr_now(display);
