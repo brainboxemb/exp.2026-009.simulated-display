@@ -159,96 +159,87 @@ const lv_font_t matrix_font_numeric_12 = {
 };
 
 
-#define NUMERIC_14_HEIGHT 14u
+#define NUMERIC_15_HEIGHT 15u
 
 typedef struct {
     uint32_t codepoint;
     uint8_t width;
     uint8_t advance;
-    uint16_t rows[NUMERIC_14_HEIGHT];
-} NumericGlyph14;
+    uint16_t rows[NUMERIC_15_HEIGHT];
+} NumericGlyph15;
 
 /*
- * Hand-drawn 9x14 numeric glyphs for the large-value fields.
+ * Hand-drawn 9x15 numeric glyphs for the large-value fields.
  *
- * They are intentionally designed at 14 pixels rather than scaling the 12px
- * set, so two-pixel horizontal strokes remain explicit.
+ * The odd height gives the glyphs one true center row. The existing 14px
+ * proportions are retained where they already read well; the 9 is redrawn
+ * from the original VBZ topology instead of carrying over the failed 14px
+ * tail experiment.
  */
-static const NumericGlyph14 glyphs_14[] = {
+static const NumericGlyph15 glyphs_15[] = {
     {' ', 0, 4, {0}},
     {'-', 9, 10, {
-        0x000, 0x000, 0x000, 0x000,
-        0x000, 0x0fe, 0x0fe, 0x000,
-        0x000, 0x000, 0x000, 0x000,
-        0x000, 0x000
+        0x000, 0x000, 0x000, 0x000, 0x000,
+        0x000, 0x0fe, 0x0fe, 0x000, 0x000,
+        0x000, 0x000, 0x000, 0x000, 0x000
     }},
     {'0', 9, 10, {
-        0x0fe, 0x0fe, 0x183, 0x183,
-        0x183, 0x183, 0x183, 0x183,
-        0x183, 0x183, 0x183, 0x183,
-        0x0fe, 0x0fe
+        0x0fe, 0x0fe, 0x183, 0x183, 0x183,
+        0x183, 0x183, 0x183, 0x183, 0x183,
+        0x183, 0x183, 0x183, 0x0fe, 0x0fe
     }},
     {'1', 9, 10, {
-        0x018, 0x038, 0x078, 0x018,
-        0x018, 0x018, 0x018, 0x018,
-        0x018, 0x018, 0x018, 0x018,
-        0x0fe, 0x0fe
+        0x018, 0x038, 0x078, 0x018, 0x018,
+        0x018, 0x018, 0x018, 0x018, 0x018,
+        0x018, 0x018, 0x018, 0x0fe, 0x0fe
     }},
     {'2', 9, 10, {
-        0x0fe, 0x0fe, 0x003, 0x003,
-        0x006, 0x00c, 0x018, 0x030,
-        0x060, 0x0c0, 0x180, 0x180,
-        0x1ff, 0x1ff
+        0x0fe, 0x0fe, 0x003, 0x003, 0x006,
+        0x00c, 0x018, 0x030, 0x060, 0x0c0,
+        0x180, 0x180, 0x180, 0x1ff, 0x1ff
     }},
     {'3', 9, 10, {
-        0x0fe, 0x0fe, 0x003, 0x003,
-        0x003, 0x01e, 0x01e, 0x003,
-        0x003, 0x003, 0x003, 0x003,
-        0x0fe, 0x0fe
+        0x0fe, 0x0fe, 0x003, 0x003, 0x003,
+        0x01e, 0x01e, 0x01e, 0x003, 0x003,
+        0x003, 0x003, 0x003, 0x0fe, 0x0fe
     }},
     {'4', 9, 10, {
-        0x183, 0x183, 0x183, 0x183,
-        0x183, 0x1ff, 0x1ff, 0x003,
-        0x003, 0x003, 0x003, 0x003,
-        0x003, 0x003
+        0x183, 0x183, 0x183, 0x183, 0x183,
+        0x183, 0x1ff, 0x1ff, 0x003, 0x003,
+        0x003, 0x003, 0x003, 0x003, 0x003
     }},
     {'5', 9, 10, {
-        0x1ff, 0x1ff, 0x180, 0x180,
-        0x180, 0x1fc, 0x1fc, 0x003,
-        0x003, 0x003, 0x003, 0x003,
-        0x0fe, 0x0fe
+        0x1ff, 0x1ff, 0x180, 0x180, 0x180,
+        0x180, 0x1fc, 0x1fc, 0x003, 0x003,
+        0x003, 0x003, 0x003, 0x0fe, 0x0fe
     }},
     {'6', 9, 10, {
-        0x0fe, 0x0fe, 0x180, 0x180,
-        0x180, 0x1fc, 0x1fc, 0x183,
-        0x183, 0x183, 0x183, 0x183,
-        0x0fe, 0x0fe
+        0x0fe, 0x0fe, 0x180, 0x180, 0x180,
+        0x1fc, 0x1fc, 0x183, 0x183, 0x183,
+        0x183, 0x183, 0x183, 0x0fe, 0x0fe
     }},
     {'7', 9, 10, {
-        0x1ff, 0x1ff, 0x003, 0x006,
-        0x00c, 0x018, 0x030, 0x060,
-        0x0c0, 0x180, 0x180, 0x180,
-        0x180, 0x180
+        0x1ff, 0x1ff, 0x003, 0x006, 0x00c,
+        0x018, 0x030, 0x060, 0x0c0, 0x180,
+        0x180, 0x180, 0x180, 0x180, 0x180
     }},
     {'8', 9, 10, {
-        0x0fe, 0x0fe, 0x183, 0x183,
-        0x183, 0x183, 0x0fe, 0x0fe,
-        0x183, 0x183, 0x183, 0x183,
-        0x0fe, 0x0fe
+        0x0fe, 0x0fe, 0x183, 0x183, 0x183,
+        0x183, 0x0fe, 0x0fe, 0x183, 0x183,
+        0x183, 0x183, 0x183, 0x0fe, 0x0fe
     }},
     {'9', 9, 10, {
-        0x0fe, 0x0fe, 0x183, 0x183,
-        0x183, 0x183, 0x07f, 0x07f,
-        0x003, 0x003, 0x006, 0x00c,
-        0x078, 0x070
+        0x0fe, 0x0fe, 0x183, 0x183, 0x183,
+        0x183, 0x0fe, 0x003, 0x003, 0x003,
+        0x003, 0x183, 0x183, 0x0c6, 0x07c
     }}
 };
 
-#define GLYPH_14_COUNT (sizeof(glyphs_14) / sizeof(glyphs_14[0]))
+#define GLYPH_15_COUNT (sizeof(glyphs_15) / sizeof(glyphs_15[0]))
 
-static int32_t glyph_14_index_find(uint32_t letter) {
-    for (uint32_t index = 0; index < GLYPH_14_COUNT; index++) {
-        if (glyphs_14[index].codepoint == letter) {
+static int32_t glyph_15_index_find(uint32_t letter) {
+    for (uint32_t index = 0; index < GLYPH_15_COUNT; index++) {
+        if (glyphs_15[index].codepoint == letter) {
             return (int32_t)index;
         }
     }
@@ -256,7 +247,7 @@ static int32_t glyph_14_index_find(uint32_t letter) {
     return -1;
 }
 
-static bool glyph_14_descriptor_get(
+static bool glyph_15_descriptor_get(
         const lv_font_t *font,
         lv_font_glyph_dsc_t *descriptor,
         uint32_t letter,
@@ -265,20 +256,20 @@ static bool glyph_14_descriptor_get(
     LV_UNUSED(letter_next);
 
     const int32_t index =
-            glyph_14_index_find(letter);
+            glyph_15_index_find(letter);
     if (index < 0) {
         return false;
     }
 
-    const NumericGlyph14 *glyph =
-            &glyphs_14[index];
+    const NumericGlyph15 *glyph =
+            &glyphs_15[index];
 
     descriptor->adv_w = glyph->advance;
     descriptor->box_w = glyph->width;
     descriptor->box_h =
             glyph->width == 0
                     ? 0
-                    : NUMERIC_14_HEIGHT;
+                    : NUMERIC_15_HEIGHT;
     descriptor->ofs_x = 0;
     descriptor->ofs_y = 0;
     descriptor->stride = glyph->width;
@@ -289,16 +280,16 @@ static bool glyph_14_descriptor_get(
     return true;
 }
 
-static const void *glyph_14_bitmap_get(
+static const void *glyph_15_bitmap_get(
         lv_font_glyph_dsc_t *descriptor,
         lv_draw_buf_t *draw_buffer) {
-    if (descriptor->gid.index >= GLYPH_14_COUNT
+    if (descriptor->gid.index >= GLYPH_15_COUNT
             || draw_buffer == NULL) {
         return NULL;
     }
 
-    const NumericGlyph14 *glyph =
-            &glyphs_14[descriptor->gid.index];
+    const NumericGlyph15 *glyph =
+            &glyphs_15[descriptor->gid.index];
 
     memset(
             draw_buffer->data,
@@ -306,7 +297,7 @@ static const void *glyph_14_bitmap_get(
             draw_buffer->data_size);
 
     for (uint32_t y = 0;
-            y < NUMERIC_14_HEIGHT;
+            y < NUMERIC_15_HEIGHT;
             y++) {
         for (uint32_t x = 0;
                 x < glyph->width;
@@ -325,17 +316,17 @@ static const void *glyph_14_bitmap_get(
     return draw_buffer;
 }
 
-const lv_font_t matrix_font_numeric_14 = {
+const lv_font_t matrix_font_numeric_15 = {
     .dsc = NULL,
     .fallback = NULL,
     .user_data = NULL,
-    .get_glyph_dsc = glyph_14_descriptor_get,
-    .get_glyph_bitmap = glyph_14_bitmap_get,
+    .get_glyph_dsc = glyph_15_descriptor_get,
+    .get_glyph_bitmap = glyph_15_bitmap_get,
     .release_glyph = NULL,
-    .line_height = NUMERIC_14_HEIGHT,
+    .line_height = NUMERIC_15_HEIGHT,
     .base_line = 0,
-    .cap_height = NUMERIC_14_HEIGHT,
-    .x_height = NUMERIC_14_HEIGHT,
+    .cap_height = NUMERIC_15_HEIGHT,
+    .x_height = NUMERIC_15_HEIGHT,
     .subpx = LV_FONT_SUBPX_NONE,
     .kerning = LV_FONT_KERNING_NONE,
     .static_bitmap = 0,
