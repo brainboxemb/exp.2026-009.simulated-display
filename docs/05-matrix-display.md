@@ -35,10 +35,13 @@ The current demo screen supports five preview layouts:
   and is therefore 81 pixels wide. The three right-side rows keep the first
   row at y=14 and use y=31 and y=48 for the extra rows, consuming the free
   pixels at the bottom instead of shifting the whole group upward;
-- `Font test`: a dedicated non-race screen that shows `0123456789` once in
-  the 12px numeric font and once in the 14px numeric font. It deliberately
-  omits the race header, footer and sprites so individual glyphs can be judged
-  directly.
+- `Font test`: a dedicated non-race screen that shows `0123456789` in the
+  original VBZ 9px font, the 12px numeric font and the 14px numeric font.
+  Every digit uses the same fixed 14-pixel column in all three rows, so `0`
+  is directly above `0`, `1` above `1`, and so on, with visible spacing
+  between adjacent glyphs. The rows start at y=1, y=14 and y=30 to keep the
+  comparison vertically compact. The race header, footer and sprites are
+  omitted.
 
 The two mixed layouts show the runner and warmup sprites. Registration-only
 layouts have no middle divider and no sprites. All layouts keep the header with
@@ -161,9 +164,10 @@ The font registry currently exposes two 1-bpp families:
 The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. Large numeric values can use separate hand-drawn 12px or 14px bitmap fonts; both are intentionally numeric-only rather than mechanically stretched general-purpose VBZ fonts.
 
 The JavaFX simulator exposes both families for comparison. VBZ is the default: 9px for header, rows and footer, with the dedicated 14px numeric font for large values. The 12px numeric variant remains selectable for comparison. The dedicated
-`Font test` layout shows both numeric sizes at the same time, which is the
-preferred visual check when adjusting individual glyphs such as the lower curve
-of the 14px `9`.
+`Font test` layout shows the original 9px VBZ digits together with the 12px
+and 14px numeric variants in aligned fixed-width columns. This is the preferred
+visual check when adjusting individual glyphs such as the lower curve of the
+14px `9`.
 
 ## Physical HUB75 output
 
