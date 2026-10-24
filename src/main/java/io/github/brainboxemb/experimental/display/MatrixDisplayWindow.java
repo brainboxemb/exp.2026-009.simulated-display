@@ -374,8 +374,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
                     List.of(
                             9,
                             12,
-                            15),
-                    15);
+                            14),
+                    14);
             setSizes(
                     footerSize,
                     regularSizes,
