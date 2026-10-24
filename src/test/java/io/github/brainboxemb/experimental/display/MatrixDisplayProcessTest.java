@@ -148,6 +148,23 @@ final class MatrixDisplayProcessTest {
             assertEquals(255, readyOverflow.green(81, 53));
             assertEquals(0, readyOverflow.blue(81, 53));
 
+            process.layout(4);
+
+            MatrixDisplayFrame fontTest =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+
+            assertNotNull(
+                    fontTest,
+                    "matrix host did not render font test layout");
+            assertEquals(255, fontTest.red(19, 2));
+            assertEquals(255, fontTest.green(19, 2));
+            assertEquals(255, fontTest.blue(19, 2));
+            assertEquals(0, fontTest.red(159, 11));
+            assertEquals(0, fontTest.green(159, 11));
+            assertEquals(0, fontTest.blue(159, 11));
+
             process.layout(2);
             frames.poll(
                     5,
