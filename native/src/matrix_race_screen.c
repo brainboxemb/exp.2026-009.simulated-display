@@ -392,7 +392,7 @@ bool matrix_race_screen_render(
     if (framebuffer == NULL
             || data == NULL
             || theme == NULL
-            || data->layout > MATRIX_RACE_LAYOUT_MIXED_READY_OVERFLOW) {
+            || data->layout > MATRIX_RACE_LAYOUT_FONT_TEST) {
         return false;
     }
 
@@ -420,6 +420,69 @@ bool matrix_race_screen_render(
     lv_obj_t *screen = lv_screen_active();
     lv_obj_clean(screen);
     style_screen(screen, theme);
+
+    if (data->layout == MATRIX_RACE_LAYOUT_FONT_TEST) {
+        const MatrixFontSpec numeric_12_spec = {
+            MATRIX_FONT_VBZ,
+            12
+        };
+        const MatrixFontSpec numeric_14_spec = {
+            MATRIX_FONT_VBZ,
+            14
+        };
+        const lv_font_t *numeric_12_font =
+                matrix_large_font_resolve(
+                        numeric_12_spec);
+        const lv_font_t *numeric_14_font =
+                matrix_large_font_resolve(
+                        numeric_14_spec);
+
+        if (numeric_12_font == NULL
+                || numeric_14_font == NULL) {
+            return false;
+        }
+
+        create_label(
+                screen,
+                "12",
+                0,
+                3,
+                16,
+                LV_TEXT_ALIGN_LEFT,
+                &theme->row_number,
+                row_number_font);
+        create_label(
+                screen,
+                "0123456789",
+                18,
+                2,
+                140,
+                LV_TEXT_ALIGN_LEFT,
+                &theme->large_value,
+                numeric_12_font);
+
+        create_label(
+                screen,
+                "14",
+                0,
+                32,
+                16,
+                LV_TEXT_ALIGN_LEFT,
+                &theme->row_number,
+                row_number_font);
+        create_label(
+                screen,
+                "0123456789",
+                18,
+                29,
+                140,
+                LV_TEXT_ALIGN_LEFT,
+                &theme->large_value,
+                numeric_14_font);
+
+        lv_refr_now(display);
+        return true;
+    }
 
     const bool registrations_only =
             data->layout == MATRIX_RACE_LAYOUT_REGISTRATIONS
