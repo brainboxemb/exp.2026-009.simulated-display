@@ -158,9 +158,12 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     fontTest,
                     "matrix host did not render font test layout");
-            assertEquals(255, fontTest.red(19, 2));
-            assertEquals(255, fontTest.green(19, 2));
-            assertEquals(255, fontTest.blue(19, 2));
+            assertEquals(255, fontTest.red(22, 14));
+            assertEquals(255, fontTest.green(22, 14));
+            assertEquals(255, fontTest.blue(22, 14));
+            assertEquals(255, fontTest.red(21, 30));
+            assertEquals(255, fontTest.green(21, 30));
+            assertEquals(255, fontTest.blue(21, 30));
             assertEquals(0, fontTest.red(159, 11));
             assertEquals(0, fontTest.green(159, 11));
             assertEquals(0, fontTest.blue(159, 11));
