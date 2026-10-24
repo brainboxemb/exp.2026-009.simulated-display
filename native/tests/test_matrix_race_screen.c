@@ -442,6 +442,49 @@ static void test_numeric_14_uses_two_pixel_horizontal_strokes(void) {
     lv_draw_buf_destroy(draw_buffer);
 }
 
+static void test_numeric_14_nine_curves_at_bottom(void) {
+    lv_font_glyph_dsc_t glyph = {0};
+
+    assert(
+            matrix_font_numeric_14.get_glyph_dsc(
+                    &matrix_font_numeric_14,
+                    &glyph,
+                    '9',
+                    0));
+
+    lv_draw_buf_t *draw_buffer =
+            lv_draw_buf_create(
+                    glyph.box_w,
+                    glyph.box_h,
+                    LV_COLOR_FORMAT_A8,
+                    LV_STRIDE_AUTO);
+
+    assert(draw_buffer != NULL);
+    assert(
+            matrix_font_numeric_14.get_glyph_bitmap(
+                    &glyph,
+                    draw_buffer)
+            == draw_buffer);
+
+    assert(
+            draw_buffer->data[
+                    12u * draw_buffer->header.stride
+                    + 2u]
+            == 0xffu);
+    assert(
+            draw_buffer->data[
+                    13u * draw_buffer->header.stride
+                    + 2u]
+            == 0xffu);
+    assert(
+            draw_buffer->data[
+                    13u * draw_buffer->header.stride
+                    + 7u]
+            == 0x00u);
+
+    lv_draw_buf_destroy(draw_buffer);
+}
+
 static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
     lv_font_glyph_dsc_t glyph = {0};
 
@@ -712,6 +755,53 @@ static void test_header_statuses_shift_content_and_clock(void) {
     assert(connected_clock_x >= 0);
     assert(wifi_clock_x == connected_clock_x);
     assert(all_status_clock_x < connected_clock_x);
+}
+
+static void test_font_test_layout_shows_both_numeric_fonts(void) {
+    MatrixFramebuffer framebuffer;
+    MatrixTheme theme =
+            matrix_theme_default_create();
+    MatrixRaceScreenData font_test = SAMPLE;
+
+    font_test.layout =
+            MATRIX_RACE_LAYOUT_FONT_TEST;
+
+    theme.line_color =
+            matrix_pixel_rgb565_create(
+                    0,
+                    255,
+                    0);
+    theme.large_value.color =
+            matrix_pixel_rgb565_create(
+                    255,
+                    0,
+                    255);
+
+    assert(
+            matrix_race_screen_render(
+                    &framebuffer,
+                    &font_test,
+                    &theme,
+                    0));
+
+    assert(
+            row_contains_color(
+                    &framebuffer,
+                    2,
+                    theme.large_value.color,
+                    MATRIX_DISPLAY_WIDTH));
+    assert(
+            row_contains_color(
+                    &framebuffer,
+                    29,
+                    theme.large_value.color,
+                    MATRIX_DISPLAY_WIDTH));
+    assert(
+            !row_contains_color(
+                    &framebuffer,
+                    HEADER_LINE_Y,
+                    theme.line_color,
+                    MATRIX_DISPLAY_WIDTH));
 }
 
 static void test_registration_layout_uses_full_width_without_sprites(void) {
@@ -1027,8 +1117,10 @@ int main(void) {
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
     test_numeric_14_uses_two_pixel_horizontal_strokes();
+    test_numeric_14_nine_curves_at_bottom();
     test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_header_statuses_shift_content_and_clock();
+    test_font_test_layout_shows_both_numeric_fonts();
     test_registration_layout_uses_full_width_without_sprites();
     test_registration_overflow_removes_footer();
     test_ready_overflow_keeps_left_half_footer();
