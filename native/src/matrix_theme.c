@@ -37,7 +37,7 @@ MatrixTheme matrix_theme_default_create(void) {
             .color = red
         },
         .large_value = {
-            .font = {MATRIX_FONT_VBZ, 14},
+            .font = {MATRIX_FONT_VBZ, 15},
             .color = red
         },
         .footer = {
