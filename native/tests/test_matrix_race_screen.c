@@ -391,23 +391,18 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
                     81));
 }
 
-static uint16_t numeric_row_mask(
-        const lv_font_t *font,
-        char digit,
-        uint32_t row,
-        uint8_t expected_width,
-        uint8_t expected_height) {
+static void test_numeric_14_uses_two_pixel_horizontal_strokes(void) {
     lv_font_glyph_dsc_t glyph = {0};
 
     assert(
-            font->get_glyph_dsc(
-                    font,
+            matrix_font_numeric_14.get_glyph_dsc(
+                    &matrix_font_numeric_14,
                     &glyph,
-                    (uint32_t)digit,
+                    '0',
                     0));
-    assert(glyph.box_w == expected_width);
-    assert(glyph.box_h == expected_height);
-    assert(glyph.adv_w == expected_width);
+    assert(glyph.box_w == 9);
+    assert(glyph.box_h == 14);
+    assert(glyph.adv_w == 10);
 
     lv_draw_buf_t *draw_buffer =
             lv_draw_buf_create(
@@ -418,109 +413,129 @@ static uint16_t numeric_row_mask(
 
     assert(draw_buffer != NULL);
     assert(
-            font->get_glyph_bitmap(
+            matrix_font_numeric_14.get_glyph_bitmap(
                     &glyph,
                     draw_buffer)
             == draw_buffer);
 
-    uint16_t mask = 0;
-
-    for (uint32_t x = 0;
-            x < glyph.box_w;
+    for (uint32_t x = 1;
+            x <= 7;
             x++) {
-        if (draw_buffer->data[
-                row * draw_buffer->header.stride
-                + x] != 0) {
-            mask |=
-                    (uint16_t)(
-                            1u
-                            << (glyph.box_w - 1u - x));
-        }
+        assert(draw_buffer->data[x] == 0xffu);
+        assert(
+                draw_buffer->data[
+                        draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        12u * draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        13u * draw_buffer->header.stride
+                        + x]
+                == 0xffu);
     }
 
     lv_draw_buf_destroy(draw_buffer);
-    return mask;
 }
 
-static void test_numeric_fonts_use_fixed_symmetric_glyphs(void) {
-    /*
-     * The larger variants are authored at their final size. In particular,
-     * round digits keep two-pixel side stems instead of the asymmetric
-     * two/three-pixel stems produced by automatic 7->9/10 scaling.
-     */
-    assert(
-            numeric_row_mask(
-                    &matrix_font_numeric_12,
-                    '0',
-                    2,
-                    9u,
-                    12u)
-            == 0x183u);
-    assert(
-            numeric_row_mask(
-                    &matrix_font_numeric_14,
-                    '0',
-                    2,
-                    10u,
-                    14u)
-            == 0x303u);
+static void test_numeric_14_nine_curves_at_bottom(void) {
+    lv_font_glyph_dsc_t glyph = {0};
 
-    /*
-     * Top and bottom curves are centered, and the 8 keeps a narrow waist.
-     */
     assert(
-            numeric_row_mask(
-                    &matrix_font_numeric_12,
-                    '0',
-                    0,
-                    9u,
-                    12u)
-            == 0x07cu);
-    assert(
-            numeric_row_mask(
-                    &matrix_font_numeric_12,
-                    '0',
-                    11,
-                    9u,
-                    12u)
-            == 0x07cu);
-    assert(
-            numeric_row_mask(
+            matrix_font_numeric_14.get_glyph_dsc(
                     &matrix_font_numeric_14,
-                    '8',
-                    6,
-                    10u,
-                    14u)
-            == 0x0fcu);
-
-    /*
-     * Characteristic VBZ details remain present in 2, 4 and 9.
-     */
-    assert(
-            numeric_row_mask(
-                    &matrix_font_numeric_12,
-                    '2',
-                    9,
-                    9u,
-                    12u)
-            == 0x186u);
-    assert(
-            numeric_row_mask(
-                    &matrix_font_numeric_12,
-                    '4',
-                    3,
-                    9u,
-                    12u)
-            == 0x198u);
-    assert(
-            numeric_row_mask(
-                    &matrix_font_numeric_14,
+                    &glyph,
                     '9',
-                    13,
-                    10u,
-                    14u)
-            == 0x0fcu);
+                    0));
+
+    lv_draw_buf_t *draw_buffer =
+            lv_draw_buf_create(
+                    glyph.box_w,
+                    glyph.box_h,
+                    LV_COLOR_FORMAT_A8,
+                    LV_STRIDE_AUTO);
+
+    assert(draw_buffer != NULL);
+    assert(
+            matrix_font_numeric_14.get_glyph_bitmap(
+                    &glyph,
+                    draw_buffer)
+            == draw_buffer);
+
+    assert(
+            draw_buffer->data[
+                    12u * draw_buffer->header.stride
+                    + 2u]
+            == 0xffu);
+    assert(
+            draw_buffer->data[
+                    13u * draw_buffer->header.stride
+                    + 2u]
+            == 0xffu);
+    assert(
+            draw_buffer->data[
+                    13u * draw_buffer->header.stride
+                    + 7u]
+            == 0x00u);
+
+    lv_draw_buf_destroy(draw_buffer);
 }
+
+static void test_numeric_12_uses_two_pixel_horizontal_strokes(void) {
+    lv_font_glyph_dsc_t glyph = {0};
+
+    assert(
+            matrix_font_numeric_12.get_glyph_dsc(
+                    &matrix_font_numeric_12,
+                    &glyph,
+                    '0',
+                    0));
+
+    lv_draw_buf_t *draw_buffer =
+            lv_draw_buf_create(
+                    glyph.box_w,
+                    glyph.box_h,
+                    LV_COLOR_FORMAT_A8,
+                    LV_STRIDE_AUTO);
+
+    assert(draw_buffer != NULL);
+
+    assert(
+            matrix_font_numeric_12.get_glyph_bitmap(
+                    &glyph,
+                    draw_buffer)
+            == draw_buffer);
+
+    for (uint32_t x = 1;
+            x <= 6;
+            x++) {
+        assert(
+                draw_buffer->data[x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        10u * draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+        assert(
+                draw_buffer->data[
+                        11u * draw_buffer->header.stride
+                        + x]
+                == 0xffu);
+    }
+
+    lv_draw_buf_destroy(draw_buffer);
+}
+
 
 static int first_header_pixel_x(
         const MatrixFramebuffer *framebuffer,
@@ -1161,7 +1176,9 @@ int main(void) {
     test_vbz_metrics_match_source_font();
     test_vbz_zero_bitmap_matches_source_rows();
     test_vbz_header_and_footer_use_vertical_edges();
-    test_numeric_fonts_use_fixed_symmetric_glyphs();
+    test_numeric_14_uses_two_pixel_horizontal_strokes();
+    test_numeric_14_nine_curves_at_bottom();
+    test_numeric_12_uses_two_pixel_horizontal_strokes();
     test_header_statuses_shift_content_and_clock();
     test_font_test_layout_aligns_all_three_font_sizes();
     test_registration_layout_uses_full_width_without_sprites();
