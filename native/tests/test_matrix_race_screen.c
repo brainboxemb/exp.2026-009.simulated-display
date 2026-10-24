@@ -799,7 +799,7 @@ static void test_font_test_layout_shows_both_numeric_fonts(void) {
     assert(
             !row_contains_color(
                     &framebuffer,
-                    HEADER_LINE_Y,
+                    11u,
                     theme.line_color,
                     MATRIX_DISPLAY_WIDTH));
 }
