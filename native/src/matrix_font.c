@@ -39,8 +39,8 @@ const lv_font_t *matrix_large_font_resolve(
             return &matrix_font_numeric_12;
         }
 
-        if (font.size == 14) {
-            return &matrix_font_numeric_14;
+        if (font.size == 15) {
+            return &matrix_font_numeric_15;
         }
     }
 
