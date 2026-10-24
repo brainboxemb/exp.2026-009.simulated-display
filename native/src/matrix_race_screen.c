@@ -130,21 +130,22 @@ static const uint16_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
 };
 
 /*
- * Synchronizing: two explicit opposing arrows. A small 11x11 raster reads
- * these horizontal arrows much more clearly than a miniature circular sync
- * symbol: the upper arrow points right and the lower arrow points left.
+ * Synchronizing: two large opposing arrows with pointed heads. The arrows
+ * are pulled toward the middle of the 11x11 block so the white shape reads
+ * larger without touching the outer border. The upper arrow points right and
+ * the lower arrow points left.
  */
 static const uint16_t STATUS_SYNC[WARNING_GLYPH_HEIGHT] = {
     0x000,
-    0x018,
-    0x1fe,
-    0x018,
-    0x000,
-    0x000,
-    0x000,
-    0x0c0,
+    0x008,
     0x3fc,
-    0x0c0,
+    0x3fe,
+    0x008,
+    0x000,
+    0x080,
+    0x1fe,
+    0x3fe,
+    0x080,
     0x000
 };
 
