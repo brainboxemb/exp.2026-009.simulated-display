@@ -472,9 +472,9 @@ bool matrix_race_screen_render(
             MATRIX_FONT_VBZ,
             12
         };
-        const MatrixFontSpec numeric_14_spec = {
+        const MatrixFontSpec numeric_15_spec = {
             MATRIX_FONT_VBZ,
-            14
+            15
         };
         const lv_font_t *original_9_font =
                 matrix_font_resolve(
@@ -482,7 +482,7 @@ bool matrix_race_screen_render(
         const lv_font_t *numeric_12_font =
                 matrix_large_font_resolve(
                         numeric_12_spec);
-        const lv_font_t *numeric_14_font =
+        const lv_font_t *numeric_15_font =
                 matrix_large_font_resolve(
                         numeric_14_spec);
 
@@ -508,7 +508,7 @@ bool matrix_race_screen_render(
                 numeric_12_font);
         create_font_test_row(
                 screen,
-                "14",
+                "15",
                 30,
                 &theme->large_value,
                 row_number_font,
