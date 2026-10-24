@@ -1,0 +1,58 @@
+#ifndef SERIAL_LCD_H
+#define SERIAL_LCD_H
+
+#include "display_framebuffer.h"
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#define SERIAL_LCD_TEXT_HISTORY_CAPACITY \
+    (DISPLAY_WIDTH * ((DISPLAY_HEIGHT + 7u) / 8u))
+#define SERIAL_LCD_SPRITE_CAPACITY \
+    (DISPLAY_WIDTH * ((DISPLAY_HEIGHT + 7u) / 8u))
+
+typedef enum {
+    SERIAL_LCD_TEXT,
+    SERIAL_LCD_COMMAND,
+    SERIAL_LCD_PARAMETERS
+} SerialLcdParserState;
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+    uint8_t clear_width;
+} SerialLcdTextEntry;
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+} SerialLcdSprite;
+
+typedef struct {
+    DisplayFramebuffer framebuffer;
+    uint8_t cursor_x;
+    uint8_t cursor_y;
+    SerialLcdTextEntry text_history[SERIAL_LCD_TEXT_HISTORY_CAPACITY];
+    uint16_t text_length;
+    SerialLcdSprite sprites[SERIAL_LCD_SPRITE_CAPACITY];
+    uint16_t sprite_count;
+    uint8_t sprite_frame;
+    uint8_t sprite_interval_ticks;
+    uint8_t sprite_elapsed_ticks;
+    SerialLcdParserState parser_state;
+    uint8_t command;
+    uint8_t parameters[4];
+    uint8_t parameter_count;
+    uint8_t parameter_expected;
+    bool pending_sprite_marker;
+    bool dirty;
+} SerialLcd;
+
+void serial_lcd_init(SerialLcd *lcd);
+void serial_lcd_feed(SerialLcd *lcd, const uint8_t *data, size_t size);
+void serial_lcd_general_timer_tick(SerialLcd *lcd);
+bool serial_lcd_dirty(const SerialLcd *lcd);
+void serial_lcd_mark_clean(SerialLcd *lcd);
+
+#endif
