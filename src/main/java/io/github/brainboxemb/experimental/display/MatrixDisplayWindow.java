@@ -335,7 +335,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 "Registraties",
                 "Registraties (>3)",
                 "Registraties + klaarstaan",
-                "Registraties + klaarstaan (>4 klaar)");
+                "Registraties + klaarstaan (>4 klaar)",
+                "Font test");
         layoutMode.setValue(
                 "Registraties + klaarstaan");
     }
@@ -556,6 +557,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                         case "Registraties (>3)" -> 1;
                         case "Registraties + klaarstaan" -> 2;
                         case "Registraties + klaarstaan (>4 klaar)" -> 3;
+                        case "Font test" -> 4;
                         default -> throw new IllegalStateException(
                                 "Unknown matrix layout");
                     });
