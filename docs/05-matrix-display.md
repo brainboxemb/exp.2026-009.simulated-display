@@ -161,7 +161,11 @@ The font registry currently exposes two 1-bpp families:
 | `MATRIX_FONT_UNSCII` | 8, 10, 16 | LVGL UNSCII 8/16 plus local 10px variant |
 | `MATRIX_FONT_VBZ` | 9; 12/14 for `large_value` | Original VBZ 9px glyphs plus dedicated 12px and 14px numeric fonts for large values |
 
-The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. Large numeric values use numeric-only bitmap fonts. The 12px digits are now derived directly from the original VBZ 9px digit topology so details such as the diagonal exit of `2`, the original `4` construction and the rounded returns of `5`, `6` and `9` are preserved. The 14px variant remains separately hand-drawn at its final size.
+The VBZ family is adapted from `vbzfont` in `sschueller/vbz-fahrgastinformation` (Copyright 2022 Stefan Schüller, MIT). The 9px variant preserves the original 1-bpp bitmap glyphs and proportional advances. Large numeric values use numeric-only bitmap fonts generated from one literal
+7×9 VBZ digit source. Both axes scale from that same topology: the 12px variant
+uses 9×12 glyph cells and the 14px variant uses 10×14 glyph cells. This keeps
+the original diagonal exits, rounded returns and digit proportions while still
+allowing three 14px digits to fit exactly inside a 30-pixel ready-team field.
 
 The JavaFX simulator exposes both families for comparison. VBZ is the default: 9px for header, rows and footer, with the dedicated 14px numeric font for large values. The 12px numeric variant remains selectable for comparison. The dedicated
 `Font test` layout shows the original 9px VBZ digits together with the 12px
