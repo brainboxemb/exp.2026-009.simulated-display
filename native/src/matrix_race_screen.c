@@ -34,7 +34,9 @@
 #define MIXED_LEFT_NUMBER_X 12
 #define MIXED_LEFT_NUMBER_WIDTH 21
 #define MIXED_LEFT_TIME_X 33
-#define MIXED_LEFT_TIME_WIDTH 48
+#define MIXED_LEFT_TIME_RIGHT_GAP 2
+#define MIXED_LEFT_TIME_WIDTH \
+    (MAIN_COLUMN_X - MIXED_LEFT_TIME_RIGHT_GAP - MIXED_LEFT_TIME_X)
 
 #define MIXED_RIGHT_SPRITE_X 82
 #define MIXED_RIGHT_VALUE_X 94
@@ -54,7 +56,7 @@
 #define REGISTRATION_RANK_SUFFIX_X 138
 #define REGISTRATION_RANK_SUFFIX_WIDTH 12
 
-#define FOOTER_Y 54
+#define FOOTER_Y 53
 
 static lv_display_t *display;
 static MatrixFramebuffer *active_framebuffer;
