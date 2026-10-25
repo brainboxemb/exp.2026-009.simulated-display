@@ -562,8 +562,8 @@ bool matrix_race_screen_render(
     }
 
     /*
-     * Exchange point: only the number is shown. Invert the header colors
-     * inside a compact, square-cornered badge, sized to the actual text.
+     * Exchange point: only the number is shown. Use independent badge
+     * background and text colors, sized to the actual text.
      * Clamping preserves the clock region for unexpected input.
      */
     const char *location = data->location != NULL
@@ -588,9 +588,9 @@ bool matrix_race_screen_render(
                 0,
                 badge_width,
                 HEADER_LINE_Y,
-                theme->exchange_point_color);
+                theme->exchange_point_background_color);
         MatrixTextStyle inverted_header = theme->header;
-        inverted_header.color = theme->background_color;
+        inverted_header.color = theme->exchange_point_text_color;
         create_label(
                 screen,
                 location,

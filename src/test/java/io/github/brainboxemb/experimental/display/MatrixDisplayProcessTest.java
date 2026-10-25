@@ -59,6 +59,7 @@ final class MatrixDisplayProcessTest {
                             0xffff,
                             0xffff,
                             0xf800,
+                            0x001f,
                             0xffff,
                             0x07e0,
                             0x001f,
@@ -83,6 +84,14 @@ final class MatrixDisplayProcessTest {
             assertEquals(0, themed.red(0, 11));
             assertEquals(255, themed.green(0, 11));
             assertEquals(0, themed.blue(0, 11));
+
+            /* Exchange background and text are independently configurable. */
+            assertEquals(0, themed.red(0, 0));
+            assertEquals(0, themed.green(0, 0));
+            assertEquals(255, themed.blue(0, 0));
+            assertEquals(255, themed.red(2, 3));
+            assertEquals(255, themed.green(2, 3));
+            assertEquals(255, themed.blue(2, 3));
 
             process.layout(0);
 

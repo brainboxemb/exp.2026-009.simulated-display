@@ -53,7 +53,7 @@ race-data feed is not connected yet, JavaFX exposes a temporary `Layout`
 dropdown for selecting these five preview modes. Later the same native layout
 selection will be derived from the real registration and ready-team counts.
 
-The exchange-point number appears at x=0 as an inverted, square-cornered badge, without a `WP` prefix. The badge fills the 11-pixel header band and uses one pixel of horizontal padding. The header text baseline is shifted one pixel down relative to the earlier layout, which gives the digits, clock and counter more visual breathing room at the top. The badge has its own `exchange_point_color`; the default is soft white (`#EEEEEE`) and the digits use the screen background color. Its width follows the rendered number, up to the reserved 39-pixel header field; the clock keeps its existing position.
+The exchange-point number appears at x=0 as an inverted, square-cornered badge, without a `WP` prefix. The badge fills the 11-pixel header band and uses one pixel of horizontal padding. The header text baseline is shifted one pixel down relative to the earlier layout, which gives the digits, clock and counter more visual breathing room at the top. The badge has independent `exchange_point_background_color` and `exchange_point_text_color` values. The background defaults to the same green used by the sync state (`#00A048`), while the digits default to soft white (`#EEEEEE`). Its width follows the rendered number, up to the reserved 39-pixel header field; the clock keeps its existing position.
 
 The main vertical divider is at x=81. This keeps the 160-pixel display visually centered while assigning the one-pixel separator itself to the middle boundary. Layout coordinates for mixed-mode content are derived from this divider instead of from the previous x=90 split.
 
@@ -125,11 +125,11 @@ Each text role has its own `MatrixTextStyle`:
 - `footer`.
 
 A style contains both a color and a font specification. The theme separately owns
-`background_color`, `line_color`, `sprite_color`, `exchange_point_color`, `flag_color`,
+`background_color`, `line_color`, `sprite_color`, `exchange_point_background_color`, `exchange_point_text_color`, `flag_color`,
 `warning_background_color`, `warning_text_color`,
 `warning_strike_color`, `sync_background_color` and `sync_icon_color`.
 Runner and warmup
-sprites share `sprite_color`. The exchange-point badge, finish flag, warning glyphs and sync glyph remain independently configurable. Their defaults use the same RGB565-neutral soft white (`#EEEEEE`); warning backgrounds remain blue, the sync background remains green and the warning strike remains red.
+sprites share `sprite_color`. The exchange-point background and text, finish flag, warning glyphs and sync glyph remain independently configurable. Exchange background defaults to green (`#00A048`); exchange text, sprites, finish flag, warning glyphs and sync glyph default to the same RGB565-neutral soft white (`#EEEEEE`). Warning backgrounds remain blue and the warning strike remains red.
 
 Example:
 
