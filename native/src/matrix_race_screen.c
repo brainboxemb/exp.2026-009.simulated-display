@@ -561,15 +561,46 @@ bool matrix_race_screen_render(
                 theme->line_color);
     }
 
-    create_label(
-            screen,
-            data->location,
-            HEADER_LOCATION_X,
-            HEADER_TEXT_Y,
-            HEADER_LOCATION_WIDTH,
-            LV_TEXT_ALIGN_LEFT,
-            &theme->header,
-            header_font);
+    /*
+     * Exchange point: only the number is shown. Invert the header colors
+     * inside a compact, square-cornered badge, sized to the actual text.
+     * Clamping preserves the clock region for unexpected input.
+     */
+    const char *location = data->location != NULL
+            ? data->location
+            : "";
+    lv_point_t location_size = {0, 0};
+    lv_text_get_size(
+            &location_size,
+            location,
+            header_font,
+            0,
+            0,
+            LV_COORD_MAX,
+            LV_TEXT_FLAG_EXPAND);
+    const int32_t location_text_width = location_size.x;
+    const int32_t badge_width = location_text_width + 4;
+    if (location_text_width > 0
+            && badge_width <= HEADER_LOCATION_WIDTH) {
+        create_line(
+                screen,
+                HEADER_LOCATION_X,
+                0,
+                badge_width,
+                HEADER_LINE_Y,
+                theme->header.color);
+        MatrixTextStyle inverted_header = theme->header;
+        inverted_header.color = theme->background_color;
+        create_label(
+                screen,
+                location,
+                HEADER_LOCATION_X + 2,
+                HEADER_TEXT_Y,
+                location_text_width,
+                LV_TEXT_ALIGN_LEFT,
+                &inverted_header,
+                header_font);
+    }
     uint16_t status_count = 0;
 
     if (!data->wifi_connected) {

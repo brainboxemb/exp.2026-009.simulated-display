@@ -7,7 +7,7 @@
 #include <string.h>
 
 static const MatrixRaceScreenData SAMPLE = {
-    .location = "WP-99",
+    .location = "99",
     .clock = "99:99:99",
     .counter = "999",
     .layout = MATRIX_RACE_LAYOUT_MIXED,
@@ -1123,9 +1123,39 @@ static void test_unsupported_font_size_is_rejected(void) {
                     0));
 }
 
+
+static void test_exchange_point_is_inverted_without_prefix(void) {
+    MatrixFramebuffer frame;
+    MatrixTheme theme = matrix_theme_default_create();
+    MatrixRaceScreenData data = SAMPLE;
+    theme.header.color = matrix_pixel_rgb565_create(255, 255, 255);
+    theme.background_color = matrix_pixel_rgb565_create(0, 0, 0);
+
+    data.location = "99";
+    assert(matrix_race_screen_render(&frame, &data, &theme, 0));
+    /* Two pixels of padding; inverted foreground is visible inside. */
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.header.color);
+    assert(matrix_framebuffer_get(&frame, 1, 5) == theme.header.color);
+    assert(matrix_framebuffer_get(&frame, 3, 3) == theme.background_color);
+    assert(matrix_framebuffer_get(&frame, 38, 5) == theme.background_color);
+    assert(matrix_framebuffer_get(&frame, 40, 11) == theme.line_color);
+
+    data.location = "9";
+    assert(matrix_race_screen_render(&frame, &data, &theme, 0));
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.header.color);
+    assert(matrix_framebuffer_get(&frame, 20, 5) == theme.background_color);
+
+    data.location = "999";
+    assert(matrix_race_screen_render(&frame, &data, &theme, 0));
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.header.color);
+    assert(matrix_framebuffer_get(&frame, 23, 5) == theme.header.color);
+    assert(matrix_framebuffer_get(&frame, 38, 5) == theme.background_color);
+}
+
 int main(void) {
     test_default_theme_uses_vbz_and_independent_sprite_color();
     test_default_screen_renders_lines();
+    test_exchange_point_is_inverted_without_prefix();
     test_font_family_and_size_are_configurable();
     test_vbz_9_and_numeric_12_render();
     test_independent_line_and_text_colors_render();
