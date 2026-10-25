@@ -55,7 +55,9 @@ final class MatrixDisplayWindow implements AutoCloseable {
             new ColorPicker(Color.RED);
     private final ColorPicker spriteColor =
             new ColorPicker(Color.web("#EEEEEE"));
-    private final ColorPicker exchangePointColor =
+    private final ColorPicker exchangePointBackgroundColor =
+            new ColorPicker(Color.web("#00A048"));
+    private final ColorPicker exchangePointTextColor =
             new ColorPicker(Color.web("#EEEEEE"));
     private final ColorPicker flagColor =
             new ColorPicker(Color.web("#EEEEEE"));
@@ -310,26 +312,29 @@ final class MatrixDisplayWindow implements AutoCloseable {
         grid.add(new Label("Sprites"), 0, 3);
         grid.add(spriteColor, 1, 3);
 
-        grid.add(new Label("Exchange"), 2, 3);
-        grid.add(exchangePointColor, 3, 3);
+        grid.add(new Label("Exchange bg"), 2, 3);
+        grid.add(exchangePointBackgroundColor, 3, 3);
 
-        grid.add(new Label("Flag"), 4, 3);
-        grid.add(flagColor, 5, 3);
+        grid.add(new Label("Exchange text"), 4, 3);
+        grid.add(exchangePointTextColor, 5, 3);
 
-        grid.add(new Label("Warning bg"), 0, 4);
-        grid.add(warningBackgroundColor, 1, 4);
+        grid.add(new Label("Flag"), 0, 4);
+        grid.add(flagColor, 1, 4);
 
-        grid.add(new Label("Warning text"), 2, 4);
-        grid.add(warningTextColor, 3, 4);
+        grid.add(new Label("Warning bg"), 2, 4);
+        grid.add(warningBackgroundColor, 3, 4);
 
-        grid.add(new Label("Warning slash"), 4, 4);
-        grid.add(warningStrikeColor, 5, 4);
+        grid.add(new Label("Warning text"), 4, 4);
+        grid.add(warningTextColor, 5, 4);
 
-        grid.add(new Label("Sync bg"), 0, 5);
-        grid.add(syncBackgroundColor, 1, 5);
+        grid.add(new Label("Warning slash"), 0, 5);
+        grid.add(warningStrikeColor, 1, 5);
 
-        grid.add(new Label("Sync icon"), 2, 5);
-        grid.add(syncIconColor, 3, 5);
+        grid.add(new Label("Sync bg"), 2, 5);
+        grid.add(syncBackgroundColor, 3, 5);
+
+        grid.add(new Label("Sync icon"), 4, 5);
+        grid.add(syncIconColor, 5, 5);
 
         grid.add(applyStyle, 6, 5);
         return grid;
@@ -442,7 +447,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
                             rgb565(largeColor.getValue()),
                             rgb565(footerColor.getValue()),
                             rgb565(spriteColor.getValue()),
-                            rgb565(exchangePointColor.getValue()),
+                            rgb565(exchangePointBackgroundColor.getValue()),
+                            rgb565(exchangePointTextColor.getValue()),
                             rgb565(flagColor.getValue()),
                             rgb565(warningBackgroundColor.getValue()),
                             rgb565(warningTextColor.getValue()),

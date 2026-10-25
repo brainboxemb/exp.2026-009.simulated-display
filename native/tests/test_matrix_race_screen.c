@@ -29,7 +29,7 @@ static const MatrixRaceScreenData SAMPLE = {
 };
 
 
-static void test_default_theme_uses_vbz_and_soft_white_accents(void) {
+static void test_default_theme_uses_vbz_and_exchange_colors(void) {
     MatrixTheme theme =
             matrix_theme_default_create();
 
@@ -50,8 +50,15 @@ static void test_default_theme_uses_vbz_and_soft_white_accents(void) {
                     0xee,
                     0xee);
 
+    const MatrixPixel green =
+            matrix_pixel_rgb565_create(
+                    0,
+                    160,
+                    72);
+
     assert(theme.sprite_color == soft_white);
-    assert(theme.exchange_point_color == soft_white);
+    assert(theme.exchange_point_background_color == green);
+    assert(theme.exchange_point_text_color == soft_white);
     assert(theme.flag_color == soft_white);
     assert(theme.warning_text_color == soft_white);
     assert(theme.sync_icon_color == soft_white);
@@ -192,7 +199,8 @@ static bool is_theme_color(
             || pixel == theme->large_value.color
             || pixel == theme->footer.color
             || pixel == theme->sprite_color
-            || pixel == theme->exchange_point_color
+            || pixel == theme->exchange_point_background_color
+            || pixel == theme->exchange_point_text_color
             || pixel == theme->flag_color
             || pixel == theme->warning_background_color
             || pixel == theme->warning_text_color
@@ -1176,33 +1184,36 @@ static void test_exchange_point_is_inverted_without_prefix(void) {
     MatrixTheme theme = matrix_theme_default_create();
     MatrixRaceScreenData data = SAMPLE;
     theme.header.color = matrix_pixel_rgb565_create(255, 0, 0);
-    theme.exchange_point_color = matrix_pixel_rgb565_create(0xee, 0xee, 0xee);
+    theme.exchange_point_background_color =
+            matrix_pixel_rgb565_create(0, 0, 255);
+    theme.exchange_point_text_color =
+            matrix_pixel_rgb565_create(255, 255, 0);
     theme.background_color = matrix_pixel_rgb565_create(0, 0, 0);
 
     data.location = "99";
     assert(matrix_race_screen_render(&frame, &data, &theme, 0));
     /* One pixel of horizontal padding; the badge fills the 11px header band. */
-    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_color);
-    assert(matrix_framebuffer_get(&frame, 0, 10) == theme.exchange_point_color);
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_background_color);
+    assert(matrix_framebuffer_get(&frame, 0, 10) == theme.exchange_point_background_color);
     assert(matrix_framebuffer_get(&frame, 0, 11) == theme.line_color);
-    assert(matrix_framebuffer_get(&frame, 2, 3) == theme.background_color);
+    assert(matrix_framebuffer_get(&frame, 2, 3) == theme.exchange_point_text_color);
     assert(matrix_framebuffer_get(&frame, 16, 5) == theme.background_color);
     assert(matrix_framebuffer_get(&frame, 40, 11) == theme.line_color);
 
     data.location = "9";
     assert(matrix_race_screen_render(&frame, &data, &theme, 0));
-    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_color);
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_background_color);
     assert(matrix_framebuffer_get(&frame, 9, 5) == theme.background_color);
 
     data.location = "999";
     assert(matrix_race_screen_render(&frame, &data, &theme, 0));
-    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_color);
-    assert(matrix_framebuffer_get(&frame, 22, 0) == theme.exchange_point_color);
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_background_color);
+    assert(matrix_framebuffer_get(&frame, 22, 0) == theme.exchange_point_background_color);
     assert(matrix_framebuffer_get(&frame, 23, 5) == theme.background_color);
 }
 
 int main(void) {
-    test_default_theme_uses_vbz_and_soft_white_accents();
+    test_default_theme_uses_vbz_and_exchange_colors();
     test_default_screen_renders_lines();
     test_exchange_point_is_inverted_without_prefix();
     test_normal_footer_keeps_vbz_spacing();
