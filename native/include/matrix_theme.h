@@ -24,6 +24,7 @@ typedef struct {
     MatrixPixel background_color;
     MatrixPixel line_color;
     MatrixPixel sprite_color;
+    MatrixPixel exchange_point_color;
     MatrixPixel flag_color;
     MatrixPixel warning_background_color;
     MatrixPixel warning_text_color;

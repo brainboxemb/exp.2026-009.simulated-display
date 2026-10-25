@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #define HEADER_LINE_Y 11
-#define HEADER_TEXT_Y -1
+#define HEADER_TEXT_Y 0
 #define MAIN_COLUMN_X 81
 #define FOOTER_LINE_Y 52
 
@@ -17,7 +17,7 @@
 #define HEADER_CLOCK_X 40
 #define HEADER_CLOCK_WIDTH 80
 #define HEADER_CLOCK_GAP 1u
-#define FINISH_FLAG_Y 1
+#define FINISH_FLAG_Y 2
 #define FINISH_FLAG_WIDTH 7u
 #define FINISH_FLAG_HEIGHT 7u
 
@@ -579,7 +579,7 @@ bool matrix_race_screen_render(
             LV_COORD_MAX,
             LV_TEXT_FLAG_EXPAND);
     const int32_t location_text_width = location_size.x;
-    const int32_t badge_width = location_text_width + 4;
+    const int32_t badge_width = location_text_width + 2;
     if (location_text_width > 0
             && badge_width <= HEADER_LOCATION_WIDTH) {
         create_line(
@@ -588,13 +588,13 @@ bool matrix_race_screen_render(
                 0,
                 badge_width,
                 HEADER_LINE_Y,
-                theme->header.color);
+                theme->exchange_point_color);
         MatrixTextStyle inverted_header = theme->header;
         inverted_header.color = theme->background_color;
         create_label(
                 screen,
                 location,
-                HEADER_LOCATION_X + 2,
+                HEADER_LOCATION_X + 1,
                 HEADER_TEXT_Y,
                 location_text_width,
                 LV_TEXT_ALIGN_LEFT,
@@ -826,7 +826,7 @@ bool matrix_race_screen_render(
 
         lv_obj_set_style_text_letter_space(
                 footer,
-                -1,
+                ready_overflow ? -1 : 0,
                 0);
         lv_label_set_long_mode(
                 footer,

@@ -29,7 +29,7 @@ static const MatrixRaceScreenData SAMPLE = {
 };
 
 
-static void test_default_theme_uses_vbz_and_independent_sprite_color(void) {
+static void test_default_theme_uses_vbz_and_soft_white_accents(void) {
     MatrixTheme theme =
             matrix_theme_default_create();
 
@@ -40,16 +40,21 @@ static void test_default_theme_uses_vbz_and_independent_sprite_color(void) {
     assert(theme.row_time.font.family == MATRIX_FONT_VBZ);
     assert(theme.row_time.font.size == 9);
     assert(theme.large_value.font.family == MATRIX_FONT_VBZ);
-    assert(theme.large_value.font.size == 15);
+    assert(theme.large_value.font.size == 14);
     assert(theme.footer.font.family == MATRIX_FONT_VBZ);
     assert(theme.footer.font.size == 9);
 
-    assert(
-            theme.sprite_color
-            == matrix_pixel_rgb565_create(
-                    255,
-                    0,
-                    0));
+    const MatrixPixel soft_white =
+            matrix_pixel_rgb565_create(
+                    0xee,
+                    0xee,
+                    0xee);
+
+    assert(theme.sprite_color == soft_white);
+    assert(theme.exchange_point_color == soft_white);
+    assert(theme.flag_color == soft_white);
+    assert(theme.warning_text_color == soft_white);
+    assert(theme.sync_icon_color == soft_white);
 }
 
 static void test_default_screen_renders_lines(void) {
@@ -187,6 +192,7 @@ static bool is_theme_color(
             || pixel == theme->large_value.color
             || pixel == theme->footer.color
             || pixel == theme->sprite_color
+            || pixel == theme->exchange_point_color
             || pixel == theme->flag_color
             || pixel == theme->warning_background_color
             || pixel == theme->warning_text_color
@@ -359,9 +365,15 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
                     0));
 
     assert(
-            row_contains_color(
+            !row_contains_color(
                     &framebuffer,
                     0,
+                    header_color,
+                    MATRIX_DISPLAY_WIDTH));
+    assert(
+            row_contains_color(
+                    &framebuffer,
+                    1,
                     header_color,
                     MATRIX_DISPLAY_WIDTH));
 
@@ -607,25 +619,25 @@ static void test_header_statuses_shift_content_and_clock(void) {
             matrix_framebuffer_get(
                     &connected_frame,
                     132,
-                    1)
+                    2)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &wifi_frame,
                     121,
-                    1)
+                    2)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &disconnected_frame,
                     109,
-                    1)
+                    2)
             == theme.flag_color);
     assert(
             matrix_framebuffer_get(
                     &all_status_frame,
                     97,
-                    1)
+                    2)
             == theme.flag_color);
 
     /*
@@ -1124,38 +1136,76 @@ static void test_unsupported_font_size_is_rejected(void) {
 }
 
 
+
+static void test_normal_footer_keeps_vbz_spacing(void) {
+    MatrixFramebuffer normal_frame;
+    MatrixFramebuffer overflow_frame;
+    MatrixTheme theme = matrix_theme_default_create();
+    MatrixRaceScreenData normal = SAMPLE;
+    MatrixRaceScreenData overflow = SAMPLE;
+
+    const MatrixPixel footer_color =
+            matrix_pixel_rgb565_create(0, 255, 0);
+    theme.footer.color = footer_color;
+    normal.layout = MATRIX_RACE_LAYOUT_MIXED;
+    overflow.layout = MATRIX_RACE_LAYOUT_MIXED_READY_OVERFLOW;
+
+    assert(matrix_race_screen_render(&normal_frame, &normal, &theme, 0));
+    assert(matrix_race_screen_render(&overflow_frame, &overflow, &theme, 0));
+
+    int normal_right = -1;
+    int overflow_right = -1;
+    for (uint16_t y = 54; y < MATRIX_DISPLAY_HEIGHT; y++) {
+        for (uint16_t x = 0; x < MATRIX_DISPLAY_WIDTH; x++) {
+            if (matrix_framebuffer_get(&normal_frame, x, y) == footer_color) {
+                normal_right = (int)x;
+            }
+            if (matrix_framebuffer_get(&overflow_frame, x, y) == footer_color) {
+                overflow_right = (int)x;
+            }
+        }
+    }
+
+    assert(normal_right >= 80);
+    assert(overflow_right < 81);
+    assert(normal_right > overflow_right);
+}
+
 static void test_exchange_point_is_inverted_without_prefix(void) {
     MatrixFramebuffer frame;
     MatrixTheme theme = matrix_theme_default_create();
     MatrixRaceScreenData data = SAMPLE;
-    theme.header.color = matrix_pixel_rgb565_create(255, 255, 255);
+    theme.header.color = matrix_pixel_rgb565_create(255, 0, 0);
+    theme.exchange_point_color = matrix_pixel_rgb565_create(0xee, 0xee, 0xee);
     theme.background_color = matrix_pixel_rgb565_create(0, 0, 0);
 
     data.location = "99";
     assert(matrix_race_screen_render(&frame, &data, &theme, 0));
-    /* Two pixels of padding; inverted foreground is visible inside. */
-    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.header.color);
-    assert(matrix_framebuffer_get(&frame, 1, 5) == theme.header.color);
-    assert(matrix_framebuffer_get(&frame, 3, 3) == theme.background_color);
-    assert(matrix_framebuffer_get(&frame, 38, 5) == theme.background_color);
+    /* One pixel of horizontal padding; the badge fills the 11px header band. */
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_color);
+    assert(matrix_framebuffer_get(&frame, 0, 10) == theme.exchange_point_color);
+    assert(matrix_framebuffer_get(&frame, 0, 11) == theme.line_color);
+    assert(matrix_framebuffer_get(&frame, 2, 3) == theme.background_color);
+    assert(matrix_framebuffer_get(&frame, 16, 5) == theme.background_color);
     assert(matrix_framebuffer_get(&frame, 40, 11) == theme.line_color);
 
     data.location = "9";
     assert(matrix_race_screen_render(&frame, &data, &theme, 0));
-    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.header.color);
-    assert(matrix_framebuffer_get(&frame, 20, 5) == theme.background_color);
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_color);
+    assert(matrix_framebuffer_get(&frame, 9, 5) == theme.background_color);
 
     data.location = "999";
     assert(matrix_race_screen_render(&frame, &data, &theme, 0));
-    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.header.color);
-    assert(matrix_framebuffer_get(&frame, 23, 5) == theme.header.color);
-    assert(matrix_framebuffer_get(&frame, 38, 5) == theme.background_color);
+    assert(matrix_framebuffer_get(&frame, 0, 0) == theme.exchange_point_color);
+    assert(matrix_framebuffer_get(&frame, 22, 0) == theme.exchange_point_color);
+    assert(matrix_framebuffer_get(&frame, 23, 5) == theme.background_color);
 }
 
 int main(void) {
-    test_default_theme_uses_vbz_and_independent_sprite_color();
+    test_default_theme_uses_vbz_and_soft_white_accents();
     test_default_screen_renders_lines();
     test_exchange_point_is_inverted_without_prefix();
+    test_normal_footer_keeps_vbz_spacing();
     test_font_family_and_size_are_configurable();
     test_vbz_9_and_numeric_12_render();
     test_independent_line_and_text_colors_render();

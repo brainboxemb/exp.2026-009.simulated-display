@@ -139,6 +139,7 @@ static bool read_theme(MatrixTheme *theme) {
     uint16_t large_color = 0;
     uint16_t footer_color = 0;
     uint16_t sprite_color = 0;
+    uint16_t exchange_point_color = 0;
     uint16_t flag_color = 0;
     uint16_t warning_background_color = 0;
     uint16_t warning_text_color = 0;
@@ -158,6 +159,7 @@ static bool read_theme(MatrixTheme *theme) {
             || !read_u16_be(&large_color)
             || !read_u16_be(&footer_color)
             || !read_u16_be(&sprite_color)
+            || !read_u16_be(&exchange_point_color)
             || !read_u16_be(&flag_color)
             || !read_u16_be(&warning_background_color)
             || !read_u16_be(&warning_text_color)
@@ -184,6 +186,7 @@ static bool read_theme(MatrixTheme *theme) {
     theme->large_value.color = large_color;
     theme->footer.color = footer_color;
     theme->sprite_color = sprite_color;
+    theme->exchange_point_color = exchange_point_color;
     theme->flag_color = flag_color;
     theme->warning_background_color = warning_background_color;
     theme->warning_text_color = warning_text_color;

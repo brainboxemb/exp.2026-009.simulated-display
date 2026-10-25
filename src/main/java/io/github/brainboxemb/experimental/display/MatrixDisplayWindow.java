@@ -54,19 +54,21 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final ColorPicker footerColor =
             new ColorPicker(Color.RED);
     private final ColorPicker spriteColor =
-            new ColorPicker(Color.RED);
+            new ColorPicker(Color.web("#EEEEEE"));
+    private final ColorPicker exchangePointColor =
+            new ColorPicker(Color.web("#EEEEEE"));
     private final ColorPicker flagColor =
-            new ColorPicker(Color.WHITE);
+            new ColorPicker(Color.web("#EEEEEE"));
     private final ColorPicker warningBackgroundColor =
             new ColorPicker(Color.web("#0060FF"));
     private final ColorPicker warningTextColor =
-            new ColorPicker(Color.WHITE);
+            new ColorPicker(Color.web("#EEEEEE"));
     private final ColorPicker warningStrikeColor =
             new ColorPicker(Color.RED);
     private final ColorPicker syncBackgroundColor =
             new ColorPicker(Color.web("#00A048"));
     private final ColorPicker syncIconColor =
-            new ColorPicker(Color.WHITE);
+            new ColorPicker(Color.web("#EEEEEE"));
 
     private final CheckBox wifiConnected =
             new CheckBox("WiFi connected");
@@ -308,23 +310,26 @@ final class MatrixDisplayWindow implements AutoCloseable {
         grid.add(new Label("Sprites"), 0, 3);
         grid.add(spriteColor, 1, 3);
 
-        grid.add(new Label("Flag"), 2, 3);
-        grid.add(flagColor, 3, 3);
+        grid.add(new Label("Exchange"), 2, 3);
+        grid.add(exchangePointColor, 3, 3);
 
-        grid.add(new Label("Warning bg"), 4, 3);
-        grid.add(warningBackgroundColor, 5, 3);
+        grid.add(new Label("Flag"), 4, 3);
+        grid.add(flagColor, 5, 3);
 
-        grid.add(new Label("Warning text"), 0, 4);
-        grid.add(warningTextColor, 1, 4);
+        grid.add(new Label("Warning bg"), 0, 4);
+        grid.add(warningBackgroundColor, 1, 4);
 
-        grid.add(new Label("Warning slash"), 2, 4);
-        grid.add(warningStrikeColor, 3, 4);
+        grid.add(new Label("Warning text"), 2, 4);
+        grid.add(warningTextColor, 3, 4);
 
-        grid.add(new Label("Sync bg"), 4, 4);
-        grid.add(syncBackgroundColor, 5, 4);
+        grid.add(new Label("Warning slash"), 4, 4);
+        grid.add(warningStrikeColor, 5, 4);
 
-        grid.add(new Label("Sync icon"), 0, 5);
-        grid.add(syncIconColor, 1, 5);
+        grid.add(new Label("Sync bg"), 0, 5);
+        grid.add(syncBackgroundColor, 1, 5);
+
+        grid.add(new Label("Sync icon"), 2, 5);
+        grid.add(syncIconColor, 3, 5);
 
         grid.add(applyStyle, 6, 5);
         return grid;
@@ -437,6 +442,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                             rgb565(largeColor.getValue()),
                             rgb565(footerColor.getValue()),
                             rgb565(spriteColor.getValue()),
+                            rgb565(exchangePointColor.getValue()),
                             rgb565(flagColor.getValue()),
                             rgb565(warningBackgroundColor.getValue()),
                             rgb565(warningTextColor.getValue()),
