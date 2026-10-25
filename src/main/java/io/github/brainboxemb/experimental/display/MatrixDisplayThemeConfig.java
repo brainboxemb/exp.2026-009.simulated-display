@@ -8,6 +8,7 @@ record MatrixDisplayThemeConfig(
         int largeColor,
         int footerColor,
         int spriteColor,
+        int exchangePointColor,
         int flagColor,
         int warningBackgroundColor,
         int warningTextColor,
@@ -28,6 +29,7 @@ record MatrixDisplayThemeConfig(
         requireUnsigned16(largeColor);
         requireUnsigned16(footerColor);
         requireUnsigned16(spriteColor);
+        requireUnsigned16(exchangePointColor);
         requireUnsigned16(flagColor);
         requireUnsigned16(warningBackgroundColor);
         requireUnsigned16(warningTextColor);

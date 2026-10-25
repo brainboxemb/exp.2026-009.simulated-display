@@ -53,7 +53,7 @@ race-data feed is not connected yet, JavaFX exposes a temporary `Layout`
 dropdown for selecting these five preview modes. Later the same native layout
 selection will be derived from the real registration and ready-team counts.
 
-The exchange-point number appears at x=0 as an inverted, square-cornered badge, without a `WP` prefix. The badge uses the header text color as background and the screen background color for its digits. Its width follows the rendered number (with two pixels of horizontal padding), up to the reserved 39-pixel header field; the clock keeps its existing position.
+The exchange-point number appears at x=0 as an inverted, square-cornered badge, without a `WP` prefix. The badge fills the 11-pixel header band and uses one pixel of horizontal padding. The header text baseline is shifted one pixel down relative to the earlier layout, which gives the digits, clock and counter more visual breathing room at the top. The badge has its own `exchange_point_color`; the default is soft white (`#EEEEEE`) and the digits use the screen background color. Its width follows the rendered number, up to the reserved 39-pixel header field; the clock keeps its existing position.
 
 The main vertical divider is at x=81. This keeps the 160-pixel display visually centered while assigning the one-pixel separator itself to the middle boundary. Layout coordinates for mixed-mode content are derived from this divider instead of from the previous x=90 split.
 
@@ -82,8 +82,8 @@ diagonal, has its own configurable `warning_strike_color` and defaults to red;
 the icon remains white on the blue warning background. Visible status blocks
 own the right edge of the header; the counter and flag shift left only by the
 space needed for the active blocks. Adjacent status blocks have a one-pixel
-separator. The warning/status blocks start at y=0; the finish flag starts one
-pixel lower at y=1. When the status group grows into the normal clock area, the
+separator. The warning/status blocks start at y=0; the finish flag starts two
+pixels lower at y=2 so it follows the one-pixel downward header shift. When the status group grows into the normal clock area, the
 clock field shrinks from the right and its centered text therefore moves left.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
@@ -125,12 +125,11 @@ Each text role has its own `MatrixTextStyle`:
 - `footer`.
 
 A style contains both a color and a font specification. The theme separately owns
-`background_color`, `line_color`, `sprite_color`, `flag_color`,
+`background_color`, `line_color`, `sprite_color`, `exchange_point_color`, `flag_color`,
 `warning_background_color`, `warning_text_color`,
 `warning_strike_color`, `sync_background_color` and `sync_icon_color`.
 Runner and warmup
-sprites share `sprite_color`. The finish flag and warning blocks are therefore
-independently configurable; warning defaults are blue with white glyphs.
+sprites share `sprite_color`. The exchange-point badge, finish flag, warning glyphs and sync glyph remain independently configurable. Their defaults use the same RGB565-neutral soft white (`#EEEEEE`); warning backgrounds remain blue, the sync background remains green and the warning strike remains red.
 
 Example:
 
@@ -177,3 +176,6 @@ visual check when adjusting individual glyphs such as the lower curve of the
 ## Physical HUB75 output
 
 The renderer works only in logical 160×64 coordinates. Five-panel ordering, scan pattern and multiplexing remain responsibilities of the later HUB75 hardware adapter.
+
+
+Normal full-width footers use the VBZ font's native letter and word spacing. Only the 81-pixel ready-overflow footer uses `-1` letter spacing to keep the compact demo footer content inside its half-width field.
