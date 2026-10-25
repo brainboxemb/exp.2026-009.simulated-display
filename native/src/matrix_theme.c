@@ -1,6 +1,8 @@
 #include "matrix_theme.h"
 
 MatrixTheme matrix_theme_default_create(void) {
+    const MatrixPixel black =
+            matrix_pixel_rgb565_create(0, 0, 0);
     const MatrixPixel red =
             matrix_pixel_rgb565_create(255, 0, 0);
     const MatrixPixel dark_gray =
@@ -20,13 +22,13 @@ MatrixTheme matrix_theme_default_create(void) {
         .line_color = gray,
         .sprite_color = warm_yellow,
         .exchange_point_background_color = lime,
-        .exchange_point_text_color = soft_white,
+        .exchange_point_text_color = black,
         .flag_color = soft_white,
         .warning_background_color = blue,
         .warning_text_color = soft_white,
         .warning_strike_color = red,
         .sync_background_color = lime,
-        .sync_icon_color = soft_white,
+        .sync_icon_color = black,
         .header = {
             .font = {MATRIX_FONT_VBZ, 9},
             .color = warm_yellow

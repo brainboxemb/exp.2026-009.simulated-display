@@ -58,7 +58,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final ColorPicker exchangePointBackgroundColor =
             new ColorPicker(Color.LIME);
     private final ColorPicker exchangePointTextColor =
-            new ColorPicker(Color.web("#EEEEEE"));
+            new ColorPicker(Color.BLACK);
     private final ColorPicker flagColor =
             new ColorPicker(Color.web("#EEEEEE"));
     private final ColorPicker warningBackgroundColor =
@@ -70,7 +70,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final ColorPicker syncBackgroundColor =
             new ColorPicker(Color.LIME);
     private final ColorPicker syncIconColor =
-            new ColorPicker(Color.web("#EEEEEE"));
+            new ColorPicker(Color.BLACK);
 
     private final CheckBox wifiConnected =
             new CheckBox("WiFi connected");

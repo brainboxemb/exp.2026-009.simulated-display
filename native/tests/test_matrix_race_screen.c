@@ -68,11 +68,11 @@ static void test_default_theme_matches_reviewed_palette(void) {
     assert(theme.footer.color == warm_yellow);
     assert(theme.sprite_color == warm_yellow);
     assert(theme.exchange_point_background_color == lime);
-    assert(theme.exchange_point_text_color == soft_white);
+    assert(theme.exchange_point_text_color == matrix_pixel_rgb565_create(0, 0, 0));
     assert(theme.flag_color == soft_white);
     assert(theme.warning_text_color == soft_white);
     assert(theme.sync_background_color == lime);
-    assert(theme.sync_icon_color == soft_white);
+    assert(theme.sync_icon_color == matrix_pixel_rgb565_create(0, 0, 0));
 }
 
 static void test_default_screen_renders_lines(void) {
