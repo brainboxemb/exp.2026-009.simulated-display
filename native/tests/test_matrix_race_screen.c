@@ -29,7 +29,7 @@ static const MatrixRaceScreenData SAMPLE = {
 };
 
 
-static void test_default_theme_uses_vbz_and_exchange_colors(void) {
+static void test_default_theme_matches_reviewed_palette(void) {
     MatrixTheme theme =
             matrix_theme_default_create();
 
@@ -50,17 +50,28 @@ static void test_default_theme_uses_vbz_and_exchange_colors(void) {
                     0xee,
                     0xee);
 
-    const MatrixPixel green =
+    const MatrixPixel warm_yellow =
+            matrix_pixel_rgb565_create(
+                    0xff,
+                    0xcc,
+                    0x66);
+    const MatrixPixel lime =
             matrix_pixel_rgb565_create(
                     0,
-                    160,
-                    72);
+                    255,
+                    0);
 
-    assert(theme.sprite_color == soft_white);
-    assert(theme.exchange_point_background_color == green);
+    assert(theme.header.color == warm_yellow);
+    assert(theme.row_number.color == soft_white);
+    assert(theme.row_time.color == soft_white);
+    assert(theme.large_value.color == lime);
+    assert(theme.footer.color == warm_yellow);
+    assert(theme.sprite_color == warm_yellow);
+    assert(theme.exchange_point_background_color == lime);
     assert(theme.exchange_point_text_color == soft_white);
     assert(theme.flag_color == soft_white);
     assert(theme.warning_text_color == soft_white);
+    assert(theme.sync_background_color == lime);
     assert(theme.sync_icon_color == soft_white);
 }
 
@@ -392,7 +403,7 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
                     footer_color,
                     81));
     assert(
-            !row_contains_color(
+            row_contains_color(
                     &framebuffer,
                     54,
                     footer_color,
@@ -400,11 +411,11 @@ static void test_vbz_header_and_footer_use_vertical_edges(void) {
     assert(
             row_contains_color(
                     &framebuffer,
-                    55,
+                    62,
                     footer_color,
                     81));
     assert(
-            row_contains_color(
+            !row_contains_color(
                     &framebuffer,
                     63,
                     footer_color,
@@ -1179,6 +1190,23 @@ static void test_normal_footer_keeps_vbz_spacing(void) {
     assert(normal_right > overflow_right);
 }
 
+
+static void test_mixed_left_time_keeps_two_pixel_divider_gap(void) {
+    MatrixFramebuffer framebuffer;
+    MatrixTheme theme = matrix_theme_default_create();
+
+    assert(matrix_race_screen_render(&framebuffer, &SAMPLE, &theme, 0));
+
+    for (uint16_t y = 13; y < 22; y++) {
+        assert(
+                matrix_framebuffer_get(&framebuffer, 79, y)
+                == theme.background_color);
+        assert(
+                matrix_framebuffer_get(&framebuffer, 80, y)
+                == theme.background_color);
+    }
+}
+
 static void test_exchange_point_is_inverted_without_prefix(void) {
     MatrixFramebuffer frame;
     MatrixTheme theme = matrix_theme_default_create();
@@ -1213,9 +1241,10 @@ static void test_exchange_point_is_inverted_without_prefix(void) {
 }
 
 int main(void) {
-    test_default_theme_uses_vbz_and_exchange_colors();
+    test_default_theme_matches_reviewed_palette();
     test_default_screen_renders_lines();
     test_exchange_point_is_inverted_without_prefix();
+    test_mixed_left_time_keeps_two_pixel_divider_gap();
     test_normal_footer_keeps_vbz_spacing();
     test_font_family_and_size_are_configurable();
     test_vbz_9_and_numeric_12_render();

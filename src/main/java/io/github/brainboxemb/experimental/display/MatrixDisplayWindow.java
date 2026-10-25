@@ -46,17 +46,17 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final ColorPicker lineColor =
             new ColorPicker(Color.GRAY);
     private final ColorPicker headerColor =
-            new ColorPicker(Color.RED);
+            new ColorPicker(Color.web("#FFCC66"));
     private final ColorPicker rowColor =
-            new ColorPicker(Color.RED);
-    private final ColorPicker largeColor =
-            new ColorPicker(Color.RED);
-    private final ColorPicker footerColor =
-            new ColorPicker(Color.RED);
-    private final ColorPicker spriteColor =
             new ColorPicker(Color.web("#EEEEEE"));
+    private final ColorPicker largeColor =
+            new ColorPicker(Color.LIME);
+    private final ColorPicker footerColor =
+            new ColorPicker(Color.web("#FFCC66"));
+    private final ColorPicker spriteColor =
+            new ColorPicker(Color.web("#FFCC66"));
     private final ColorPicker exchangePointBackgroundColor =
-            new ColorPicker(Color.web("#00A048"));
+            new ColorPicker(Color.LIME);
     private final ColorPicker exchangePointTextColor =
             new ColorPicker(Color.web("#EEEEEE"));
     private final ColorPicker flagColor =
@@ -68,7 +68,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private final ColorPicker warningStrikeColor =
             new ColorPicker(Color.RED);
     private final ColorPicker syncBackgroundColor =
-            new ColorPicker(Color.web("#00A048"));
+            new ColorPicker(Color.LIME);
     private final ColorPicker syncIconColor =
             new ColorPicker(Color.web("#EEEEEE"));
 

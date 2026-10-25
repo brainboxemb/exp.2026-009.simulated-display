@@ -53,7 +53,7 @@ race-data feed is not connected yet, JavaFX exposes a temporary `Layout`
 dropdown for selecting these five preview modes. Later the same native layout
 selection will be derived from the real registration and ready-team counts.
 
-The exchange-point number appears at x=0 as an inverted, square-cornered badge, without a `WP` prefix. The badge fills the 11-pixel header band and uses one pixel of horizontal padding. The header text baseline is shifted one pixel down relative to the earlier layout, which gives the digits, clock and counter more visual breathing room at the top. The badge has independent `exchange_point_background_color` and `exchange_point_text_color` values. The background defaults to the same green used by the sync state (`#00A048`), while the digits default to soft white (`#EEEEEE`). Its width follows the rendered number, up to the reserved 39-pixel header field; the clock keeps its existing position.
+The exchange-point number appears at x=0 as an inverted, square-cornered badge, without a `WP` prefix. The badge fills the 11-pixel header band and uses one pixel of horizontal padding. The header text baseline is shifted one pixel down relative to the earlier layout, which gives the digits, clock and counter more visual breathing room at the top. The badge has independent `exchange_point_background_color` and `exchange_point_text_color` values. The background defaults to lime, while the digits default to soft white (`#EEEEEE`). Its width follows the rendered number, up to the reserved 39-pixel header field; the clock keeps its existing position.
 
 The main vertical divider is at x=81. This keeps the 160-pixel display visually centered while assigning the one-pixel separator itself to the middle boundary. Layout coordinates for mixed-mode content are derived from this divider instead of from the previous x=90 split.
 
@@ -85,6 +85,8 @@ space needed for the active blocks. Adjacent status blocks have a one-pixel
 separator. The warning/status blocks start at y=0; the finish flag starts two
 pixels lower at y=2 so it follows the one-pixel downward header shift. When the status group grows into the normal clock area, the
 clock field shrinks from the right and its centered text therefore moves left.
+
+In the mixed layout, the left-side time field is right-aligned with an explicit two-pixel gap before the x=81 vertical divider. The gap is derived from `MAIN_COLUMN_X`, so it remains intentional if the left-side geometry changes. The footer label is positioned one pixel higher at y=53; with the VBZ glyph offset its visible pixels occupy y=54..62.
 
 The first passed-runner row reserves the far-left 10 pixels for the runner
 sprite. Its number starts at x=12 with a 21-pixel field, so three-digit values
@@ -129,7 +131,7 @@ A style contains both a color and a font specification. The theme separately own
 `warning_background_color`, `warning_text_color`,
 `warning_strike_color`, `sync_background_color` and `sync_icon_color`.
 Runner and warmup
-sprites share `sprite_color`. The exchange-point background and text, finish flag, warning glyphs and sync glyph remain independently configurable. Exchange background defaults to green (`#00A048`); exchange text, sprites, finish flag, warning glyphs and sync glyph default to the same RGB565-neutral soft white (`#EEEEEE`). Warning backgrounds remain blue and the warning strike remains red.
+sprites share `sprite_color`. The reviewed default palette uses warm yellow (`#FFCC66`) for the header, footer and sprites; soft white (`#EEEEEE`) for row text, exchange text, finish flag, warning glyphs and sync glyph; lime for large values, exchange background and sync background; blue (`#0060FF`) for warning backgrounds; red for the warning strike; dark gray (`#333333`) for the screen and gray (`#808080`) for divider lines.
 
 Example:
 
