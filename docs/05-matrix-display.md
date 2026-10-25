@@ -53,7 +53,7 @@ race-data feed is not connected yet, JavaFX exposes a temporary `Layout`
 dropdown for selecting these five preview modes. Later the same native layout
 selection will be derived from the real registration and ready-team counts.
 
-The location label starts at x=0 so values such as `WP-99` use the full left edge of the header.
+The exchange-point number appears at x=0 as an inverted, square-cornered badge, without a `WP` prefix. The badge uses the header text color as background and the screen background color for its digits. Its width follows the rendered number (with two pixels of horizontal padding), up to the reserved 39-pixel header field; the clock keeps its existing position.
 
 The main vertical divider is at x=81. This keeps the 160-pixel display visually centered while assigning the one-pixel separator itself to the middle boundary. Layout coordinates for mixed-mode content are derived from this divider instead of from the previous x=90 split.
 

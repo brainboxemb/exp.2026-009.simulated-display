@@ -19,7 +19,7 @@
 #define MATRIX_HOST_REQUEST_LAYOUT 5u
 
 static MatrixRaceScreenData DEMO_SCREEN = {
-    .location = "WP-99",
+    .location = "99",
     .clock = "99:99:99",
     .counter = "999",
     .layout = MATRIX_RACE_LAYOUT_MIXED,
