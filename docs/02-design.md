@@ -14,7 +14,8 @@ legacy-display
 matrix-display
   160x64
   RGB565 logical framebuffer
-  synchronized application data interpreter (next step)
+  serial drawing interpreter (first input phase)
+  synchronized application data interpreter (later phase)
   no physical HUB75 panel topology
 ```
 
@@ -23,7 +24,7 @@ The libraries should only share a third component when genuinely generic code ap
 ## Ownership boundaries
 
 - **legacy-display (C):** owns the 90×35 serial parser, custom character map, sprites, large digit bitmaps and bit-packed monochrome framebuffer.
-- **matrix-display (C):** owns the 160×64 RGB565 logical framebuffer and will own the synchronized-data interpreter.
+- **matrix-display (C):** owns the 160×64 RGB565 logical framebuffer, the matrix serial drawing interpreter and later the synchronized-data interpreter.
 - **Host runtime (C):** adapts desktop process framing to one display library and emits logical frames.
 - **JavaFX 21:** starts native host processes, supplies development controls and paints returned logical pixels. It owns no display protocol or font behavior.
 - **HUB75 hardware adapter (future):** maps the 160×64 logical framebuffer to five physical panels, scan order and multiplexing.

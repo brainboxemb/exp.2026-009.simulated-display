@@ -50,6 +50,8 @@ The matrix demo now renders the first race-screen layout in C/LVGL rather than a
 
 The matrix framebuffer is intentionally independent of the five-panel physical HUB75 topology. Panel order, scan pattern and multiplexing belong in the later hardware adapter.
 
+As a first input phase before the synchronized race-data interpreter, the matrix display accepts a readable slash-command stream in the simulator. The 160×64 simulator separates two explicit modes in tabs. **Demo** provides the direct prebuilt layouts, static test data and color/font controls; **Serial** provides editable serial profiles with three transparent pages, atomic `/UB`…`/UE` updates, palette-based foreground/background colors, font-size selection, line drawing, built-in icons and animated sprites. Viewer-only controls for 2× scale and the visual color of unlit LEDs are shared by both modes. Both the legacy 90×35 and RGB 160×64 simulator windows open at application startup.
+
 Neither native library depends on Java, JavaFX, libuv, ESP-IDF or Arduino.
 
 ## Build and run
@@ -122,7 +124,7 @@ The C parser currently understands:
 
 `CharMap1`, `SpriteMap1` and `Bitmap_0..Bitmap_9` were imported from the supplied legacy data. `Bitmap_Batavieren` and the other unrelated legacy bitmaps were deliberately excluded.
 
-See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [protocol](docs/03-protocol.md), [development setup](docs/04-development.md) and [matrix display design](docs/05-matrix-display.md).
+See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [legacy protocol](docs/03-protocol.md), [development setup](docs/04-development.md), [matrix display design](docs/05-matrix-display.md) and [matrix serial protocol](docs/06-matrix-serial-protocol.md).
 
 
 # Third-party font attribution

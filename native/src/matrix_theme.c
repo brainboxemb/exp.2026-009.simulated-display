@@ -5,8 +5,6 @@ MatrixTheme matrix_theme_default_create(void) {
             matrix_pixel_rgb565_create(0, 0, 0);
     const MatrixPixel red =
             matrix_pixel_rgb565_create(255, 0, 0);
-    const MatrixPixel dark_gray =
-            matrix_pixel_rgb565_create(0x33, 0x33, 0x33);
     const MatrixPixel gray =
             matrix_pixel_rgb565_create(0x80, 0x80, 0x80);
     const MatrixPixel soft_white =
@@ -18,7 +16,7 @@ MatrixTheme matrix_theme_default_create(void) {
     const MatrixPixel blue =
             matrix_pixel_rgb565_create(0, 96, 255);
     MatrixTheme theme = {
-        .background_color = dark_gray,
+        .background_color = black,
         .line_color = gray,
         .sprite_color = warm_yellow,
         .exchange_point_background_color = lime,

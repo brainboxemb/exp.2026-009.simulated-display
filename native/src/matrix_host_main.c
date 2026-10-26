@@ -1,5 +1,6 @@
 #include "matrix_framebuffer.h"
 #include "matrix_race_screen.h"
+#include "matrix_serial.h"
 #include "matrix_theme.h"
 
 #include <stdbool.h>
@@ -17,6 +18,9 @@
 #define MATRIX_HOST_REQUEST_ANIMATION_FRAME 3u
 #define MATRIX_HOST_REQUEST_CONNECTION_STATUS 4u
 #define MATRIX_HOST_REQUEST_LAYOUT 5u
+#define MATRIX_HOST_REQUEST_SERIAL_BYTES 6u
+#define MATRIX_HOST_REQUEST_SERIAL_TICK 7u
+#define MATRIX_HOST_SERIAL_CHUNK_MAX 4096u
 
 static MatrixRaceScreenData DEMO_SCREEN = {
     .location = "99",
@@ -94,8 +98,29 @@ static bool read_u32_be(uint32_t *value) {
     return true;
 }
 
-static void write_frame(
-        const MatrixFramebuffer *framebuffer) {
+static MatrixPixel scale_brightness(
+        MatrixPixel pixel,
+        uint8_t brightness) {
+    if (brightness >= 99u) {
+        return pixel;
+    }
+
+    const uint32_t red =
+            (pixel >> 11u) & 0x1fu;
+    const uint32_t green =
+            (pixel >> 5u) & 0x3fu;
+    const uint32_t blue =
+            pixel & 0x1fu;
+
+    return (MatrixPixel)(
+            (((red * brightness) / 99u) << 11u)
+            | (((green * brightness) / 99u) << 5u)
+            | ((blue * brightness) / 99u));
+}
+
+static void write_frame_with_brightness(
+        const MatrixFramebuffer *framebuffer,
+        uint8_t brightness) {
     static const uint8_t magic[] = {'S', 'D', 'F', '2'};
 
     fwrite(magic, 1, sizeof(magic), stdout);
@@ -110,14 +135,23 @@ static void write_frame(
                 x < MATRIX_DISPLAY_WIDTH;
                 x++) {
             write_u16_be(
-                    matrix_framebuffer_get(
-                            framebuffer,
-                            x,
-                            y));
+                    scale_brightness(
+                            matrix_framebuffer_get(
+                                    framebuffer,
+                                    x,
+                                    y),
+                            brightness));
         }
     }
 
     fflush(stdout);
+}
+
+static void write_frame(
+        const MatrixFramebuffer *framebuffer) {
+    write_frame_with_brightness(
+            framebuffer,
+            99u);
 }
 
 static bool draw_demo_screen(
@@ -233,8 +267,12 @@ int main(void) {
     MatrixFramebuffer framebuffer;
     MatrixTheme theme =
             matrix_theme_default_create();
+    MatrixSerialDisplay serial_display;
     uint8_t animation_frame = 0;
     bool demo_visible = true;
+    bool serial_visible = false;
+
+    matrix_serial_init(&serial_display);
 
     if (!draw_demo_screen(
             &framebuffer,
@@ -255,6 +293,7 @@ int main(void) {
         switch (request) {
             case MATRIX_HOST_REQUEST_DEMO_SCREEN:
                 demo_visible = true;
+                serial_visible = false;
                 if (!draw_demo_screen(
                         &framebuffer,
                         &theme,
@@ -266,6 +305,7 @@ int main(void) {
 
             case MATRIX_HOST_REQUEST_CLEAR:
                 demo_visible = false;
+                serial_visible = false;
                 matrix_framebuffer_clear(&framebuffer);
                 write_frame(&framebuffer);
                 break;
@@ -282,11 +322,9 @@ int main(void) {
                             animation_frame)) {
                         return 6;
                     }
-                } else {
-                    matrix_framebuffer_clear(&framebuffer);
-                }
 
-                write_frame(&framebuffer);
+                    write_frame(&framebuffer);
+                }
                 break;
 
             case MATRIX_HOST_REQUEST_ANIMATION_FRAME: {
@@ -371,6 +409,59 @@ int main(void) {
                 }
                 break;
             }
+
+            case MATRIX_HOST_REQUEST_SERIAL_BYTES: {
+                uint32_t length = 0u;
+                uint8_t bytes[MATRIX_HOST_SERIAL_CHUNK_MAX];
+
+                if (!read_u32_be(&length)
+                        || length > MATRIX_HOST_SERIAL_CHUNK_MAX
+                        || fread(
+                                bytes,
+                                1,
+                                length,
+                                stdin) != length) {
+                    return 6;
+                }
+
+                demo_visible = false;
+                serial_visible = true;
+
+                const bool accepted =
+                        matrix_serial_feed(
+                                &serial_display,
+                                bytes,
+                                length);
+
+                if (accepted
+                        && !matrix_serial_update_active(
+                                &serial_display)) {
+                    matrix_serial_compose(
+                            &serial_display,
+                            &framebuffer);
+                    write_frame_with_brightness(
+                            &framebuffer,
+                            matrix_serial_brightness(
+                                    &serial_display));
+                }
+                break;
+            }
+
+            case MATRIX_HOST_REQUEST_SERIAL_TICK:
+                if (serial_visible
+                        && !matrix_serial_update_active(
+                                &serial_display)
+                        && matrix_serial_tick(
+                                &serial_display)) {
+                    matrix_serial_compose(
+                            &serial_display,
+                            &framebuffer);
+                    write_frame_with_brightness(
+                            &framebuffer,
+                            matrix_serial_brightness(
+                                    &serial_display));
+                }
+                break;
 
             default:
                 return 2;

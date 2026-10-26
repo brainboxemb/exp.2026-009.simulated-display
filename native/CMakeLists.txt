@@ -99,7 +99,9 @@ add_library(matrix-display
     src/matrix_vbz_font.c
     src/matrix_numeric_font.c
     src/matrix_sprite.c
+    src/matrix_lvgl.c
     src/matrix_font.c
+    src/matrix_serial.c
     src/matrix_theme.c
     src/matrix_race_screen.c
 )
@@ -134,4 +136,8 @@ if(BUILD_TESTING)
     target_include_directories(test-matrix-race-screen PRIVATE src)
     target_link_libraries(test-matrix-race-screen PRIVATE matrix-display)
     add_test(NAME matrix-race-screen COMMAND test-matrix-race-screen)
+
+    add_executable(test-matrix-serial tests/test_matrix_serial.c)
+    target_link_libraries(test-matrix-serial PRIVATE matrix-display)
+    add_test(NAME matrix-serial COMMAND test-matrix-serial)
 endif()
