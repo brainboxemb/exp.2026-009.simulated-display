@@ -174,11 +174,6 @@ int main(void) {
                     0,
                     96,
                     255);
-    const MatrixPixel active_background =
-            matrix_pixel_rgb565_create(
-                    0,
-                    255,
-                    0);
 
     /* Two startup warnings occupy the normal top-right status positions. */
     assert(
@@ -200,7 +195,7 @@ int main(void) {
                     &wifi_scan0,
                     137,
                     10)
-            == active_background);
+            == warning_background);
     assert(
             matrix_framebuffer_get(
                     &wifi_scan0,
@@ -227,7 +222,7 @@ int main(void) {
                     &link_connect0,
                     149,
                     10)
-            == active_background);
+            == warning_background);
     assert(
             memcmp(
                     link_connect0.pixels,

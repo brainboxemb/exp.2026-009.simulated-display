@@ -572,16 +572,6 @@ bool matrix_startup_sequence_render(
                     255,
                     0,
                     0);
-    const MatrixPixel active_background =
-            matrix_pixel_rgb565_create(
-                    0,
-                    255,
-                    0);
-    const MatrixPixel active_glyph =
-            matrix_pixel_rgb565_create(
-                    0,
-                    0,
-                    0);
     const uint16_t one_status_x =
             (uint16_t)(
                     MATRIX_DISPLAY_WIDTH
@@ -626,8 +616,8 @@ bool matrix_startup_sequence_render(
                     0u,
                     MATRIX_STATUS_ICON_WIFI,
                     animation_frame,
-                    active_background,
-                    active_glyph);
+                    warning_background,
+                    warning_glyph);
             matrix_status_icon_draw(
                     framebuffer,
                     second_status_x,
@@ -658,8 +648,8 @@ bool matrix_startup_sequence_render(
                     0u,
                     MATRIX_STATUS_ICON_LINK,
                     animation_frame,
-                    active_background,
-                    active_glyph);
+                    warning_background,
+                    warning_glyph);
             break;
 
         case MATRIX_STARTUP_READY:

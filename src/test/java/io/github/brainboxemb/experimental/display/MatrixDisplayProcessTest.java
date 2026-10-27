@@ -53,8 +53,8 @@ final class MatrixDisplayProcessTest {
                             TimeUnit.SECONDS);
             assertNotNull(scanning);
             assertEquals(0, scanning.red(137, 10));
-            assertEquals(255, scanning.green(137, 10));
-            assertEquals(0, scanning.blue(137, 10));
+            assertEquals(97, scanning.green(137, 10));
+            assertEquals(255, scanning.blue(137, 10));
 
             process.startupSequence(4, 0);
             MatrixDisplayFrame ready =
