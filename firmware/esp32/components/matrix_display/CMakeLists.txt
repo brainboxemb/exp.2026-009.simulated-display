@@ -10,6 +10,7 @@ idf_component_register(
         "${MATRIX_NATIVE_ROOT}/src/matrix_font.c"
         "${MATRIX_NATIVE_ROOT}/src/matrix_serial.c"
         "${MATRIX_NATIVE_ROOT}/src/matrix_theme.c"
+        "${MATRIX_NATIVE_ROOT}/src/matrix_startup_screen.c"
         "${MATRIX_NATIVE_ROOT}/src/matrix_race_screen.c"
     INCLUDE_DIRS "${MATRIX_NATIVE_ROOT}/include"
     PRIV_INCLUDE_DIRS "${MATRIX_NATIVE_ROOT}/src"

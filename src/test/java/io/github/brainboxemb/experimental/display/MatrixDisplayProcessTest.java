@@ -32,6 +32,16 @@ final class MatrixDisplayProcessTest {
             assertEquals(160, initial.width());
             assertEquals(64, initial.height());
 
+            assertEquals(206, initial.red(24, 2));
+            assertEquals(255, initial.green(24, 2));
+            assertEquals(0, initial.blue(24, 2));
+
+            process.requestDemoScreen();
+            assertNotNull(
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS));
+
             process.layout(4);
 
             MatrixDisplayFrame fontTest =
@@ -137,6 +147,13 @@ final class MatrixDisplayProcessTest {
             assertNotNull(
                     demo,
                     "switching back to demo did not publish a frame");
+
+            process.requestStartupScreen();
+            assertNotNull(
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS),
+                    "switching to startup did not publish a frame");
         }
     }
 
@@ -152,6 +169,13 @@ final class MatrixDisplayProcessTest {
                 new MatrixDisplayProcess(
                         frames::add,
                         errors::add)) {
+            assertNotNull(
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS));
+
+            process.requestDemoScreen();
+
             MatrixDisplayFrame demo =
                     frames.poll(
                             5,

@@ -44,7 +44,7 @@ HUB75 DMA
 
 The same `matrix_serial.c` used by the desktop simulator is compiled into the firmware. No second parser or renderer is maintained for ESP32.
 
-At boot the firmware shows one static direct-rendered race demo so physical panel bring-up still has an immediate image. Serial state starts independently. A normal `/UB ... /UE` transaction builds the new serial frame off-screen and replaces the startup image only at `/UE`. Outside a transaction, accepted serial input is published immediately, matching the desktop host semantics.
+At boot the firmware renders the same shared `RELAY RACE` startup screen used by the desktop simulator, including the compact software version at bottom-right. Serial state starts independently. The ESP32 build derives that displayed version from the repository Maven version in `pom.xml` (currently `0.1.0-SNAPSHOT` → `v0.1.0`). A normal `/UB ... /UE` transaction builds the new serial frame off-screen and replaces the startup image only at `/UE`. Outside a transaction, accepted serial input is published immediately, matching the desktop host semantics.
 
 The UART receive loop runs every 20 ms. That same cadence drives `/SV1..9` sprite animation, preserving the matrix serial timing used by the simulator.
 

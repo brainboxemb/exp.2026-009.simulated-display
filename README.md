@@ -46,7 +46,7 @@ The native side now has two explicit libraries and two desktop host processes:
 - `display-host`: legacy 90×35 serial display host;
 - `matrix-display-host`: RGB565/LVGL matrix host used by the JavaFX matrix window.
 
-The matrix demo now renders the first race-screen layout in C/LVGL rather than a color-bar test. Colors and font family/size are supplied through `MatrixTheme`. The first registry supports UNSCII 8/16 and Montserrat 8/10/12/14/16/18/20.
+The matrix simulator now starts with the dedicated C-rendered `RELAY RACE` pixel-art splash, including the compact software version at bottom-right, and also renders the race-screen layouts in C/LVGL rather than a color-bar test. Colors and font family/size are supplied through `MatrixTheme`. The first registry supports UNSCII 8/16 and Montserrat 8/10/12/14/16/18/20.
 
 The matrix framebuffer is intentionally independent of the five-panel physical HUB75 topology. Panel order, scan pattern and multiplexing belong in the ESP32 hardware adapter.
 
@@ -71,7 +71,7 @@ cmake --build native/build --config Release
 ctest --test-dir native/build -C Release --output-on-failure
 ```
 
-Then open the repository root as a Maven project in NetBeans and use **Run Project**. Both the 90×35 legacy simulator and the 160×64 RGB matrix window open at startup. From a terminal with Maven available:
+Then open the repository root as a Maven project in NetBeans and use **Run Project**. Both the 90×35 legacy simulator and the 160×64 RGB matrix window open at startup; the matrix window initially shows the `RELAY RACE` splash. From a terminal with Maven available:
 
 ```powershell
 mvn javafx:run

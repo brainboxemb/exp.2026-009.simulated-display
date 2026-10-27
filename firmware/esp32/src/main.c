@@ -1,8 +1,7 @@
 #include "hub75_output.h"
 #include "matrix_framebuffer.h"
-#include "matrix_race_screen.h"
 #include "matrix_serial.h"
-#include "matrix_theme.h"
+#include "matrix_startup_screen.h"
 
 #include "driver/uart.h"
 #include "esp_err.h"
@@ -26,27 +25,6 @@ static const char *TAG = "matrix-esp32";
 static MatrixFramebuffer framebuffer;
 static MatrixSerialDisplay serial_display;
 
-static const MatrixRaceScreenData startup_demo = {
-    .location = "99",
-    .clock = "99:99:99",
-    .counter = "999",
-    .layout = MATRIX_RACE_LAYOUT_MIXED,
-    .wifi_connected = true,
-    .registration_server_connected = true,
-    .synchronizing = false,
-    .left_rows = {
-        {"999", "99:99", "99", "1"},
-        {"999", "99:99", "99", "2"},
-        {"999", "99:99", "99", "3"},
-        {"999", "99:99", "99", "4"}
-    },
-    .right_rows = {
-        {"999", "999"},
-        {"999", "999"},
-        {"999", "999"}
-    },
-    .footer = "520 234 346 12"
-};
 
 static uint32_t frame_hash(void) {
     uint32_t hash = UINT32_C(2166136261);
@@ -160,21 +138,17 @@ static bool present_serial(
     return true;
 }
 
-static bool show_startup_demo(
+static bool show_startup_screen(
         bool hub75_ready) {
-    const MatrixTheme theme =
-            matrix_theme_default_create();
     const int64_t render_start =
             esp_timer_get_time();
 
-    if (!matrix_race_screen_render(
+    if (!matrix_startup_screen_render(
             &framebuffer,
-            &startup_demo,
-            &theme,
-            0u)) {
+            MATRIX_SOFTWARE_VERSION)) {
         ESP_LOGE(
                 TAG,
-                "Startup race-screen rendering failed");
+                "Startup screen rendering failed");
         return false;
     }
 
@@ -184,14 +158,15 @@ static bool show_startup_demo(
 
     if (!present_frame(
             hub75_ready,
-            "startup-demo",
+            "startup-screen",
             true)) {
         return false;
     }
 
     ESP_LOGI(
             TAG,
-            "startup demo render_us=%lld; serial /UB.../UE can replace it atomically",
+            "startup screen %s render_us=%lld; serial /UB.../UE can replace it atomically",
+            MATRIX_SOFTWARE_VERSION,
             (long long)render_us);
     return true;
 }
@@ -247,7 +222,7 @@ void app_main(void) {
 
     matrix_serial_init(&serial_display);
 
-    if (!show_startup_demo(hub75_ready)) {
+    if (!show_startup_screen(hub75_ready)) {
         hub75_output_shutdown();
         return;
     }

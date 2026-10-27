@@ -1,6 +1,7 @@
 #include "matrix_framebuffer.h"
 #include "matrix_race_screen.h"
 #include "matrix_serial.h"
+#include "matrix_startup_screen.h"
 #include "matrix_theme.h"
 
 #include <stdbool.h>
@@ -20,7 +21,12 @@
 #define MATRIX_HOST_REQUEST_LAYOUT 5u
 #define MATRIX_HOST_REQUEST_SERIAL_BYTES 6u
 #define MATRIX_HOST_REQUEST_SERIAL_TICK 7u
+#define MATRIX_HOST_REQUEST_STARTUP_SCREEN 8u
 #define MATRIX_HOST_SERIAL_CHUNK_MAX 4096u
+
+#ifndef MATRIX_SOFTWARE_VERSION
+#define MATRIX_SOFTWARE_VERSION "v0.0.0"
+#endif
 
 static MatrixRaceScreenData DEMO_SCREEN = {
     .location = "99",
@@ -269,15 +275,17 @@ int main(void) {
             matrix_theme_default_create();
     MatrixSerialDisplay serial_display;
     uint8_t animation_frame = 0;
-    bool demo_visible = true;
+    bool demo_visible = false;
+    bool startup_visible = true;
     bool serial_visible = false;
+
+    (void)startup_visible;
 
     matrix_serial_init(&serial_display);
 
-    if (!draw_demo_screen(
+    if (!matrix_startup_screen_render(
             &framebuffer,
-            &theme,
-            animation_frame)) {
+            MATRIX_SOFTWARE_VERSION)) {
         return 6;
     }
 
@@ -293,6 +301,7 @@ int main(void) {
         switch (request) {
             case MATRIX_HOST_REQUEST_DEMO_SCREEN:
                 demo_visible = true;
+                startup_visible = false;
                 serial_visible = false;
                 if (!draw_demo_screen(
                         &framebuffer,
@@ -305,6 +314,7 @@ int main(void) {
 
             case MATRIX_HOST_REQUEST_CLEAR:
                 demo_visible = false;
+                startup_visible = false;
                 serial_visible = false;
                 matrix_framebuffer_clear(&framebuffer);
                 write_frame(&framebuffer);
@@ -425,6 +435,7 @@ int main(void) {
                 }
 
                 demo_visible = false;
+                startup_visible = false;
                 serial_visible = true;
 
                 const bool accepted =
@@ -461,6 +472,23 @@ int main(void) {
                             matrix_serial_brightness(
                                     &serial_display));
                 }
+                break;
+
+            case MATRIX_HOST_REQUEST_STARTUP_SCREEN:
+                if (startup_visible) {
+                    write_frame(&framebuffer);
+                    break;
+                }
+
+                demo_visible = false;
+                startup_visible = true;
+                serial_visible = false;
+                if (!matrix_startup_screen_render(
+                        &framebuffer,
+                        MATRIX_SOFTWARE_VERSION)) {
+                    return 6;
+                }
+                write_frame(&framebuffer);
                 break;
 
             default:
