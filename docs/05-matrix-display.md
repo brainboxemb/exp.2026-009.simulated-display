@@ -16,6 +16,16 @@ LVGL is internal to `matrix-display`. Application-facing screen data and theme s
 
 The experiment pins LVGL **v9.6.0** through CMake FetchContent. The first native configure therefore needs access to GitHub.
 
+## Startup screen
+
+The matrix simulator starts with a dedicated 160×64 splash rendered entirely by portable C in `matrix_startup_screen.c`. It is also selectable as **Startup** in the Demo layout control so the artwork can be reviewed without a timed transition.
+
+The current design uses a logical black/off background, a two-line slanted pixel wordmark `RELAY` / `RACE`, lime and warm-yellow lettering, and short cyan/blue plus red/magenta diagonal speed streaks. The wordmark uses an explicit 5×7 block alphabet at 4× scale rather than a JavaFX font, so every pixel is deterministic and the same renderer can later be reused for the ESP32 boot image.
+
+The splash is intentionally a separate renderer rather than another `MatrixRaceLayout`: it has no race data, theme state, connection status or sprite animation.
+
+A compact software version is rendered in gray at the bottom-right using a dedicated 3×5 pixel alphabet. The renderer receives the version as input rather than owning it. For the desktop simulator, CMake reads the Maven project version from `pom.xml` (currently `0.1.0-SNAPSHOT`) and displays the compact release part as `v0.1.0`. This keeps `pom.xml` as the current version authority while allowing the ESP32 target to pass its own build/version value later.
+
 ## First race screen
 
 The current demo screen supports five preview layouts:
