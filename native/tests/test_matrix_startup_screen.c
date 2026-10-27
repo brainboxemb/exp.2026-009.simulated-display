@@ -6,11 +6,16 @@
 
 int main(void) {
     MatrixFramebuffer framebuffer;
+    const MatrixStartupInfo info = {
+        .version = "v0.1.0",
+        .display_id = 'A',
+        .ssid_id = 'B'
+    };
 
     assert(
             matrix_startup_screen_render(
                     &framebuffer,
-                    "v0.1.0"));
+                    &info));
 
     const MatrixPixel black =
             matrix_pixel_rgb565_create(
@@ -98,7 +103,21 @@ int main(void) {
                     55)
             == red);
 
-    /* v0.1.0 is right aligned with one pixel of bottom/right margin. */
+    /* Startup config is right aligned directly below the top-right icons. */
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    143,
+                    13)
+            == version_color);
+    assert(
+            matrix_framebuffer_get(
+                    &framebuffer,
+                    134,
+                    20)
+            == version_color);
+
+    /* v0.1.0 remains right aligned with one pixel of bottom/right margin. */
     assert(
             matrix_framebuffer_get(
                     &framebuffer,
@@ -129,43 +148,43 @@ int main(void) {
     assert(
             matrix_startup_sequence_render(
                     &boot,
-                    "v0.1.0",
+                    &info,
                     MATRIX_STARTUP_BOOT,
                     0u));
     assert(
             matrix_startup_sequence_render(
                     &wifi_scan0,
-                    "v0.1.0",
+                    &info,
                     MATRIX_STARTUP_WIFI_SCAN,
                     0u));
     assert(
             matrix_startup_sequence_render(
                     &wifi_scan2,
-                    "v0.1.0",
+                    &info,
                     MATRIX_STARTUP_WIFI_SCAN,
                     2u));
     assert(
             matrix_startup_sequence_render(
                     &wifi_connected,
-                    "v0.1.0",
+                    &info,
                     MATRIX_STARTUP_WIFI_CONNECTED,
                     0u));
     assert(
             matrix_startup_sequence_render(
                     &link_connect0,
-                    "v0.1.0",
+                    &info,
                     MATRIX_STARTUP_LINK_CONNECTING,
                     0u));
     assert(
             matrix_startup_sequence_render(
                     &link_connect2,
-                    "v0.1.0",
+                    &info,
                     MATRIX_STARTUP_LINK_CONNECTING,
                     2u));
     assert(
             matrix_startup_sequence_render(
                     &ready,
-                    "v0.1.0",
+                    &info,
                     MATRIX_STARTUP_READY,
                     0u));
 

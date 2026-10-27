@@ -29,6 +29,12 @@
 #define MATRIX_SOFTWARE_VERSION "v0.0.0"
 #endif
 
+static const MatrixStartupInfo STARTUP_INFO = {
+    .version = MATRIX_SOFTWARE_VERSION,
+    .display_id = 'A',
+    .ssid_id = 'B'
+};
+
 static MatrixRaceScreenData DEMO_SCREEN = {
     .location = "99",
     .clock = "99:99:99",
@@ -286,7 +292,7 @@ int main(void) {
 
     if (!matrix_startup_screen_render(
             &framebuffer,
-            MATRIX_SOFTWARE_VERSION)) {
+            &STARTUP_INFO)) {
         return 6;
     }
 
@@ -510,7 +516,7 @@ int main(void) {
 
                 if (!matrix_startup_sequence_render(
                         &framebuffer,
-                        MATRIX_SOFTWARE_VERSION,
+                        &STARTUP_INFO,
                         (MatrixStartupState)state,
                         requested_frame)) {
                     return 6;
