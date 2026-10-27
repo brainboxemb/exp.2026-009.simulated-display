@@ -6,6 +6,7 @@ idf_component_register(
         "${MATRIX_NATIVE_ROOT}/src/matrix_vbz_font.c"
         "${MATRIX_NATIVE_ROOT}/src/matrix_numeric_font.c"
         "${MATRIX_NATIVE_ROOT}/src/matrix_sprite.c"
+        "${MATRIX_NATIVE_ROOT}/src/matrix_status_icon.c"
         "${MATRIX_NATIVE_ROOT}/src/matrix_lvgl.c"
         "${MATRIX_NATIVE_ROOT}/src/matrix_font.c"
         "${MATRIX_NATIVE_ROOT}/src/matrix_serial.c"

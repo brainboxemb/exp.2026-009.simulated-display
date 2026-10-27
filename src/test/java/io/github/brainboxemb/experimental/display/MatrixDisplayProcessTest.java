@@ -36,6 +36,37 @@ final class MatrixDisplayProcessTest {
             assertEquals(255, initial.green(24, 2));
             assertEquals(0, initial.blue(24, 2));
 
+            process.startupSequence(0, 0);
+            MatrixDisplayFrame boot =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+            assertNotNull(boot);
+            assertEquals(0, boot.red(137, 10));
+            assertEquals(97, boot.green(137, 10));
+            assertEquals(255, boot.blue(137, 10));
+
+            process.startupSequence(1, 0);
+            MatrixDisplayFrame scanning =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+            assertNotNull(scanning);
+            assertEquals(0, scanning.red(137, 10));
+            assertEquals(97, scanning.green(137, 10));
+            assertEquals(255, scanning.blue(137, 10));
+
+            process.startupSequence(4, 0);
+            MatrixDisplayFrame ready =
+                    frames.poll(
+                            5,
+                            TimeUnit.SECONDS);
+            assertNotNull(ready);
+            assertArrayEquals(
+                    initial.pixels(),
+                    ready.pixels(),
+                    "READY startup state must equal the static splash");
+
             process.requestDemoScreen();
             assertNotNull(
                     frames.poll(

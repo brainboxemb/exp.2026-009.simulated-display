@@ -20,11 +20,24 @@
 #define SERIAL_READ_CHUNK_SIZE 256
 #define SERIAL_TICK_MS 20
 
+#ifndef MATRIX_DISPLAY_ID
+#define MATRIX_DISPLAY_ID 'A'
+#endif
+
+#ifndef MATRIX_SSID_ID
+#define MATRIX_SSID_ID 'A'
+#endif
+
 static const char *TAG = "matrix-esp32";
 
 static MatrixFramebuffer framebuffer;
 static MatrixSerialDisplay serial_display;
 
+static const MatrixStartupInfo startup_info = {
+    .version = MATRIX_SOFTWARE_VERSION,
+    .display_id = MATRIX_DISPLAY_ID,
+    .ssid_id = MATRIX_SSID_ID
+};
 
 static uint32_t frame_hash(void) {
     uint32_t hash = UINT32_C(2166136261);
@@ -143,9 +156,11 @@ static bool show_startup_screen(
     const int64_t render_start =
             esp_timer_get_time();
 
-    if (!matrix_startup_screen_render(
+    if (!matrix_startup_sequence_render(
             &framebuffer,
-            MATRIX_SOFTWARE_VERSION)) {
+            &startup_info,
+            MATRIX_STARTUP_BOOT,
+            0u)) {
         ESP_LOGE(
                 TAG,
                 "Startup screen rendering failed");
@@ -158,15 +173,17 @@ static bool show_startup_screen(
 
     if (!present_frame(
             hub75_ready,
-            "startup-screen",
+            "startup-boot",
             true)) {
         return false;
     }
 
     ESP_LOGI(
             TAG,
-            "startup screen %s render_us=%lld; serial /UB.../UE can replace it atomically",
-            MATRIX_SOFTWARE_VERSION,
+            "startup %s ID=%c SSID=%c state=BOOT render_us=%lld; serial /UB.../UE can replace it atomically",
+            startup_info.version,
+            startup_info.display_id,
+            startup_info.ssid_id,
             (long long)render_us);
     return true;
 }

@@ -30,7 +30,7 @@ Verify split/combined input buffers, invalid slash commands, clipping, cursor wr
 - [x] integrate LVGL v9.6.0 for matrix text/layout rendering;
 - [x] render the first 160×64 race screen with configurable colors and font family/size;
 - [x] add a first matrix serial drawing/input phase with pages, palette-indexed drawing, fonts, icons, notifications and sprites;
-- [x] add a portable `RELAY RACE` startup splash with compact software-version display;
+- [x] add a portable `RELAY RACE` startup splash/status sequence with software version and one-character display/SSID IDs;
 - [x] select an Arduino-free ESP-IDF HUB75 backend for the PoP: `esphome/esp-hub75`;
 - [x] model the proven five-panel baseline as 5×1 `TOP_RIGHT_DOWN` plus 90° rotation at the hardware-adapter boundary;
 - [ ] design the synchronized application-data input model;
@@ -42,7 +42,7 @@ The five-panel physical topology belongs at the hardware adapter boundary and is
 
 - [x] add a standalone ESP-IDF PlatformIO firmware target for classic ESP32-WROOM;
 - [x] compile the same shared C/LVGL renderer and matrix serial interpreter under ESP-IDF;
-- [x] reuse the shared startup splash renderer as the ESP32 boot image;
+- [x] reuse the shared startup renderer as the ESP32 boot image, starting in the explicit disconnected `BOOT` state;
 - [x] add a narrow C/C++ HUB75 adapter using RGB565 bulk transfer;
 - [x] receive the matrix serial protocol over UART0 at 115200 baud;
 - [x] preserve `/UB`…`/UE` as the firmware-visible update boundary;

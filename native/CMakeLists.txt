@@ -116,6 +116,7 @@ add_library(matrix-display
     src/matrix_vbz_font.c
     src/matrix_numeric_font.c
     src/matrix_sprite.c
+    src/matrix_status_icon.c
     src/matrix_lvgl.c
     src/matrix_font.c
     src/matrix_serial.c

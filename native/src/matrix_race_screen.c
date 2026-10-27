@@ -3,6 +3,7 @@
 #include "matrix_font.h"
 #include "matrix_lvgl.h"
 #include "matrix_sprite.h"
+#include "matrix_status_icon.h"
 #include "lvgl.h"
 
 #include <stddef.h>
@@ -23,13 +24,6 @@
 #define FINISH_FLAG_HEIGHT 7u
 
 #define HEADER_COUNTER_WIDTH 21u
-
-#define WARNING_Y 0
-#define WARNING_WIDTH 11u
-#define WARNING_GAP 1u
-#define WARNING_HEIGHT 11u
-#define WARNING_GLYPH_WIDTH 11u
-#define WARNING_GLYPH_HEIGHT 11u
 
 #define MIXED_LEFT_SPRITE_X 1
 #define MIXED_LEFT_NUMBER_X 12
@@ -76,80 +70,6 @@ static const uint8_t FINISH_FLAG[FINISH_FLAG_HEIGHT] = {
     0x55
 };
 
-/*
- * WiFi unavailable: a broad signal bar, a narrower bar below it and one
- * diagonal strike-through.
- */
-static const uint16_t WARNING_WIFI[WARNING_GLYPH_HEIGHT] = {
-    0x000,
-    0x3fe,
-    0x3fe,
-    0x000,
-    0x0f8,
-    0x0f8,
-    0x000,
-    0x060,
-    0x060,
-    0x000,
-    0x000
-};
-
-/*
- * Registration server unavailable: two diagonal chain links, based on the
- * conventional link icon. The links are offset from each other instead of
- * forming two vertically stacked loops.
- */
-static const uint16_t WARNING_LINK[WARNING_GLYPH_HEIGHT] = {
-    0x00e,
-    0x011,
-    0x021,
-    0x042,
-    0x074,
-    0x090,
-    0x170,
-    0x210,
-    0x420,
-    0x440,
-    0x380
-};
-
-/*
- * Two-pixel diagonal strike-through across the complete warning block.
- * Both outer corners are part of the strike.
- */
-static const uint16_t WARNING_STRIKE[WARNING_GLYPH_HEIGHT] = {
-    0x600,
-    0x300,
-    0x180,
-    0x0c0,
-    0x060,
-    0x030,
-    0x018,
-    0x00c,
-    0x006,
-    0x003,
-    0x003
-};
-
-/*
- * Synchronizing: two large opposing arrows with pointed heads. The arrows
- * are pulled toward the middle of the 11x11 block so the white shape reads
- * larger without touching the outer border. The upper arrow points right and
- * the lower arrow points left.
- */
-static const uint16_t STATUS_SYNC[WARNING_GLYPH_HEIGHT] = {
-    0x000,
-    0x008,
-    0x3fc,
-    0x3fe,
-    0x008,
-    0x000,
-    0x080,
-    0x1fe,
-    0x3fe,
-    0x080,
-    0x000
-};
 
 static void draw_finish_flag(
         MatrixFramebuffer *framebuffer,
@@ -180,62 +100,6 @@ static void draw_finish_flag(
         }
     }
 }
-
-static void draw_status_block(
-        MatrixFramebuffer *framebuffer,
-        uint16_t x,
-        const uint16_t glyph[WARNING_GLYPH_HEIGHT],
-        MatrixPixel background_color,
-        MatrixPixel icon_color,
-        bool strike,
-        MatrixPixel strike_color) {
-    for (uint16_t row = 0;
-            row < WARNING_HEIGHT;
-            row++) {
-        for (uint16_t column = 0;
-                column < WARNING_WIDTH;
-                column++) {
-            matrix_framebuffer_set(
-                    framebuffer,
-                    (uint16_t)(x + column),
-                    (uint16_t)(WARNING_Y + row),
-                    background_color);
-        }
-    }
-
-    for (uint16_t row = 0;
-            row < WARNING_GLYPH_HEIGHT;
-            row++) {
-        for (uint16_t column = 0;
-                column < WARNING_GLYPH_WIDTH;
-                column++) {
-            const uint16_t mask =
-                    (uint16_t)(
-                            1u
-                            << (WARNING_GLYPH_WIDTH
-                                    - 1u
-                                    - column));
-
-            if ((glyph[row] & mask) != 0) {
-                matrix_framebuffer_set(
-                        framebuffer,
-                        (uint16_t)(x + column),
-                        (uint16_t)(WARNING_Y + row),
-                        icon_color);
-            }
-
-            if (strike
-                    && (WARNING_STRIKE[row] & mask) != 0) {
-                matrix_framebuffer_set(
-                        framebuffer,
-                        (uint16_t)(x + column),
-                        (uint16_t)(WARNING_Y + row),
-                        strike_color);
-            }
-        }
-    }
-}
-
 
 static lv_color_t lv_color_from_pixel(MatrixPixel pixel) {
     const uint8_t red =
@@ -620,8 +484,8 @@ bool matrix_race_screen_render(
             status_count == 0u
                     ? 0u
                     : (uint16_t)(
-                            status_count * WARNING_WIDTH
-                            + (status_count - 1u) * WARNING_GAP);
+                            status_count * MATRIX_STATUS_ICON_WIDTH
+                            + (status_count - 1u) * MATRIX_STATUS_ICON_GAP);
     const uint16_t counter_right =
             (uint16_t)(
                     MATRIX_DISPLAY_WIDTH
@@ -848,10 +712,11 @@ bool matrix_race_screen_render(
                     - status_group_width);
 
     if (!data->wifi_connected) {
-        draw_status_block(
+        matrix_status_icon_draw(
                 framebuffer,
                 status_x,
-                WARNING_WIFI,
+                0u,
+                MATRIX_STATUS_ICON_WIFI,
                 theme->warning_background_color,
                 theme->warning_text_color,
                 true,
@@ -859,15 +724,16 @@ bool matrix_race_screen_render(
         status_x =
                 (uint16_t)(
                         status_x
-                        + WARNING_WIDTH
-                        + WARNING_GAP);
+                        + MATRIX_STATUS_ICON_WIDTH
+                        + MATRIX_STATUS_ICON_GAP);
     }
 
     if (!data->registration_server_connected) {
-        draw_status_block(
+        matrix_status_icon_draw(
                 framebuffer,
                 status_x,
-                WARNING_LINK,
+                0u,
+                MATRIX_STATUS_ICON_LINK,
                 theme->warning_background_color,
                 theme->warning_text_color,
                 true,
@@ -875,15 +741,16 @@ bool matrix_race_screen_render(
         status_x =
                 (uint16_t)(
                         status_x
-                        + WARNING_WIDTH
-                        + WARNING_GAP);
+                        + MATRIX_STATUS_ICON_WIDTH
+                        + MATRIX_STATUS_ICON_GAP);
     }
 
     if (data->synchronizing) {
-        draw_status_block(
+        matrix_status_icon_draw(
                 framebuffer,
                 status_x,
-                STATUS_SYNC,
+                0u,
+                MATRIX_STATUS_ICON_SYNC,
                 theme->sync_background_color,
                 theme->sync_icon_color,
                 false,

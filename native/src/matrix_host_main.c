@@ -22,11 +22,18 @@
 #define MATRIX_HOST_REQUEST_SERIAL_BYTES 6u
 #define MATRIX_HOST_REQUEST_SERIAL_TICK 7u
 #define MATRIX_HOST_REQUEST_STARTUP_SCREEN 8u
+#define MATRIX_HOST_REQUEST_STARTUP_SEQUENCE 9u
 #define MATRIX_HOST_SERIAL_CHUNK_MAX 4096u
 
 #ifndef MATRIX_SOFTWARE_VERSION
 #define MATRIX_SOFTWARE_VERSION "v0.0.0"
 #endif
+
+static const MatrixStartupInfo STARTUP_INFO = {
+    .version = MATRIX_SOFTWARE_VERSION,
+    .display_id = 'A',
+    .ssid_id = 'A'
+};
 
 static MatrixRaceScreenData DEMO_SCREEN = {
     .location = "99",
@@ -285,7 +292,7 @@ int main(void) {
 
     if (!matrix_startup_screen_render(
             &framebuffer,
-            MATRIX_SOFTWARE_VERSION)) {
+            &STARTUP_INFO)) {
         return 6;
     }
 
@@ -485,11 +492,39 @@ int main(void) {
                 serial_visible = false;
                 if (!matrix_startup_screen_render(
                         &framebuffer,
-                        MATRIX_SOFTWARE_VERSION)) {
+                        &STARTUP_INFO)) {
                     return 6;
                 }
                 write_frame(&framebuffer);
                 break;
+
+            case MATRIX_HOST_REQUEST_STARTUP_SEQUENCE: {
+                uint8_t state = 0u;
+                uint8_t requested_frame = 0u;
+
+                if (!read_u8(&state)
+                        || !read_u8(&requested_frame)
+                        || state > MATRIX_STARTUP_READY
+                        || requested_frame
+                                >= MATRIX_STARTUP_SEQUENCE_FRAME_COUNT) {
+                    return 6;
+                }
+
+                demo_visible = false;
+                startup_visible = false;
+                serial_visible = false;
+
+                if (!matrix_startup_sequence_render(
+                        &framebuffer,
+                        &STARTUP_INFO,
+                        (MatrixStartupState)state,
+                        requested_frame)) {
+                    return 6;
+                }
+
+                write_frame(&framebuffer);
+                break;
+            }
 
             default:
                 return 2;

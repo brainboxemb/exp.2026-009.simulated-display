@@ -32,12 +32,15 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private static final int HEIGHT = 64;
     private static final int ANIMATION_FRAME_COUNT = 12;
     private static final int RUNNER_FRAME_COUNT = 6;
+    private static final int STARTUP_SEQUENCE_FRAME_COUNT = 4;
+    private static final int STARTUP_SEQUENCE_TICKS = 32;
 
     private final Stage stage;
     private final RgbMatrixView view;
     private final Label status;
     private final MatrixDisplayProcess process;
     private final Timeline demoSpriteAnimation;
+    private final Timeline startupSequenceAnimation;
     private final Timeline serialSpriteAnimation;
     private final Label spriteFrameStatus =
             new Label();
@@ -99,6 +102,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
             new TextArea();
 
     private int animationFrame;
+    private int startupSequenceTick;
     private boolean demoSpriteAnimationRunning = true;
     private boolean serialMode;
 
@@ -209,6 +213,15 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 Animation.INDEFINITE);
         demoSpriteAnimation.play();
 
+        startupSequenceAnimation =
+                new Timeline(
+                        new KeyFrame(
+                                Duration.millis(250),
+                                event -> animateStartupSequence()));
+        startupSequenceAnimation.setCycleCount(
+                Animation.INDEFINITE);
+        startupSequenceAnimation.play();
+
         serialSpriteAnimation =
                 new Timeline(
                         new KeyFrame(
@@ -246,6 +259,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     @Override
     public void close() {
         demoSpriteAnimation.stop();
+        startupSequenceAnimation.stop();
         serialSpriteAnimation.stop();
         process.close();
     }
@@ -433,6 +447,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private void configureLayoutControl() {
         layoutMode.getItems().addAll(
                 "Startup",
+                "Startup sequence",
                 "Registraties",
                 "Registraties (>3)",
                 "Registraties + klaarstaan",
@@ -602,6 +617,13 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 return;
             }
 
+            if ("Startup sequence".equals(
+                    layoutMode.getValue())) {
+                startupSequenceTick = 0;
+                sendStartupSequenceFrame();
+                return;
+            }
+
             process.layout(
                     switch (layoutMode.getValue()) {
                         case "Registraties" -> 0;
@@ -637,7 +659,11 @@ final class MatrixDisplayWindow implements AutoCloseable {
     }
 
     private void animateDemoSprites() {
-        if (serialMode) {
+        if (serialMode
+                || "Startup".equals(
+                        layoutMode.getValue())
+                || "Startup sequence".equals(
+                        layoutMode.getValue())) {
             return;
         }
 
@@ -707,6 +733,49 @@ final class MatrixDisplayWindow implements AutoCloseable {
                         + animationFrame % RUNNER_FRAME_COUNT
                         + " · warmup "
                         + animationFrame / 2);
+    }
+
+    private void animateStartupSequence() {
+        if (serialMode
+                || !"Startup sequence".equals(
+                        layoutMode.getValue())) {
+            return;
+        }
+
+        startupSequenceTick =
+                (startupSequenceTick + 1)
+                % STARTUP_SEQUENCE_TICKS;
+        sendStartupSequenceFrame();
+    }
+
+    private void sendStartupSequenceFrame() {
+        final int tick = startupSequenceTick;
+        final int state;
+        final int frame =
+                tick % STARTUP_SEQUENCE_FRAME_COUNT;
+
+        if (tick < 4) {
+            state = 0;
+        } else if (tick < 16) {
+            state = 1;
+        } else if (tick < 19) {
+            state = 2;
+        } else if (tick < 27) {
+            state = 3;
+        } else {
+            state = 4;
+        }
+
+        try {
+            process.startupSequence(
+                    state,
+                    frame);
+        } catch (IOException exception) {
+            startupSequenceAnimation.stop();
+            status.setText(
+                    "Startup sequence failed: "
+                            + exception.getMessage());
+        }
     }
 
     private void sendSerialProtocol(
