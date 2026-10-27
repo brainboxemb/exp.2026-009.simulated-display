@@ -2,11 +2,11 @@
 
 Proof of Principle for running **native C display software** behind a **Java 21 / JavaFX 21** desktop simulator, with the portable C core intended to remain usable later on ESP32 / ESP-IDF.
 
-Status: **active — first 90×35 display vertical slice implemented on PR #2; qualification in progress**.
+Status: **active — simulator foundation and matrix serial protocol are merged; ESP32/HUB75 qualification continues on issue #3 / PR #4**.
 
 - [Cross-project record](https://github.com/brainboxemb/brainboxemb.meta/blob/main/experiments/009-simulated-display/README.md)
 - [Meta tracking issue #188](https://github.com/brainboxemb/brainboxemb.meta/issues/188)
-- [Implementation issue #1](https://github.com/brainboxemb/exp.2026-009.simulated-display/issues/1)
+- [ESP32/HUB75 issue #3](https://github.com/brainboxemb/exp.2026-009.simulated-display/issues/3)
 
 ## Reference displays
 
@@ -48,11 +48,11 @@ The native side now has two explicit libraries and two desktop host processes:
 
 The matrix demo now renders the first race-screen layout in C/LVGL rather than a color-bar test. Colors and font family/size are supplied through `MatrixTheme`. The first registry supports UNSCII 8/16 and Montserrat 8/10/12/14/16/18/20.
 
-The matrix framebuffer is intentionally independent of the five-panel physical HUB75 topology. Panel order, scan pattern and multiplexing belong in the later hardware adapter.
+The matrix framebuffer is intentionally independent of the five-panel physical HUB75 topology. Panel order, scan pattern and multiplexing belong in the ESP32 hardware adapter.
 
 As a first input phase before the synchronized race-data interpreter, the matrix display accepts a readable slash-command stream in the simulator. The 160×64 simulator separates two explicit modes in tabs. **Demo** provides the direct prebuilt layouts, static test data and color/font controls; **Serial** provides editable serial profiles with three transparent pages, atomic `/UB`…`/UE` updates, palette-based foreground/background colors, font-size selection, line drawing, built-in icons and animated sprites. Viewer-only controls for 2× scale and the visual color of unlit LEDs are shared by both modes. Both the legacy 90×35 and RGB 160×64 simulator windows open at application startup.
 
-Neither native library depends on Java, JavaFX, libuv, ESP-IDF or Arduino.
+The portable native libraries do not depend on Java, JavaFX, ESP-IDF or Arduino. The ESP32 target in `firmware/esp32/` adds ESP-IDF and `esp-hub75` only at the firmware/hardware-adapter boundary. It accepts the same matrix serial protocol over UART0 and maps `/XB00..99` to HUB75 OE brightness rather than altering RGB565 pixels.
 
 ## Build and run
 
@@ -71,7 +71,7 @@ cmake --build native/build --config Release
 ctest --test-dir native/build -C Release --output-on-failure
 ```
 
-Then open the repository root as a Maven project in NetBeans and use **Run Project**. The 90×35 window contains a **160×64 RGB matrix** button that opens the second native matrix simulator. From a terminal with Maven available:
+Then open the repository root as a Maven project in NetBeans and use **Run Project**. Both the 90×35 legacy simulator and the 160×64 RGB matrix window open at startup. From a terminal with Maven available:
 
 ```powershell
 mvn javafx:run
@@ -124,7 +124,7 @@ The C parser currently understands:
 
 `CharMap1`, `SpriteMap1` and `Bitmap_0..Bitmap_9` were imported from the supplied legacy data. `Bitmap_Batavieren` and the other unrelated legacy bitmaps were deliberately excluded.
 
-See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [legacy protocol](docs/03-protocol.md), [development setup](docs/04-development.md), [matrix display design](docs/05-matrix-display.md) and [matrix serial protocol](docs/06-matrix-serial-protocol.md).
+See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [legacy protocol](docs/03-protocol.md), [development setup](docs/04-development.md), [matrix display design](docs/05-matrix-display.md), [matrix serial protocol](docs/06-matrix-serial-protocol.md), and [ESP32 firmware target](firmware/esp32/README.md).
 
 
 # Third-party font attribution

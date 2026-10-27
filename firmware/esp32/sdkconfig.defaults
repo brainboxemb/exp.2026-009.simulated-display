@@ -1,0 +1,10 @@
+CONFIG_FREERTOS_HZ=1000
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# Match native/lv_conf.h font availability.
+CONFIG_LV_FONT_UNSCII_8=y
+CONFIG_LV_FONT_UNSCII_16=y
+
+# Preserve all RGB565 source precision with the minimum BCM plane count.
+# RGB565 remains the application/transfer format; this is PWM depth per channel.
+CONFIG_HUB75_BIT_DEPTH_6=y
