@@ -23,6 +23,7 @@ final class MatrixDisplayProcess implements AutoCloseable {
     private static final int REQUEST_LAYOUT = 5;
     private static final int REQUEST_SERIAL_BYTES = 6;
     private static final int REQUEST_SERIAL_TICK = 7;
+    private static final int REQUEST_STARTUP_SCREEN = 8;
     private static final int MAX_SERIAL_BYTES = 4096;
     private static final int MAX_PIXELS = 1_000_000;
 
@@ -70,6 +71,11 @@ final class MatrixDisplayProcess implements AutoCloseable {
     synchronized void requestDemoScreen()
             throws IOException {
         sendRequest(REQUEST_DEMO_SCREEN);
+    }
+
+    synchronized void requestStartupScreen()
+            throws IOException {
+        sendRequest(REQUEST_STARTUP_SCREEN);
     }
 
     synchronized void clear()

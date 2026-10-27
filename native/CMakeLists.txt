@@ -1,6 +1,23 @@
 cmake_minimum_required(VERSION 3.20)
 project(simulated_display_native C)
 
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../pom.xml" SIMULATED_DISPLAY_POM)
+string(
+    REGEX MATCH
+    "<artifactId>simulated-display</artifactId>[ \t\r\n]*<version>([^<]+)</version>"
+    SIMULATED_DISPLAY_VERSION_MATCH
+    "${SIMULATED_DISPLAY_POM}")
+if(NOT SIMULATED_DISPLAY_VERSION_MATCH)
+    message(FATAL_ERROR "Unable to read simulated-display version from pom.xml")
+endif()
+set(SIMULATED_DISPLAY_VERSION "${CMAKE_MATCH_1}")
+string(
+    REGEX REPLACE
+    "-SNAPSHOT$"
+    ""
+    SIMULATED_DISPLAY_DISPLAY_VERSION
+    "${SIMULATED_DISPLAY_VERSION}")
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -103,6 +120,7 @@ add_library(matrix-display
     src/matrix_font.c
     src/matrix_serial.c
     src/matrix_theme.c
+    src/matrix_startup_screen.c
     src/matrix_race_screen.c
 )
 target_include_directories(matrix-display PUBLIC include)
@@ -121,6 +139,10 @@ target_link_libraries(display-host PRIVATE legacy-display)
 
 add_executable(matrix-display-host src/matrix_host_main.c)
 target_link_libraries(matrix-display-host PRIVATE matrix-display)
+target_compile_definitions(
+    matrix-display-host
+    PRIVATE
+        MATRIX_SOFTWARE_VERSION="v${SIMULATED_DISPLAY_DISPLAY_VERSION}")
 
 include(CTest)
 if(BUILD_TESTING)
@@ -140,4 +162,8 @@ if(BUILD_TESTING)
     add_executable(test-matrix-serial tests/test_matrix_serial.c)
     target_link_libraries(test-matrix-serial PRIVATE matrix-display)
     add_test(NAME matrix-serial COMMAND test-matrix-serial)
+
+    add_executable(test-matrix-startup-screen tests/test_matrix_startup_screen.c)
+    target_link_libraries(test-matrix-startup-screen PRIVATE matrix-display)
+    add_test(NAME matrix-startup-screen COMMAND test-matrix-startup-screen)
 endif()

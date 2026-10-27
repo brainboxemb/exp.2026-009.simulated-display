@@ -432,13 +432,14 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
     private void configureLayoutControl() {
         layoutMode.getItems().addAll(
+                "Startup",
                 "Registraties",
                 "Registraties (>3)",
                 "Registraties + klaarstaan",
                 "Registraties + klaarstaan (>4 klaar)",
                 "Font test");
         layoutMode.setValue(
-                "Registraties + klaarstaan");
+                "Startup");
     }
 
     private void configureFontControls() {
@@ -542,14 +543,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
     private void activateDemoMode() {
         serialMode = false;
-
-        try {
-            process.requestDemoScreen();
-        } catch (IOException exception) {
-            status.setText(
-                    "Demo mode failed: "
-                            + exception.getMessage());
-        }
+        sendDemoLayout();
     }
 
     private void activateSerialMode() {
@@ -602,6 +596,12 @@ final class MatrixDisplayWindow implements AutoCloseable {
         }
 
         try {
+            if ("Startup".equals(
+                    layoutMode.getValue())) {
+                process.requestStartupScreen();
+                return;
+            }
+
             process.layout(
                     switch (layoutMode.getValue()) {
                         case "Registraties" -> 0;
