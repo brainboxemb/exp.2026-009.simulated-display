@@ -70,6 +70,37 @@ static const uint8_t FINISH_FLAG[FINISH_FLAG_HEIGHT] = {
     0x55
 };
 
+
+static void draw_finish_flag(
+        MatrixFramebuffer *framebuffer,
+        uint16_t x,
+        MatrixPixel color) {
+    for (uint16_t row = 0;
+            row < FINISH_FLAG_HEIGHT;
+            row++) {
+        for (uint16_t column = 0;
+                column < FINISH_FLAG_WIDTH;
+                column++) {
+            const uint16_t mask =
+                    (uint16_t)(
+                            1u
+                            << (FINISH_FLAG_WIDTH
+                                    - 1u
+                                    - column));
+
+            if ((FINISH_FLAG[row] & mask) == 0) {
+                continue;
+            }
+
+            matrix_framebuffer_set(
+                    framebuffer,
+                    (uint16_t)(x + column),
+                    (uint16_t)(FINISH_FLAG_Y + row),
+                    color);
+        }
+    }
+}
+
 static lv_color_t lv_color_from_pixel(MatrixPixel pixel) {
     const uint8_t red =
             (uint8_t)((((pixel >> 11u) & 0x1fu) * 255u) / 31u);
