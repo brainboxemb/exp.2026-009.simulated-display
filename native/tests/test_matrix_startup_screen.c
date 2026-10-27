@@ -113,7 +113,7 @@ int main(void) {
     assert(
             matrix_framebuffer_get(
                     &framebuffer,
-                    134,
+                    136,
                     20)
             == version_color);
 

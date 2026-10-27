@@ -492,7 +492,7 @@ int main(void) {
                 serial_visible = false;
                 if (!matrix_startup_screen_render(
                         &framebuffer,
-                        MATRIX_SOFTWARE_VERSION)) {
+                        &STARTUP_INFO)) {
                     return 6;
                 }
                 write_frame(&framebuffer);
