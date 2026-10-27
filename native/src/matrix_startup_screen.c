@@ -1,5 +1,7 @@
 #include "matrix_startup_screen.h"
 
+#include "matrix_status_icon.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -372,7 +374,7 @@ static bool draw_word(
     return true;
 }
 
-bool matrix_startup_screen_render(
+static bool draw_startup_base(
         MatrixFramebuffer *framebuffer,
         const char *version) {
     if (framebuffer == NULL
@@ -527,6 +529,141 @@ bool matrix_startup_screen_render(
                     version,
                     version_color)) {
         return false;
+    }
+
+    return true;
+}
+
+
+bool matrix_startup_screen_render(
+        MatrixFramebuffer *framebuffer,
+        const char *version) {
+    return draw_startup_base(
+            framebuffer,
+            version);
+}
+
+bool matrix_startup_sequence_render(
+        MatrixFramebuffer *framebuffer,
+        const char *version,
+        MatrixStartupState state,
+        uint8_t animation_frame) {
+    if (state > MATRIX_STARTUP_READY
+            || animation_frame
+                    >= MATRIX_STARTUP_SEQUENCE_FRAME_COUNT
+            || !draw_startup_base(
+                    framebuffer,
+                    version)) {
+        return false;
+    }
+
+    const MatrixPixel warning_background =
+            matrix_pixel_rgb565_create(
+                    0,
+                    96,
+                    255);
+    const MatrixPixel warning_glyph =
+            matrix_pixel_rgb565_create(
+                    0xee,
+                    0xee,
+                    0xee);
+    const MatrixPixel warning_strike =
+            matrix_pixel_rgb565_create(
+                    255,
+                    0,
+                    0);
+    const MatrixPixel active_background =
+            matrix_pixel_rgb565_create(
+                    0,
+                    255,
+                    0);
+    const MatrixPixel active_glyph =
+            matrix_pixel_rgb565_create(
+                    0,
+                    0,
+                    0);
+    const uint16_t one_status_x =
+            (uint16_t)(
+                    MATRIX_DISPLAY_WIDTH
+                    - MATRIX_STATUS_ICON_WIDTH);
+    const uint16_t two_status_x =
+            (uint16_t)(
+                    MATRIX_DISPLAY_WIDTH
+                    - 2u * MATRIX_STATUS_ICON_WIDTH
+                    - MATRIX_STATUS_ICON_GAP);
+    const uint16_t second_status_x =
+            (uint16_t)(
+                    two_status_x
+                    + MATRIX_STATUS_ICON_WIDTH
+                    + MATRIX_STATUS_ICON_GAP);
+
+    switch (state) {
+        case MATRIX_STARTUP_BOOT:
+            matrix_status_icon_draw(
+                    framebuffer,
+                    two_status_x,
+                    0u,
+                    MATRIX_STATUS_ICON_WIFI,
+                    warning_background,
+                    warning_glyph,
+                    true,
+                    warning_strike);
+            matrix_status_icon_draw(
+                    framebuffer,
+                    second_status_x,
+                    0u,
+                    MATRIX_STATUS_ICON_LINK,
+                    warning_background,
+                    warning_glyph,
+                    true,
+                    warning_strike);
+            break;
+
+        case MATRIX_STARTUP_WIFI_SCAN:
+            matrix_status_icon_draw_progress(
+                    framebuffer,
+                    two_status_x,
+                    0u,
+                    MATRIX_STATUS_ICON_WIFI,
+                    animation_frame,
+                    active_background,
+                    active_glyph);
+            matrix_status_icon_draw(
+                    framebuffer,
+                    second_status_x,
+                    0u,
+                    MATRIX_STATUS_ICON_LINK,
+                    warning_background,
+                    warning_glyph,
+                    true,
+                    warning_strike);
+            break;
+
+        case MATRIX_STARTUP_WIFI_CONNECTED:
+            matrix_status_icon_draw(
+                    framebuffer,
+                    one_status_x,
+                    0u,
+                    MATRIX_STATUS_ICON_LINK,
+                    warning_background,
+                    warning_glyph,
+                    true,
+                    warning_strike);
+            break;
+
+        case MATRIX_STARTUP_LINK_CONNECTING:
+            matrix_status_icon_draw_progress(
+                    framebuffer,
+                    one_status_x,
+                    0u,
+                    MATRIX_STATUS_ICON_LINK,
+                    animation_frame,
+                    active_background,
+                    active_glyph);
+            break;
+
+        case MATRIX_STARTUP_READY:
+            break;
     }
 
     return true;

@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 int main(void) {
     MatrixFramebuffer framebuffer;
@@ -116,6 +117,131 @@ int main(void) {
                     159,
                     63)
             == black);
+
+    MatrixFramebuffer boot;
+    MatrixFramebuffer wifi_scan0;
+    MatrixFramebuffer wifi_scan2;
+    MatrixFramebuffer wifi_connected;
+    MatrixFramebuffer link_connect0;
+    MatrixFramebuffer link_connect2;
+    MatrixFramebuffer ready;
+
+    assert(
+            matrix_startup_sequence_render(
+                    &boot,
+                    "v0.1.0",
+                    MATRIX_STARTUP_BOOT,
+                    0u));
+    assert(
+            matrix_startup_sequence_render(
+                    &wifi_scan0,
+                    "v0.1.0",
+                    MATRIX_STARTUP_WIFI_SCAN,
+                    0u));
+    assert(
+            matrix_startup_sequence_render(
+                    &wifi_scan2,
+                    "v0.1.0",
+                    MATRIX_STARTUP_WIFI_SCAN,
+                    2u));
+    assert(
+            matrix_startup_sequence_render(
+                    &wifi_connected,
+                    "v0.1.0",
+                    MATRIX_STARTUP_WIFI_CONNECTED,
+                    0u));
+    assert(
+            matrix_startup_sequence_render(
+                    &link_connect0,
+                    "v0.1.0",
+                    MATRIX_STARTUP_LINK_CONNECTING,
+                    0u));
+    assert(
+            matrix_startup_sequence_render(
+                    &link_connect2,
+                    "v0.1.0",
+                    MATRIX_STARTUP_LINK_CONNECTING,
+                    2u));
+    assert(
+            matrix_startup_sequence_render(
+                    &ready,
+                    "v0.1.0",
+                    MATRIX_STARTUP_READY,
+                    0u));
+
+    const MatrixPixel warning_background =
+            matrix_pixel_rgb565_create(
+                    0,
+                    96,
+                    255);
+    const MatrixPixel active_background =
+            matrix_pixel_rgb565_create(
+                    0,
+                    255,
+                    0);
+
+    /* Two startup warnings occupy the normal top-right status positions. */
+    assert(
+            matrix_framebuffer_get(
+                    &boot,
+                    137,
+                    10)
+            == warning_background);
+    assert(
+            matrix_framebuffer_get(
+                    &boot,
+                    149,
+                    10)
+            == warning_background);
+
+    /* Scanning uses an active lime block; the link remains a warning. */
+    assert(
+            matrix_framebuffer_get(
+                    &wifi_scan0,
+                    137,
+                    10)
+            == active_background);
+    assert(
+            matrix_framebuffer_get(
+                    &wifi_scan0,
+                    149,
+                    10)
+            == warning_background);
+    assert(
+            memcmp(
+                    wifi_scan0.pixels,
+                    wifi_scan2.pixels,
+                    sizeof(wifi_scan0.pixels))
+            != 0);
+
+    /* Once WiFi is connected, only link remains and owns the rightmost slot. */
+    assert(
+            matrix_framebuffer_get(
+                    &wifi_connected,
+                    149,
+                    10)
+            == warning_background);
+
+    assert(
+            matrix_framebuffer_get(
+                    &link_connect0,
+                    149,
+                    10)
+            == active_background);
+    assert(
+            memcmp(
+                    link_connect0.pixels,
+                    link_connect2.pixels,
+                    sizeof(link_connect0.pixels))
+            != 0);
+
+    /* READY is exactly the untouched static splash again. */
+    assert(
+            memcmp(
+                    framebuffer.pixels,
+                    ready.pixels,
+                    sizeof(framebuffer.pixels))
+            == 0);
 
     puts("matrix_startup_screen tests passed");
     return 0;
