@@ -166,10 +166,16 @@ final class NativeDisplayProcess implements AutoCloseable {
             }
         } catch (EOFException eof) {
             if (process.isAlive()) {
-                errorConsumer.accept(eof.getMessage());
+                errorConsumer.accept(
+                        eof.getMessage() != null
+                                ? eof.getMessage()
+                                : "Native display process ended unexpectedly");
             }
         } catch (IOException | ArithmeticException exception) {
-            errorConsumer.accept(exception.getMessage());
+            errorConsumer.accept(
+                    exception.getMessage() != null
+                            ? exception.getMessage()
+                            : exception.getClass().getSimpleName());
         }
     }
 

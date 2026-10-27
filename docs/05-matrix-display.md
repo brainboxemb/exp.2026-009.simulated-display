@@ -131,7 +131,7 @@ A style contains both a color and a font specification. The theme separately own
 `warning_background_color`, `warning_text_color`,
 `warning_strike_color`, `sync_background_color` and `sync_icon_color`.
 Runner and warmup
-sprites share `sprite_color`. The reviewed default palette uses warm yellow (`#FFCC66`) for the header, footer and sprites; soft white (`#EEEEEE`) for row text, finish flag and warning glyphs; black (`#000000`) for exchange text and the sync glyph; lime for large values, exchange background and sync background; blue (`#0060FF`) for warning backgrounds; red for the warning strike; dark gray (`#333333`) for the screen and gray (`#808080`) for divider lines.
+sprites share `sprite_color`. The reviewed logical display uses black (`#000000`) for unlit/background pixels, warm yellow (`#FFCC66`) for the header, footer and sprites; soft white (`#EEEEEE`) for row text, finish flag and warning glyphs; black for exchange text and the sync glyph; lime for large values, exchange background and sync background; blue (`#0060FF`) for warning backgrounds; red for the warning strike; and gray (`#808080`) for divider lines. JavaFX renders logical black/off pixels as dark gray (`#333333`) only to make the simulated LED matrix readable; that gray is not sent to the framebuffer.
 
 Example:
 

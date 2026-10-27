@@ -21,6 +21,9 @@ final class MatrixDisplayProcess implements AutoCloseable {
     private static final int REQUEST_ANIMATION_FRAME = 3;
     private static final int REQUEST_CONNECTION_STATUS = 4;
     private static final int REQUEST_LAYOUT = 5;
+    private static final int REQUEST_SERIAL_BYTES = 6;
+    private static final int REQUEST_SERIAL_TICK = 7;
+    private static final int MAX_SERIAL_BYTES = 4096;
     private static final int MAX_PIXELS = 1_000_000;
 
     private final Process process;
@@ -111,6 +114,28 @@ final class MatrixDisplayProcess implements AutoCloseable {
                         : 0);
         input.writeByte(synchronizing ? 1 : 0);
         input.flush();
+    }
+
+    synchronized void serial(byte[] bytes)
+            throws IOException {
+        Objects.requireNonNull(bytes);
+
+        if (bytes.length > MAX_SERIAL_BYTES) {
+            throw new IllegalArgumentException(
+                    "matrix serial chunk must be <= "
+                            + MAX_SERIAL_BYTES
+                            + " bytes");
+        }
+
+        input.writeInt(REQUEST_SERIAL_BYTES);
+        input.writeInt(bytes.length);
+        input.write(bytes);
+        input.flush();
+    }
+
+    synchronized void serialTick()
+            throws IOException {
+        sendRequest(REQUEST_SERIAL_TICK);
     }
 
     synchronized void applyTheme(
@@ -210,10 +235,16 @@ final class MatrixDisplayProcess implements AutoCloseable {
             }
         } catch (EOFException eof) {
             if (process.isAlive()) {
-                errorConsumer.accept(eof.getMessage());
+                errorConsumer.accept(
+                        eof.getMessage() != null
+                                ? eof.getMessage()
+                                : "Matrix display process ended unexpectedly");
             }
         } catch (IOException | ArithmeticException exception) {
-            errorConsumer.accept(exception.getMessage());
+            errorConsumer.accept(
+                    exception.getMessage() != null
+                            ? exception.getMessage()
+                            : exception.getClass().getSimpleName());
         }
     }
 

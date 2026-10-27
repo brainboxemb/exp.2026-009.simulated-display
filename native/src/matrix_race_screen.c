@@ -1,6 +1,7 @@
 #include "matrix_race_screen.h"
 
 #include "matrix_font.h"
+#include "matrix_lvgl.h"
 #include "matrix_sprite.h"
 #include "lvgl.h"
 
@@ -60,7 +61,6 @@
 
 static lv_display_t *display;
 static MatrixFramebuffer *active_framebuffer;
-static bool lvgl_initialized;
 
 /*
  * Static one-pixel checker flag. At this resolution a literal 1x1 checker
@@ -258,10 +258,9 @@ static void display_flush(
 }
 
 static void ensure_display(MatrixFramebuffer *framebuffer) {
-    if (!lvgl_initialized) {
-        lv_init();
-        lvgl_initialized = true;
+    matrix_lvgl_ensure_initialized();
 
+    if (display == NULL) {
         display =
                 lv_display_create(
                         MATRIX_DISPLAY_WIDTH,

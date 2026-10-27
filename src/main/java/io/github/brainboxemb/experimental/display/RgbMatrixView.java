@@ -14,12 +14,27 @@ final class RgbMatrixView extends Canvas {
     private final int logicalHeight;
 
     private int displayScale = 1;
+    private Color offPixelColor =
+            Color.web("#333333");
     private MatrixDisplayFrame lastFrame;
 
     RgbMatrixView(int width, int height) {
         logicalWidth = width;
         logicalHeight = height;
         updateCanvasSize();
+    }
+
+    void setOffPixelColor(Color color) {
+        if (color == null) {
+            throw new IllegalArgumentException(
+                    "off pixel color is required");
+        }
+
+        offPixelColor = color;
+
+        if (lastFrame != null) {
+            render(lastFrame);
+        }
     }
 
     void setDisplayScale(int scale) {
@@ -58,11 +73,19 @@ final class RgbMatrixView extends Canvas {
 
         for (int y = 0; y < frame.height(); y++) {
             for (int x = 0; x < frame.width(); x++) {
+                int red = frame.red(x, y);
+                int green = frame.green(x, y);
+                int blue = frame.blue(x, y);
+
                 graphics.setFill(
-                        Color.rgb(
-                                frame.red(x, y),
-                                frame.green(x, y),
-                                frame.blue(x, y)));
+                        red == 0
+                                && green == 0
+                                && blue == 0
+                                ? offPixelColor
+                                : Color.rgb(
+                                        red,
+                                        green,
+                                        blue));
 
                 graphics.fillOval(
                         x * pitch + inset,

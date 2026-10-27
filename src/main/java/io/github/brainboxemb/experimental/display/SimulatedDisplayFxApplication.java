@@ -32,7 +32,7 @@ public final class SimulatedDisplayFxApplication extends Application {
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(12));
         root.setCenter(display);
-        root.setBottom(createControls(stage));
+        root.setBottom(createControls());
 
         stage.setTitle(
                 "Experiment 009 — 90×35 Serial LED Display");
@@ -62,6 +62,8 @@ public final class SimulatedDisplayFxApplication extends Application {
         } catch (IOException exception) {
             status.setText(exception.getMessage());
         }
+
+        openMatrixDisplay(stage);
     }
 
     @Override
@@ -75,7 +77,7 @@ public final class SimulatedDisplayFxApplication extends Application {
         }
     }
 
-    private VBox createControls(Stage owner) {
+    private VBox createControls() {
         TextField text =
                 new TextField("HELLO WORLD");
         text.setPrefColumnCount(22);
@@ -169,23 +171,12 @@ public final class SimulatedDisplayFxApplication extends Application {
                         protocol,
                         sendProtocol);
 
-        Button openMatrix =
-                new Button("160×64 RGB matrix");
-        openMatrix.setOnAction(
-                event -> openMatrixDisplay(owner));
-
-        HBox matrixControls =
-                new HBox(
-                        8,
-                        openMatrix);
-
         VBox controls =
                 new VBox(
                         8,
                         textControls,
                         spriteControls,
                         protocolControls,
-                        matrixControls,
                         status);
         controls.setPadding(
                 new Insets(12, 0, 0, 0));
@@ -194,12 +185,6 @@ public final class SimulatedDisplayFxApplication extends Application {
     }
 
     private void openMatrixDisplay(Stage owner) {
-        if (matrixDisplayWindow != null
-                && matrixDisplayWindow.isShowing()) {
-            matrixDisplayWindow.toFront();
-            return;
-        }
-
         try {
             matrixDisplayWindow =
                     new MatrixDisplayWindow(owner);

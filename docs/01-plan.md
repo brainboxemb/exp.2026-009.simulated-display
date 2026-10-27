@@ -29,6 +29,7 @@ Verify split/combined input buffers, invalid slash commands, clipping, cursor wr
 - [x] add a matrix-native host process and RGB JavaFX view;
 - [x] integrate LVGL v9.6.0 for matrix text/layout rendering;
 - [x] render the first 160×64 race screen with configurable colors and font family/size;
+- [x] add a first matrix serial drawing/input phase with pages, palette-indexed drawing, fonts, icons and sprites;
 - [ ] design the synchronized application-data input model;
 - [ ] implement the synchronized matrix-data interpreter;
 - [ ] investigate an Arduino-free ESP-IDF HUB75 driver and panel mapping.
