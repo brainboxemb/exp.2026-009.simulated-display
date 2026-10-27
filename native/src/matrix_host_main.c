@@ -484,7 +484,8 @@ int main(void) {
                 startup_visible = true;
                 serial_visible = false;
                 if (!matrix_startup_screen_render(
-                        &framebuffer)) {
+                        &framebuffer,
+                        MATRIX_SOFTWARE_VERSION)) {
                     return 6;
                 }
                 write_frame(&framebuffer);
