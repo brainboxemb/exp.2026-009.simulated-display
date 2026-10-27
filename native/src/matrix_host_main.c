@@ -32,7 +32,7 @@
 static const MatrixStartupInfo STARTUP_INFO = {
     .version = MATRIX_SOFTWARE_VERSION,
     .display_id = 'A',
-    .ssid_id = 'B'
+    .ssid_id = 'A'
 };
 
 static MatrixRaceScreenData DEMO_SCREEN = {

@@ -9,7 +9,7 @@ int main(void) {
     const MatrixStartupInfo info = {
         .version = "v0.1.0",
         .display_id = 'A',
-        .ssid_id = 'B'
+        .ssid_id = 'A'
     };
 
     assert(
@@ -208,7 +208,7 @@ int main(void) {
                     10)
             == warning_background);
 
-    /* Scanning uses an active lime block; the link remains a warning. */
+    /* Scanning animates the normal blue/white WiFi block; link stays warning. */
     assert(
             matrix_framebuffer_get(
                     &wifi_scan0,
