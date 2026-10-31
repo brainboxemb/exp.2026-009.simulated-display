@@ -257,6 +257,84 @@ int main(void) {
                     sizeof(framebuffer.pixels))
             == 0);
 
+    MatrixFramebuffer menu_a;
+    MatrixFramebuffer menu_b;
+
+    assert(
+            matrix_startup_menu_render(
+                    &menu_a,
+                    &info,
+                    0u));
+    assert(
+            matrix_startup_menu_render(
+                    &menu_b,
+                    &info,
+                    1u));
+
+    const MatrixPixel menu_blue =
+            matrix_pixel_rgb565_create(
+                    0,
+                    0,
+                    170);
+    const MatrixPixel menu_white =
+            matrix_pixel_rgb565_create(
+                    238,
+                    238,
+                    238);
+
+    /* The startup artwork remains visible outside the compact popup. */
+    assert(
+            matrix_framebuffer_get(
+                    &menu_a,
+                    24,
+                    2)
+            == lime);
+
+    /* Popup is blue with a one-pixel white border. */
+    assert(
+            matrix_framebuffer_get(
+                    &menu_a,
+                    36,
+                    20)
+            == menu_blue);
+    assert(
+            matrix_framebuffer_get(
+                    &menu_a,
+                    35,
+                    19)
+            == menu_white);
+
+    /* A/B selection moves the small inverted 5x7 cell. */
+    assert(
+            matrix_framebuffer_get(
+                    &menu_a,
+                    42,
+                    33)
+            == menu_white);
+    assert(
+            matrix_framebuffer_get(
+                    &menu_b,
+                    42,
+                    33)
+            == menu_blue);
+    assert(
+            matrix_framebuffer_get(
+                    &menu_b,
+                    49,
+                    33)
+            == menu_white);
+    assert(
+            memcmp(
+                    menu_a.pixels,
+                    menu_b.pixels,
+                    sizeof(menu_a.pixels))
+            != 0);
+    assert(
+            !matrix_startup_menu_render(
+                    &menu_a,
+                    &info,
+                    MATRIX_STARTUP_MENU_OPTION_COUNT));
+
     puts("matrix_startup_screen tests passed");
     return 0;
 }

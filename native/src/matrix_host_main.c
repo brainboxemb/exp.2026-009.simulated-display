@@ -23,6 +23,7 @@
 #define MATRIX_HOST_REQUEST_SERIAL_TICK 7u
 #define MATRIX_HOST_REQUEST_STARTUP_SCREEN 8u
 #define MATRIX_HOST_REQUEST_STARTUP_SEQUENCE 9u
+#define MATRIX_HOST_REQUEST_STARTUP_MENU 10u
 #define MATRIX_HOST_SERIAL_CHUNK_MAX 4096u
 
 #ifndef MATRIX_SOFTWARE_VERSION
@@ -519,6 +520,30 @@ int main(void) {
                         &STARTUP_INFO,
                         (MatrixStartupState)state,
                         requested_frame)) {
+                    return 6;
+                }
+
+                write_frame(&framebuffer);
+                break;
+            }
+
+            case MATRIX_HOST_REQUEST_STARTUP_MENU: {
+                uint8_t selected_index = 0u;
+
+                if (!read_u8(&selected_index)
+                        || selected_index
+                                >= MATRIX_STARTUP_MENU_OPTION_COUNT) {
+                    return 6;
+                }
+
+                demo_visible = false;
+                startup_visible = false;
+                serial_visible = false;
+
+                if (!matrix_startup_menu_render(
+                        &framebuffer,
+                        &STARTUP_INFO,
+                        selected_index)) {
                     return 6;
                 }
 

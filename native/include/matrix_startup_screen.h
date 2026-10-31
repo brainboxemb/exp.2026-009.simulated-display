@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #define MATRIX_STARTUP_SEQUENCE_FRAME_COUNT 4u
+#define MATRIX_STARTUP_MENU_OPTION_COUNT 11u
 
 typedef enum {
     MATRIX_STARTUP_BOOT,
@@ -31,5 +32,10 @@ bool matrix_startup_sequence_render(
         const MatrixStartupInfo *info,
         MatrixStartupState state,
         uint8_t animation_frame);
+
+bool matrix_startup_menu_render(
+        MatrixFramebuffer *framebuffer,
+        const MatrixStartupInfo *info,
+        uint8_t selected_index);
 
 #endif

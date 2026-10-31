@@ -26,6 +26,8 @@ The splash is intentionally a separate renderer rather than another `MatrixRaceL
 
 The Demo selector also exposes **Startup sequence**. This keeps the static splash available for artwork review while the second variant loops through the intended startup states: both warnings, WiFi scan, WiFi connected, link connecting and ready. WiFi/link indicators use the exact same shared 11×11 glyphs and top-right grouping as the normal race screen. Two indicators therefore occupy x=137 and x=149; a single remaining indicator uses x=149. Warning states remain blue/white with a red strike. Active connection work keeps the same blue background and white glyph but removes the red strike; only the glyph shape animates. This keeps WiFi/link visually consistent while still distinguishing unavailable from actively connecting. The sequence is simulator-driven at 250 ms per animation step; it does not yet change ESP32 runtime behavior.
 
+A third Demo choice, **Startup menu**, previews the future single-button WiFi/SSID profile selector from issue #21. It is a compact DOS-like popup over the normal startup artwork rather than a separate full-screen page. The roughly 90×27-pixel popup uses a dark-blue fill, soft-white one-pixel border/separator and the same smallest 3×5 mini-font already used for startup ID/SSID/version text. It contains only the title `WIFI ID` and one compact row `A B C D E F G H I 1 2`. The selected value is inverted to a small white cell with a blue glyph. JavaFX supplies only the selected index through a host-only request; the menu pixels remain native-C-owned. Two simulator buttons, `◀ ID` and `ID ▶`, cycle the selection for visual review. This does not yet define ESP32 long-press timing or persistent storage.
+
 The startup renderer receives one `MatrixStartupInfo` configuration containing the software version, one-character display ID and one-character SSID/profile ID. The simulator currently uses `A` for both example config values, matching the expected common case where display ID and SSID/profile ID use the same letter. Directly below the top-right 11×11 status indicators, two gray 3×5 lines are right-aligned to the same screen edge: `ID: A` at y=13 and `SSID: A` at y=20. The compact software version remains gray and right-aligned at the bottom-right. The mini alphabet supports uppercase A–Z and digits so the configured character identifiers are not tied to the demo values.
 
 For the desktop simulator, CMake receives the version rather than the artwork owning it. For the desktop simulator, CMake reads the Maven project version from `pom.xml` (currently `0.1.0-SNAPSHOT`) and displays the compact release part as `v0.1.0`. This keeps `pom.xml` as the current version authority while allowing the ESP32 target to pass its own build/version value later.
@@ -188,6 +190,12 @@ The JavaFX simulator exposes both families for comparison. VBZ is the default: 9
 and 14px numeric variants in aligned fixed-width columns. This is the preferred
 visual check when adjusting individual glyphs such as the lower curve of the
 14px `9`.
+
+## PNG framebuffer export
+
+The matrix viewer has a **Save PNG** control. It exports the most recently received `MatrixDisplayFrame` directly as a 160×64 RGB PNG. The export deliberately does not capture the JavaFX window, LED-circle visualization, 1×/2× viewer scale, or the configurable dark-gray off-pixel preview. Logical RGB565 black is therefore black in the saved file, and every non-black pixel is expanded from its RGB565 channel values to 8-bit RGB.
+
+This makes exported images suitable for documentation and pixel-level comparison with native/ESP32 output rather than merely serving as screenshots of the desktop simulator.
 
 ## Physical HUB75 output
 

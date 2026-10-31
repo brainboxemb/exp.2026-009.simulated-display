@@ -20,6 +20,18 @@
 #define INFO_SSID_Y 20u
 #define VERSION_BOTTOM_MARGIN 1u
 
+#define MENU_BORDER_LEFT 35
+#define MENU_BORDER_TOP 19
+#define MENU_BORDER_RIGHT 124
+#define MENU_BORDER_BOTTOM 45
+#define MENU_TITLE_Y 22
+#define MENU_SEPARATOR_Y 29
+#define MENU_OPTION_START_X 42
+#define MENU_OPTION_Y 33
+#define MENU_OPTION_SLOT_WIDTH 7
+#define MENU_OPTION_BOX_WIDTH 5
+#define MENU_OPTION_BOX_HEIGHT 7
+
 static const uint8_t GLYPH_R[GLYPH_HEIGHT] = {
     0x1e, 0x11, 0x11, 0x1e, 0x14, 0x12, 0x11
 };
@@ -89,6 +101,9 @@ static const uint8_t INFO_V[INFO_GLYPH_HEIGHT] = {
     0x5, 0x5, 0x5, 0x5, 0x2
 };
 
+static const char STARTUP_MENU_OPTIONS[
+        MATRIX_STARTUP_MENU_OPTION_COUNT + 1u] = "ABCDEFGHI12";
+
 static const uint8_t *glyph_rows(char character) {
     switch (character) {
         case 'R':
@@ -125,6 +140,28 @@ static void set_pixel(
             (uint16_t)x,
             (uint16_t)y,
             color);
+}
+
+static void fill_rect(
+        MatrixFramebuffer *framebuffer,
+        int32_t x,
+        int32_t y,
+        int32_t width,
+        int32_t height,
+        MatrixPixel color) {
+    for (int32_t row = 0;
+            row < height;
+            row++) {
+        for (int32_t column = 0;
+                column < width;
+                column++) {
+            set_pixel(
+                    framebuffer,
+                    x + column,
+                    y + row,
+                    color);
+        }
+    }
 }
 
 static void draw_line(
@@ -337,6 +374,154 @@ static bool draw_info_text_right(
     }
 
     return true;
+}
+
+static bool draw_info_character_scaled(
+        MatrixFramebuffer *framebuffer,
+        char character,
+        int32_t x,
+        int32_t y,
+        uint8_t scale,
+        MatrixPixel color) {
+    if (scale == 0u) {
+        return false;
+    }
+
+    if (character == ' ') {
+        return true;
+    }
+
+    const uint8_t *rows =
+            info_rows(character);
+
+    if (rows == NULL) {
+        return false;
+    }
+
+    for (uint8_t row = 0u;
+            row < INFO_GLYPH_HEIGHT;
+            row++) {
+        for (uint8_t column = 0u;
+                column < INFO_GLYPH_WIDTH;
+                column++) {
+            const uint8_t mask =
+                    (uint8_t)(
+                            1u
+                            << (INFO_GLYPH_WIDTH
+                                    - 1u
+                                    - column));
+
+            if ((rows[row] & mask) == 0u) {
+                continue;
+            }
+
+            fill_rect(
+                    framebuffer,
+                    x + (int32_t)column * scale,
+                    y + (int32_t)row * scale,
+                    scale,
+                    scale,
+                    color);
+        }
+    }
+
+    return true;
+}
+
+static size_t info_text_scaled_width(
+        const char *text,
+        uint8_t scale) {
+    if (text == NULL
+            || text[0] == '\0'
+            || scale == 0u) {
+        return 0u;
+    }
+
+    size_t width = 0u;
+
+    for (size_t index = 0u;
+            text[index] != '\0';
+            index++) {
+        width +=
+                (size_t)info_character_width(text[index])
+                * scale;
+
+        if (text[index + 1u] != '\0') {
+            width += scale;
+        }
+    }
+
+    return width;
+}
+
+static bool draw_info_text_scaled(
+        MatrixFramebuffer *framebuffer,
+        const char *text,
+        int32_t x,
+        int32_t y,
+        uint8_t scale,
+        MatrixPixel color) {
+    if (text == NULL
+            || scale == 0u) {
+        return false;
+    }
+
+    int32_t cursor_x = x;
+
+    for (size_t index = 0u;
+            text[index] != '\0';
+            index++) {
+        const char character =
+                text[index];
+
+        if (!draw_info_character_scaled(
+                framebuffer,
+                character,
+                cursor_x,
+                y,
+                scale,
+                color)) {
+            return false;
+        }
+
+        cursor_x +=
+                (int32_t)(
+                        info_character_width(character)
+                        * scale);
+
+        if (text[index + 1u] != '\0') {
+            cursor_x += scale;
+        }
+    }
+
+    return true;
+}
+
+static bool draw_info_text_centered(
+        MatrixFramebuffer *framebuffer,
+        const char *text,
+        int32_t y,
+        uint8_t scale,
+        MatrixPixel color) {
+    const size_t width =
+            info_text_scaled_width(
+                    text,
+                    scale);
+
+    if (width == 0u
+            || width > MATRIX_DISPLAY_WIDTH) {
+        return false;
+    }
+
+    return draw_info_text_scaled(
+            framebuffer,
+            text,
+            (int32_t)(
+                    (MATRIX_DISPLAY_WIDTH - width)
+                    / 2u),
+            y,
+            scale,
+            color);
 }
 
 static bool draw_startup_info(
@@ -753,6 +938,141 @@ bool matrix_startup_sequence_render(
 
         case MATRIX_STARTUP_READY:
             break;
+    }
+
+    return true;
+}
+
+
+bool matrix_startup_menu_render(
+        MatrixFramebuffer *framebuffer,
+        const MatrixStartupInfo *info,
+        uint8_t selected_index) {
+    if (framebuffer == NULL
+            || info == NULL
+            || selected_index
+                    >= MATRIX_STARTUP_MENU_OPTION_COUNT
+            || !draw_startup_base(
+                    framebuffer,
+                    info)) {
+        return false;
+    }
+
+    const MatrixPixel blue =
+            matrix_pixel_rgb565_create(
+                    0,
+                    0,
+                    170);
+    const MatrixPixel white =
+            matrix_pixel_rgb565_create(
+                    238,
+                    238,
+                    238);
+
+    /*
+     * Keep the normal startup splash visible around this deliberately small,
+     * DOS-like popup. The menu itself owns only its compact blue rectangle.
+     */
+    fill_rect(
+            framebuffer,
+            MENU_BORDER_LEFT,
+            MENU_BORDER_TOP,
+            MENU_BORDER_RIGHT
+                    - MENU_BORDER_LEFT
+                    + 1,
+            MENU_BORDER_BOTTOM
+                    - MENU_BORDER_TOP
+                    + 1,
+            blue);
+
+    draw_line(
+            framebuffer,
+            MENU_BORDER_LEFT,
+            MENU_BORDER_TOP,
+            MENU_BORDER_RIGHT,
+            MENU_BORDER_TOP,
+            white);
+    draw_line(
+            framebuffer,
+            MENU_BORDER_LEFT,
+            MENU_BORDER_BOTTOM,
+            MENU_BORDER_RIGHT,
+            MENU_BORDER_BOTTOM,
+            white);
+    draw_line(
+            framebuffer,
+            MENU_BORDER_LEFT,
+            MENU_BORDER_TOP,
+            MENU_BORDER_LEFT,
+            MENU_BORDER_BOTTOM,
+            white);
+    draw_line(
+            framebuffer,
+            MENU_BORDER_RIGHT,
+            MENU_BORDER_TOP,
+            MENU_BORDER_RIGHT,
+            MENU_BORDER_BOTTOM,
+            white);
+    draw_line(
+            framebuffer,
+            MENU_BORDER_LEFT + 3,
+            MENU_SEPARATOR_Y,
+            MENU_BORDER_RIGHT - 3,
+            MENU_SEPARATOR_Y,
+            white);
+
+    const size_t title_width =
+            info_text_scaled_width(
+                    "WIFI ID",
+                    1u);
+    const int32_t title_x =
+            MENU_BORDER_LEFT
+            + (int32_t)(
+                    (MENU_BORDER_RIGHT
+                            - MENU_BORDER_LEFT
+                            + 1
+                            - title_width)
+                    / 2u);
+
+    if (!draw_info_text_scaled(
+            framebuffer,
+            "WIFI ID",
+            title_x,
+            MENU_TITLE_Y,
+            1u,
+            white)) {
+        return false;
+    }
+
+    for (uint8_t index = 0u;
+            index < MATRIX_STARTUP_MENU_OPTION_COUNT;
+            index++) {
+        const int32_t option_x =
+                MENU_OPTION_START_X
+                + (int32_t)index
+                        * MENU_OPTION_SLOT_WIDTH;
+        const bool selected =
+                index == selected_index;
+
+        if (selected) {
+            fill_rect(
+                    framebuffer,
+                    option_x,
+                    MENU_OPTION_Y,
+                    MENU_OPTION_BOX_WIDTH,
+                    MENU_OPTION_BOX_HEIGHT,
+                    white);
+        }
+
+        if (!draw_info_character_scaled(
+                framebuffer,
+                STARTUP_MENU_OPTIONS[index],
+                option_x + 1,
+                MENU_OPTION_Y + 1,
+                1u,
+                selected ? blue : white)) {
+            return false;
+        }
     }
 
     return true;
