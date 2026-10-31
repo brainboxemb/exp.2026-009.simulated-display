@@ -263,10 +263,12 @@ int main(void) {
     assert(
             matrix_startup_menu_render(
                     &menu_a,
+                    &info,
                     0u));
     assert(
             matrix_startup_menu_render(
                     &menu_b,
+                    &info,
                     1u));
 
     const MatrixPixel menu_blue =
@@ -280,35 +282,46 @@ int main(void) {
                     238,
                     238);
 
+    /* The startup artwork remains visible outside the compact popup. */
     assert(
             matrix_framebuffer_get(
                     &menu_a,
-                    0,
-                    0)
-            == menu_blue);
-    assert(
-            matrix_framebuffer_get(
-                    &menu_a,
-                    2,
+                    24,
                     2)
-            == menu_white);
+            == lime);
+
+    /* Popup is blue with a one-pixel white border. */
     assert(
             matrix_framebuffer_get(
                     &menu_a,
-                    19,
-                    30)
+                    36,
+                    20)
+            == menu_blue);
+    assert(
+            matrix_framebuffer_get(
+                    &menu_a,
+                    35,
+                    19)
+            == menu_white);
+
+    /* A/B selection moves the small inverted 5x7 cell. */
+    assert(
+            matrix_framebuffer_get(
+                    &menu_a,
+                    42,
+                    33)
             == menu_white);
     assert(
             matrix_framebuffer_get(
                     &menu_b,
-                    19,
-                    30)
+                    42,
+                    33)
             == menu_blue);
     assert(
             matrix_framebuffer_get(
                     &menu_b,
-                    30,
-                    30)
+                    49,
+                    33)
             == menu_white);
     assert(
             memcmp(
@@ -319,6 +332,7 @@ int main(void) {
     assert(
             !matrix_startup_menu_render(
                     &menu_a,
+                    &info,
                     MATRIX_STARTUP_MENU_OPTION_COUNT));
 
     puts("matrix_startup_screen tests passed");

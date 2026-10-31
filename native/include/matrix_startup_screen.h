@@ -35,6 +35,7 @@ bool matrix_startup_sequence_render(
 
 bool matrix_startup_menu_render(
         MatrixFramebuffer *framebuffer,
+        const MatrixStartupInfo *info,
         uint8_t selected_index);
 
 #endif

@@ -542,6 +542,7 @@ int main(void) {
 
                 if (!matrix_startup_menu_render(
                         &framebuffer,
+                        &STARTUP_INFO,
                         selected_index)) {
                     return 6;
                 }

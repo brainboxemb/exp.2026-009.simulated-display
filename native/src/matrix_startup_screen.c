@@ -20,15 +20,17 @@
 #define INFO_SSID_Y 20u
 #define VERSION_BOTTOM_MARGIN 1u
 
-#define MENU_BORDER_LEFT 2
-#define MENU_BORDER_TOP 2
-#define MENU_BORDER_RIGHT 157
-#define MENU_BORDER_BOTTOM 61
-#define MENU_OPTION_START_X 19
-#define MENU_OPTION_Y 30
-#define MENU_OPTION_SLOT_WIDTH 11
-#define MENU_OPTION_BOX_WIDTH 9
-#define MENU_OPTION_BOX_HEIGHT 12
+#define MENU_BORDER_LEFT 35
+#define MENU_BORDER_TOP 19
+#define MENU_BORDER_RIGHT 124
+#define MENU_BORDER_BOTTOM 45
+#define MENU_TITLE_Y 22
+#define MENU_SEPARATOR_Y 29
+#define MENU_OPTION_START_X 42
+#define MENU_OPTION_Y 33
+#define MENU_OPTION_SLOT_WIDTH 7
+#define MENU_OPTION_BOX_WIDTH 5
+#define MENU_OPTION_BOX_HEIGHT 7
 
 static const uint8_t GLYPH_R[GLYPH_HEIGHT] = {
     0x1e, 0x11, 0x11, 0x1e, 0x14, 0x12, 0x11
@@ -944,10 +946,15 @@ bool matrix_startup_sequence_render(
 
 bool matrix_startup_menu_render(
         MatrixFramebuffer *framebuffer,
+        const MatrixStartupInfo *info,
         uint8_t selected_index) {
     if (framebuffer == NULL
+            || info == NULL
             || selected_index
-                    >= MATRIX_STARTUP_MENU_OPTION_COUNT) {
+                    >= MATRIX_STARTUP_MENU_OPTION_COUNT
+            || !draw_startup_base(
+                    framebuffer,
+                    info)) {
         return false;
     }
 
@@ -962,12 +969,20 @@ bool matrix_startup_menu_render(
                     238,
                     238);
 
+    /*
+     * Keep the normal startup splash visible around this deliberately small,
+     * DOS-like popup. The menu itself owns only its compact blue rectangle.
+     */
     fill_rect(
             framebuffer,
-            0,
-            0,
-            MATRIX_DISPLAY_WIDTH,
-            MATRIX_DISPLAY_HEIGHT,
+            MENU_BORDER_LEFT,
+            MENU_BORDER_TOP,
+            MENU_BORDER_RIGHT
+                    - MENU_BORDER_LEFT
+                    + 1,
+            MENU_BORDER_BOTTOM
+                    - MENU_BORDER_TOP
+                    + 1,
             blue);
 
     draw_line(
@@ -1000,31 +1015,32 @@ bool matrix_startup_menu_render(
             white);
     draw_line(
             framebuffer,
-            5,
-            19,
-            154,
-            19,
+            MENU_BORDER_LEFT + 3,
+            MENU_SEPARATOR_Y,
+            MENU_BORDER_RIGHT - 3,
+            MENU_SEPARATOR_Y,
             white);
 
-    if (!draw_info_text_centered(
+    const size_t title_width =
+            info_text_scaled_width(
+                    "WIFI ID",
+                    1u);
+    const int32_t title_x =
+            MENU_BORDER_LEFT
+            + (int32_t)(
+                    (MENU_BORDER_RIGHT
+                            - MENU_BORDER_LEFT
+                            + 1
+                            - title_width)
+                    / 2u);
+
+    if (!draw_info_text_scaled(
             framebuffer,
             "WIFI ID",
-            6,
-            2u,
-            white)
-            || !draw_info_text_scaled(
-                    framebuffer,
-                    "SELECT",
-                    7,
-                    22,
-                    1u,
-                    white)
-            || !draw_info_text_centered(
-                    framebuffer,
-                    "SHORT NEXT  LONG SAVE",
-                    51,
-                    1u,
-                    white)) {
+            title_x,
+            MENU_TITLE_Y,
+            1u,
+            white)) {
         return false;
     }
 
@@ -1053,7 +1069,7 @@ bool matrix_startup_menu_render(
                 STARTUP_MENU_OPTIONS[index],
                 option_x + 1,
                 MENU_OPTION_Y + 1,
-                2u,
+                1u,
                 selected ? blue : white)) {
             return false;
         }
