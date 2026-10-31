@@ -34,6 +34,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private static final int RUNNER_FRAME_COUNT = 6;
     private static final int STARTUP_SEQUENCE_FRAME_COUNT = 4;
     private static final int STARTUP_SEQUENCE_TICKS = 32;
+    private static final int STARTUP_MENU_OPTION_COUNT = 11;
 
     private final Stage stage;
     private final RgbMatrixView view;
@@ -103,6 +104,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
     private int animationFrame;
     private int startupSequenceTick;
+    private int startupMenuIndex;
     private boolean demoSpriteAnimationRunning = true;
     private boolean serialMode;
 
@@ -271,6 +273,10 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new Button("▶");
         Button runPauseSprites =
                 new Button("Pause");
+        Button previousMenuId =
+                new Button("◀ ID");
+        Button nextMenuId =
+                new Button("ID ▶");
 
         updateSpriteFrameStatus();
 
@@ -283,6 +289,13 @@ final class MatrixDisplayWindow implements AutoCloseable {
                         8,
                         new Label("Layout:"),
                         layoutMode);
+
+        HBox menuControls =
+                new HBox(
+                        8,
+                        new Label("Startup menu:"),
+                        previousMenuId,
+                        nextMenuId);
 
         HBox spriteControls =
                 new HBox(
@@ -318,6 +331,10 @@ final class MatrixDisplayWindow implements AutoCloseable {
         runPauseSprites.setOnAction(
                 event -> toggleDemoSpriteAnimation(
                         runPauseSprites));
+        previousMenuId.setOnAction(
+                event -> stepStartupMenuId(-1));
+        nextMenuId.setOnAction(
+                event -> stepStartupMenuId(1));
 
         wifiConnected.setOnAction(
                 event -> sendConnectionStatus());
@@ -334,6 +351,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new VBox(
                         8,
                         layoutControls,
+                        menuControls,
                         spriteControls,
                         connectionControls,
                         styleControls);
@@ -448,6 +466,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
         layoutMode.getItems().addAll(
                 "Startup",
                 "Startup sequence",
+                "Startup menu",
                 "Registraties",
                 "Registraties (>3)",
                 "Registraties + klaarstaan",
@@ -624,6 +643,13 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 return;
             }
 
+            if ("Startup menu".equals(
+                    layoutMode.getValue())) {
+                process.startupMenu(
+                        startupMenuIndex);
+                return;
+            }
+
             process.layout(
                     switch (layoutMode.getValue()) {
                         case "Registraties" -> 0;
@@ -663,6 +689,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 || "Startup".equals(
                         layoutMode.getValue())
                 || "Startup sequence".equals(
+                        layoutMode.getValue())
+                || "Startup menu".equals(
                         layoutMode.getValue())) {
             return;
         }
@@ -774,6 +802,29 @@ final class MatrixDisplayWindow implements AutoCloseable {
             startupSequenceAnimation.stop();
             status.setText(
                     "Startup sequence failed: "
+                            + exception.getMessage());
+        }
+    }
+
+    private void stepStartupMenuId(
+            int delta) {
+        startupMenuIndex =
+                Math.floorMod(
+                        startupMenuIndex + delta,
+                        STARTUP_MENU_OPTION_COUNT);
+
+        if (serialMode
+                || !"Startup menu".equals(
+                        layoutMode.getValue())) {
+            return;
+        }
+
+        try {
+            process.startupMenu(
+                    startupMenuIndex);
+        } catch (IOException exception) {
+            status.setText(
+                    "Startup menu failed: "
                             + exception.getMessage());
         }
     }

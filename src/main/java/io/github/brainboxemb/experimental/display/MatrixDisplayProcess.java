@@ -25,6 +25,8 @@ final class MatrixDisplayProcess implements AutoCloseable {
     private static final int REQUEST_SERIAL_TICK = 7;
     private static final int REQUEST_STARTUP_SCREEN = 8;
     private static final int REQUEST_STARTUP_SEQUENCE = 9;
+    private static final int REQUEST_STARTUP_MENU = 10;
+    private static final int STARTUP_MENU_OPTION_COUNT = 11;
     private static final int MAX_SERIAL_BYTES = 4096;
     private static final int MAX_PIXELS = 1_000_000;
 
@@ -97,6 +99,21 @@ final class MatrixDisplayProcess implements AutoCloseable {
         input.writeInt(REQUEST_STARTUP_SEQUENCE);
         input.writeByte(state);
         input.writeByte(animationFrame);
+        input.flush();
+    }
+
+    synchronized void startupMenu(
+            int selectedIndex)
+            throws IOException {
+        if (selectedIndex < 0
+                || selectedIndex >= STARTUP_MENU_OPTION_COUNT) {
+            throw new IllegalArgumentException(
+                    "startup menu index must be 0.."
+                            + (STARTUP_MENU_OPTION_COUNT - 1));
+        }
+
+        input.writeInt(REQUEST_STARTUP_MENU);
+        input.writeByte(selectedIndex);
         input.flush();
     }
 
