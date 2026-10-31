@@ -1,6 +1,8 @@
 package io.github.brainboxemb.experimental.display;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -22,6 +24,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -105,6 +108,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
     private int animationFrame;
     private int startupSequenceTick;
     private int startupMenuIndex;
+    private MatrixDisplayFrame lastFrame;
     private boolean demoSpriteAnimationRunning = true;
     private boolean serialMode;
 
@@ -129,6 +133,8 @@ final class MatrixDisplayWindow implements AutoCloseable {
 
         ToggleButton scale2x =
                 new ToggleButton("2×");
+        Button savePng =
+                new Button("Save PNG");
         scale2x.setOnAction(
                 event -> {
                     view.setDisplayScale(
@@ -141,11 +147,14 @@ final class MatrixDisplayWindow implements AutoCloseable {
         offPixelColor.setOnAction(
                 event -> view.setOffPixelColor(
                         offPixelColor.getValue()));
+        savePng.setOnAction(
+                event -> saveCurrentFrame());
 
         HBox viewerControls =
                 new HBox(
                         8,
                         scale2x,
+                        savePng,
                         new Label("Off pixel:"),
                         offPixelColor,
                         status);
@@ -190,6 +199,7 @@ final class MatrixDisplayWindow implements AutoCloseable {
                 new MatrixDisplayProcess(
                         frame -> Platform.runLater(
                                 () -> {
+                                    lastFrame = frame;
                                     view.render(frame);
                                     status.setText(
                                             "Native C matrix: "
@@ -825,6 +835,58 @@ final class MatrixDisplayWindow implements AutoCloseable {
         } catch (IOException exception) {
             status.setText(
                     "Startup menu failed: "
+                            + exception.getMessage());
+        }
+    }
+
+    private void saveCurrentFrame() {
+        if (lastFrame == null) {
+            status.setText(
+                    "No matrix frame available to save");
+            return;
+        }
+
+        FileChooser chooser =
+                new FileChooser();
+        chooser.setTitle(
+                "Save logical matrix framebuffer");
+        chooser.setInitialFileName(
+                "matrix-160x64.png");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "PNG image",
+                        "*.png"));
+
+        File selected =
+                chooser.showSaveDialog(stage);
+
+        if (selected == null) {
+            return;
+        }
+
+        Path output =
+                selected.toPath();
+
+        if (!selected.getName()
+                .toLowerCase()
+                .endsWith(".png")) {
+            output =
+                    selected.toPath()
+                            .resolveSibling(
+                                    selected.getName()
+                                    + ".png");
+        }
+
+        try {
+            MatrixFramePng.write(
+                    lastFrame,
+                    output);
+            status.setText(
+                    "Saved logical 160×64 PNG: "
+                            + output.getFileName());
+        } catch (IOException exception) {
+            status.setText(
+                    "Save PNG failed: "
                             + exception.getMessage());
         }
     }

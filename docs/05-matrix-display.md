@@ -191,6 +191,12 @@ and 14px numeric variants in aligned fixed-width columns. This is the preferred
 visual check when adjusting individual glyphs such as the lower curve of the
 14px `9`.
 
+## PNG framebuffer export
+
+The matrix viewer has a **Save PNG** control. It exports the most recently received `MatrixDisplayFrame` directly as a 160×64 RGB PNG. The export deliberately does not capture the JavaFX window, LED-circle visualization, 1×/2× viewer scale, or the configurable dark-gray off-pixel preview. Logical RGB565 black is therefore black in the saved file, and every non-black pixel is expanded from its RGB565 channel values to 8-bit RGB.
+
+This makes exported images suitable for documentation and pixel-level comparison with native/ESP32 output rather than merely serving as screenshots of the desktop simulator.
+
 ## Physical HUB75 output
 
 The renderer works only in logical 160×64 coordinates. Five-panel ordering, scan pattern and multiplexing remain responsibilities of the later HUB75 hardware adapter.
