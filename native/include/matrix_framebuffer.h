@@ -15,6 +15,10 @@ typedef struct {
     MatrixPixel pixels[MATRIX_DISPLAY_PIXEL_COUNT];
 } MatrixFramebuffer;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 MatrixPixel matrix_pixel_rgb565_create(
         uint8_t red,
         uint8_t green,
@@ -33,5 +37,9 @@ void matrix_framebuffer_set(
         uint16_t x,
         uint16_t y,
         MatrixPixel pixel);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
