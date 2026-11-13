@@ -25,10 +25,11 @@ example. The `esp-hub75` adapter and portable C/LVGL renderer use ESP-IDF
 components directly; switching frameworks would be a separate driver/runtime
 migration, not a `platformio.ini` simplification.
 
-The root `CMakeLists.txt` sets `COMPONENTS src` instead of building every
+The root `CMakeLists.txt` sets `COMPONENTS src __pio_env` instead of building every
 discovered ESP-IDF component. PlatformIO registers `src/` as an application
 component, and ESP-IDF follows its declared dependency graph to compile only
-what it needs (including any transitive dependencies). `MINIMAL_BUILD` is
+what it needs (including any transitive dependencies). The tiny `__pio_env`
+component is required by PlatformIO to derive compiler flags. `MINIMAL_BUILD` is
 not used because this project has no special `main/` component.
 
 If you previously built without the component filter, do a fresh build from
