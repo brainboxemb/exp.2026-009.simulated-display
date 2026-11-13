@@ -146,6 +146,11 @@ void setup() {
     }
 
     matrix_serial_init(&serialDisplay);
+    // The desktop protocol defaults to 99/99. Never switch the physical
+    // five-panel development rig to 100% upon its first serial frame.
+    // 9/99 maps to 23/255; startup is held at the proven 24/255.
+    // An explicit /XBnn command can override this later.
+    serialDisplay.brightness = 9u;
     startupReady = showStartup();
     if (!startupReady) {
         Serial.println("ERROR: startup frame unavailable");
