@@ -65,7 +65,7 @@ jobs:
           fi
 
           # Verify that the 12 portable C source files really join this build.
-          shared=$(grep -Ec '^Compiling .*\/shared_native\/.*\.c\.o' /tmp/firmware-initial.log || true)
+          shared=$(grep -Ec '^Compiling .*\/shared_native\/.*\.o' /tmp/firmware-initial.log || true)
           echo "shared_sources=$shared" >> "$GITHUB_OUTPUT"
           echo "Shared native C files compiled: $shared"
           if (( shared != 12 )); then
