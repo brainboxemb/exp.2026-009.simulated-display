@@ -38,7 +38,7 @@ if version is None:
     raise RuntimeError("Cannot determine simulated-display version from pom.xml")
 display_version = version.group(1).removesuffix("-SNAPSHOT")
 env.Append(CPPDEFINES=[
-    ("MATRIX_SOFTWARE_VERSION", f'\"v{display_version}\"'),
+    ("MATRIX_SOFTWARE_VERSION", f'\\"v{display_version}\\"'),
 ])
 
 files = [
