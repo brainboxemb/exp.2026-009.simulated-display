@@ -1,0 +1,36 @@
+name: Verify ESP32 PlatformIO
+
+on:
+  pull_request:
+    paths:
+      - 'firmware/esp32/**'
+      - 'native/**'
+      - '.github/workflows/verify-esp32.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'firmware/esp32/**'
+      - 'native/**'
+      - '.github/workflows/verify-esp32.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-esp32:
+    name: PlatformIO (ESP32-WROOM)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout experiment
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install PlatformIO Core 6.2.0
+        run: |
+          python3 -m venv .venv-platformio
+          .venv-platformio/bin/pip install platformio==6.2.0
+
+      - name: Build classic ESP32 firmware
+        run: .venv-platformio/bin/pio run -d firmware/esp32 -e esp32dev

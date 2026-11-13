@@ -29,16 +29,33 @@ Verify split/combined input buffers, invalid slash commands, clipping, cursor wr
 - [x] add a matrix-native host process and RGB JavaFX view;
 - [x] integrate LVGL v9.6.0 for matrix text/layout rendering;
 - [x] render the first 160×64 race screen with configurable colors and font family/size;
-- [x] add a first matrix serial drawing/input phase with pages, palette-indexed drawing, fonts, icons and sprites;
+- [x] add a first matrix serial drawing/input phase with pages, palette-indexed drawing, fonts, icons, notifications and sprites;
+- [x] add a portable `RELAY RACE` startup splash/status sequence with software version and one-character display/SSID IDs;
+- [x] select an Arduino-free ESP-IDF HUB75 backend for the PoP: `esphome/esp-hub75`;
+- [x] model the proven five-panel baseline as 5×1 `TOP_RIGHT_DOWN` plus 90° rotation at the hardware-adapter boundary;
 - [ ] design the synchronized application-data input model;
-- [ ] implement the synchronized matrix-data interpreter;
-- [ ] investigate an Arduino-free ESP-IDF HUB75 driver and panel mapping.
+- [ ] implement the synchronized matrix-data interpreter.
 
 The five-panel physical topology belongs at the hardware adapter boundary and is not encoded in the logical 160×64 framebuffer.
 
 ## Stage 4 — ESP32 qualification
 
-Compile shared C sources under ESP-IDF and validate the driver/output boundary on actual hardware when available. Keep physical-panel evidence separate from simulator evidence.
+- [x] add a standalone ESP-IDF PlatformIO firmware target for classic ESP32-WROOM;
+- [x] compile the same shared C/LVGL renderer and matrix serial interpreter under ESP-IDF;
+- [x] reuse the shared startup renderer as the ESP32 boot image, starting in the explicit disconnected `BOOT` state;
+- [x] add a narrow C/C++ HUB75 adapter using RGB565 bulk transfer;
+- [x] receive the matrix serial protocol over UART0 at 115200 baud;
+- [x] preserve `/UB`…`/UE` as the firmware-visible update boundary;
+- [x] map `/XB00..99` to HUB75 driver/OE brightness without changing framebuffer pixels;
+- [x] retain GPIO, chain-entry and panel mapping as hardware configuration outside the renderer;
+- [x] add exact-head PlatformIO CI for the ESP32 target;
+- [ ] flash the current WROOM hardware and verify driver initialization / available DMA memory;
+- [ ] verify five-panel image orientation and chain mapping on hardware;
+- [ ] verify scan wiring / shift-driver selection, refresh, brightness and low-brightness behavior;
+- [ ] record power and signal-integrity observations;
+- [ ] qualify the later ESP32-S3 target separately.
+
+The WROOM baseline keeps the application/transfer framebuffer at RGB565 and uses six HUB75 BCM planes per channel with a single driver buffer. Physical-panel evidence remains separate from simulator/build evidence.
 
 ## Completion
 
