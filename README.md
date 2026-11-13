@@ -1,8 +1,8 @@
 # Experiment 009 — Simulated LED displays
 
-Proof of Principle for running **native C display software** behind a **Java 21 / JavaFX 21** desktop simulator, with the portable C core intended to remain usable later on ESP32 / ESP-IDF.
+Proof of Principle for running **native C display software** behind a **Java 21 / JavaFX 21** desktop simulator. Dezelfde portable C-renderer en parser worden gebouwd in een **ESP32 Arduino PlatformIO-firmware** met LVGL en vijf HUB75-panelen.
 
-Status: **active — simulator foundation and matrix serial protocol are merged; ESP32/HUB75 qualification continues on issue #3 / PR #4**.
+Status: **active — JavaFX-simulator en gedeeld C/LVGL-renderpad zijn aanwezig; Arduino-firmware gebruikt de werkende vijfpanelen-HUB75-configuratie uit Experiment 012**.
 
 - [Cross-project record](https://github.com/brainboxemb/brainboxemb.meta/blob/main/experiments/009-simulated-display/README.md)
 - [Meta tracking issue #188](https://github.com/brainboxemb/brainboxemb.meta/issues/188)
@@ -52,7 +52,7 @@ The matrix framebuffer is intentionally independent of the five-panel physical H
 
 As a first input phase before the synchronized race-data interpreter, the matrix display accepts a readable slash-command stream in the simulator. The 160×64 simulator separates two explicit modes in tabs. **Demo** provides the direct prebuilt layouts, static test data and color/font controls; **Serial** provides editable serial profiles with three transparent pages, atomic `/UB`…`/UE` updates, palette-based foreground/background colors, font-size selection, line drawing, built-in icons and animated sprites. Viewer-only controls for 2× scale and the visual color of unlit LEDs are shared by both modes. Both the legacy 90×35 and RGB 160×64 simulator windows open at application startup.
 
-The portable native libraries do not depend on Java, JavaFX, ESP-IDF or Arduino. The ESP32 target in `firmware/esp32/` adds ESP-IDF and `esp-hub75` only at the firmware/hardware-adapter boundary. It accepts the same matrix serial protocol over UART0 and maps `/XB00..99` to HUB75 OE brightness rather than altering RGB565 pixels.
+The portable native libraries do not depend on Java, JavaFX, ESP-IDF or Arduino. De ESP32-target in `firmware/esp32/` bouwt de **identieke C-bronnen** via PlatformIO met `framework = arduino`, LVGL 9.6 en de MatrixPanel_I2S_DMA-library. UART0 accepteert hetzelfde matrix-serialprotocol en `/XB00..99` regelt HUB75 OE-helderheid zonder RGB565-pixels te wijzigen.
 
 ## Build and run
 
@@ -123,6 +123,8 @@ The C parser currently understands:
 - `FE FE` sprite marker using the imported `SpriteMap1` appearances.
 
 `CharMap1`, `SpriteMap1` and `Bitmap_0..Bitmap_9` were imported from the supplied legacy data. `Bitmap_Batavieren` and the other unrelated legacy bitmaps were deliberately excluded.
+
+Build de fysieke Arduino-firmware afzonderlijk met `pio run -d firmware/esp32`; de JavaFX-simulator en zijn CMake-build blijven ongewijzigd. Zie [de ESP32-firmwarehandleiding](firmware/esp32/README.md) voor de nieuwe build en hardwareconfiguratie.
 
 See [the experiment plan](docs/01-plan.md), [architecture](docs/02-design.md), [legacy protocol](docs/03-protocol.md), [development setup](docs/04-development.md), [matrix display design](docs/05-matrix-display.md), [matrix serial protocol](docs/06-matrix-serial-protocol.md), and [ESP32 firmware target](firmware/esp32/README.md).
 
