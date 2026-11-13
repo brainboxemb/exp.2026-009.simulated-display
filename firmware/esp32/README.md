@@ -18,6 +18,31 @@ pio run -d firmware/esp32
 pio run -d firmware/esp32 -e esp32doit-devkit-v1
 ```
 
+## Build scope
+
+This is intentionally an **ESP-IDF** project, unlike an Arduino + Adafruit GFX
+example. The `esp-hub75` adapter and portable C/LVGL renderer use ESP-IDF
+components directly; switching frameworks would be a separate driver/runtime
+migration, not a `platformio.ini` simplification.
+
+The root `CMakeLists.txt` sets `COMPONENTS src` instead of building every
+discovered ESP-IDF component. PlatformIO registers `src/` as an application
+component, and ESP-IDF follows its declared dependency graph to compile only
+what it needs (including any transitive dependencies). `MINIMAL_BUILD` is
+not used because this project has no special `main/` component.
+
+If you previously built without the component filter, do a fresh build from
+the `firmware/esp32` directory:
+
+```powershell
+Remove-Item -Recurse -Force .pio/build/esp32dev -ErrorAction SilentlyContinue
+pio run -e esp32dev
+```
+
+The ESP-IDF framework and bootloader still build necessary runtime components.
+Do not forcibly disable a component such as mbedTLS if another dependency
+requires it.
+
 A later target is ESP32-S3, including boards such as the Adafruit MatrixPortal S3. The shared renderer, serial interpreter and `MatrixFramebuffer` must not change for that move.
 
 ## Runtime path
