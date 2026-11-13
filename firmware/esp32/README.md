@@ -71,6 +71,34 @@ Serial notifications are global overlays:
 
 Sprites use `/S0`, `/S1` and `/SV1..9`.
 
+## Copy/paste serial examples
+
+The `examples/` directory contains ready-to-send **plain-text serial commands** for the physical ESP32. Open a file, copy its *contents* (without a filename or code fence), and paste into the PlatformIO serial monitor after uploading the firmware.
+
+From the `firmware/esp32` directory, start the monitor with:
+
+```powershell
+pio device monitor -b 115200
+```
+
+Or use **PlatformIO: Upload and Monitor** in VS Code. Ensure the terminal has input focus. The ESP32 receives commands over **UART0, 115200 baud**. Newline characters are ignored by the parser, so the multi-line examples can be pasted as written. Each example uses `/UB` and `/UE` to publish the complete screen together.
+
+| File | Purpose |
+| --- | --- |
+| `hello.txt` | Basic lime HELLO message at 35% brightness |
+| `exchange-badge.txt` | Lime exchange badge with black `99` |
+| `race-screen.txt` | Full race screen using three pages |
+| `pages-lines.txt` | Lines drawn on separate pages |
+| `fonts-colors.txt` | Font sizes, text colors and transparency |
+| `built-in-icons.txt` | Flag, WiFi, link and sync icons |
+| `sprites-speed.txt` | Runner/warmup sprites with animation |
+| `notifications.txt` | WiFi and link warning overlays |
+| `brightness.txt` | Set brightness to 35% |
+
+The seven examples from `race-screen.txt` through `brightness.txt` are **direct copies of the payloads defined in** `src/main/java/io/github/brainboxemb/experimental/display/MatrixSerialExamples.java` (from the repository root). Keep them in sync when editing simulator presets.
+
+See `docs/06-matrix-serial-protocol.md` for the protocol. The text files are transport-neutral and can also be sent by other serial tools.
+
 ## Brightness
 
 The application framebuffer and driver input remain **RGB565**. `/XB00..99` does not scale RGB565 values on ESP32.
