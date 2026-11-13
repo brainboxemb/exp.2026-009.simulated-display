@@ -22,6 +22,10 @@ typedef struct {
     char ssid_id;
 } MatrixStartupInfo;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool matrix_startup_screen_render(
         MatrixFramebuffer *framebuffer,
         const MatrixStartupInfo *info);
@@ -31,5 +35,9 @@ bool matrix_startup_sequence_render(
         const MatrixStartupInfo *info,
         MatrixStartupState state,
         uint8_t animation_frame);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

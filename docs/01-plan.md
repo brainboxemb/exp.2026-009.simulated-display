@@ -60,3 +60,11 @@ The WROOM baseline keeps the application/transfer framebuffer at RGB565 and uses
 ## Completion
 
 Retain exact CI/test evidence and report the conclusion to the [meta experiment record](https://github.com/brainboxemb/brainboxemb.meta/blob/main/experiments/009-simulated-display/README.md). A successful experiment does not itself authorize production adoption.
+
+## Arduino migration (2026-11-13)
+
+After proving the five-panel HUB75 output and LVGL 9.6 on classic ESP32-WROOM in Experiment 012, we replaced the earlier **ESP-IDF-only firmware adapter** with **Arduino PlatformIO** in `firmware/esp32`. The decisions and checkmarks above record the earlier PoP sequence; they are **superseded for the active embedded build**, not silently rewritten.
+
+The JavaFX/CMake desktop simulator and portable C11 parser/renderer are unchanged. The Arduino backend compiles the same `native/src` C sources, uses the already-proven MatrixPanel_I2S_DMA v3.0.10 driver, 160×64 RGB565 geometry and LVGL 9.6, and uses an explicit LVGL source filter to avoid compiling unused drivers and widgets.
+
+Verification: `.github/workflows/verify-esp32.yml` checks exact-head firmware compilation, geometry, shared-source count, LVGL source budget, build timing and size. Physical hardware verification is a separate step.

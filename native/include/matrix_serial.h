@@ -48,6 +48,10 @@ typedef struct {
     bool update_active;
 } MatrixSerialDisplay;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void matrix_serial_init(MatrixSerialDisplay *display);
 
 bool matrix_serial_feed(
@@ -69,5 +73,9 @@ bool matrix_serial_update_active(
 
 uint8_t matrix_serial_brightness(
         const MatrixSerialDisplay *display);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

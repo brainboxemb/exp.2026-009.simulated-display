@@ -1,5 +1,5 @@
-#ifndef EXP_009_HUB75_OUTPUT_H
-#define EXP_009_HUB75_OUTPUT_H
+#ifndef EXP_009_ARDUINO_HUB75_OUTPUT_H
+#define EXP_009_ARDUINO_HUB75_OUTPUT_H
 
 #include "matrix_framebuffer.h"
 
@@ -11,13 +11,8 @@ extern "C" {
 #endif
 
 bool hub75_output_init(void);
-
-bool hub75_output_present(
-        const MatrixFramebuffer *framebuffer);
-
-void hub75_output_set_brightness(
-        uint8_t brightness);
-
+bool hub75_output_present(const MatrixFramebuffer *framebuffer);
+void hub75_output_set_brightness(uint8_t brightness);
 void hub75_output_shutdown(void);
 
 #ifdef __cplusplus
