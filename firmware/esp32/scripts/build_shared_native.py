@@ -16,11 +16,17 @@ source = native / "src"
 if not source.is_dir():
     raise RuntimeError(f"Missing shared C sources: {source}")
 
+# BuildSources compiles external C files outside PlatformIO's library LDF.
+# They therefore need an explicit LVGL include path, unlike the app sources.
+# LVGL v9.6.0 exposes the compatibility header in src/lvgl.h.
+lvgl_install = project / ".pio" / "libdeps" / env["PIOENV"] / "lvgl"
 env.Append(CPPPATH=[
     str(native),
     str(native / "include"),
     str(source),
     str(project / "include"),
+    str(lvgl_install),
+    str(lvgl_install / "src"),
 ])
 
 # Keep startup version identical to JavaFX/native simulator, derived from pom.
