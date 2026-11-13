@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 
-# PlatformIO uses src/ as the application component (not ESP-IDF's main/).
-# Without COMPONENTS, ESP-IDF builds every discovered framework component.
-# Select only the application: its REQUIRES/PRIV_REQUIRES dependencies
-# recursively pull in the HUB75, LVGL, UART and other required components.
-# MINIMAL_BUILD is not suitable for a project without a main/ component.
-set(COMPONENTS src)
+# Trim ESP-IDF to the application and its transitive component dependencies.
+# PlatformIO registers src/ as our application component, and injects
+# __pio_env into the ESP-IDF framework to derive generic build flags.
+# Both components MUST be listed: omitting __pio_env breaks PlatformIO's
+# CMake code model even when the firmware itself is otherwise configured.
+# MINIMAL_BUILD is only for projects with a special main/ component.
+set(COMPONENTS src __pio_env)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(experiment_009_matrix_esp32)
