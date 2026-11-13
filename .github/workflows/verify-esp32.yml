@@ -1,10 +1,11 @@
-name: Verify ESP32 PlatformIO
+name: Verify ESP32 Arduino PlatformIO
 
 on:
   pull_request:
     paths:
       - 'firmware/esp32/**'
       - 'native/**'
+      - 'pom.xml'
       - '.github/workflows/verify-esp32.yml'
   push:
     branches:
@@ -12,6 +13,7 @@ on:
     paths:
       - 'firmware/esp32/**'
       - 'native/**'
+      - 'pom.xml'
       - '.github/workflows/verify-esp32.yml'
   workflow_dispatch:
 
@@ -20,17 +22,109 @@ permissions:
 
 jobs:
   build-esp32:
-    name: PlatformIO (ESP32-WROOM)
+    name: PlatformIO (ESP32-WROOM Arduino)
     runs-on: ubuntu-24.04
-
     steps:
       - name: Checkout experiment
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Test five-panel geometry (native C++)
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Werror -Ifirmware/esp32/include \
+            firmware/esp32/tests/test_hub75_geometry.cpp \
+            -o /tmp/test_hub75_geometry
+          /tmp/test_hub75_geometry
 
       - name: Install PlatformIO Core 6.2.0
         run: |
           python3 -m venv .venv-platformio
           .venv-platformio/bin/pip install platformio==6.2.0
 
-      - name: Build classic ESP32 firmware
-        run: .venv-platformio/bin/pio run -d firmware/esp32 -e esp32dev
+      - name: Initial Arduino build (toolchain and dependencies)
+        id: initial
+        shell: bash
+        run: |
+          set -o pipefail
+          start=$(date +%s%3N)
+          .venv-platformio/bin/pio run -d firmware/esp32 -e esp32dev | tee /tmp/firmware-initial.log
+          elapsed=$(( $(date +%s%3N) - start ))
+          echo "ms=$elapsed" >> "$GITHUB_OUTPUT"
+          echo "Initial Arduino build: $elapsed ms"
+
+          # The reduced library must not silently regress to 551 LVGL objects.
+          sources=$(grep -Ec '^Compiling .*\/lvgl\/' /tmp/firmware-initial.log || true)
+          echo "lvgl_sources=$sources" >> "$GITHUB_OUTPUT"
+          echo "LVGL objects compiled: $sources"
+          if (( sources < 70 || sources > 150 )); then
+            echo "::error::Unexpected LVGL compile count $sources (budget 70..150)"
+            exit 1
+          fi
+          if grep -Eq '^Compiling .*\/lvgl\/(drivers|libs|widgets\/button|font\/lv_font_montserrat)' /tmp/firmware-initial.log; then
+            echo "::error::Disabled LVGL modules were compiled"
+            exit 1
+          fi
+
+          # Verify that the 12 portable C source files really join this build.
+          shared=$(grep -Ec '^Compiling .*\/shared_native\/.*\.c\.o' /tmp/firmware-initial.log || true)
+          echo "shared_sources=$shared" >> "$GITHUB_OUTPUT"
+          echo "Shared native C files compiled: $shared"
+          if (( shared != 12 )); then
+            echo "::error::Expected exactly 12 shared native C files, found $shared"
+            exit 1
+          fi
+
+      - name: Clean rebuild (installed dependencies)
+        id: clean
+        shell: bash
+        run: |
+          .venv-platformio/bin/pio run -d firmware/esp32 -e esp32dev -t clean
+          start=$(date +%s%3N)
+          .venv-platformio/bin/pio run -d firmware/esp32 -e esp32dev
+          elapsed=$(( $(date +%s%3N) - start ))
+          echo "ms=$elapsed" >> "$GITHUB_OUTPUT"
+          echo "Clean Arduino rebuild: $elapsed ms"
+
+      - name: No-change incremental build
+        id: incremental
+        shell: bash
+        run: |
+          start=$(date +%s%3N)
+          .venv-platformio/bin/pio run -d firmware/esp32 -e esp32dev
+          elapsed=$(( $(date +%s%3N) - start ))
+          echo "ms=$elapsed" >> "$GITHUB_OUTPUT"
+          echo "No-change Arduino build: $elapsed ms"
+
+      - name: Firmware size
+        shell: bash
+        run: |
+          .venv-platformio/bin/pio run -d firmware/esp32 -e esp32dev -t size
+
+      - name: Build timing summary
+        if: always()
+        shell: bash
+        env:
+          INITIAL_MS: ${{ steps.initial.outputs.ms }}
+          CLEAN_MS: ${{ steps.clean.outputs.ms }}
+          INCREMENTAL_MS: ${{ steps.incremental.outputs.ms }}
+          LVGL_SOURCES: ${{ steps.initial.outputs.lvgl_sources }}
+          SHARED_SOURCES: ${{ steps.initial.outputs.shared_sources }}
+        run: |
+          {
+            echo "## Experiment 009 — Arduino ESP32 build qualification"
+            echo
+            echo "| Build | Wall time (s) |"
+            echo "| --- | ---: |"
+            for item in "First (downloads):$INITIAL_MS" "Clean:$CLEAN_MS" "Incremental:$INCREMENTAL_MS"; do
+              name="${item%%:*}"
+              value="${item#*:}"
+              if [[ -n "$value" ]]; then
+                printf '| %s | %.2f |\n' "$name" "$(awk "BEGIN {print $value / 1000}")"
+              else
+                echo "| $name | Failed/not run |"
+              fi
+            done
+            echo
+            echo "LVGL sources compiled: **${LVGL_SOURCES:-n/a}** (max 150)."
+            echo
+            echo "Simulator native C sources reused: **${SHARED_SOURCES:-n/a}** (expected 12)."
+          } >> "$GITHUB_STEP_SUMMARY"
