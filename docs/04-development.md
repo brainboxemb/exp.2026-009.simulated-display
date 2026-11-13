@@ -189,4 +189,4 @@ mvn -Ddisplay.native="C:\path\to\display-host.exe" javafx:run
 
 Clang or MinGW can also compile portable C11 code, but they are not needed for the initial Windows experiment. MSVC is the recommended baseline because it integrates directly with Windows, CMake Tools and GitHub's Windows qualification runner.
 
-ESP32 development will later use the ESP-IDF toolchain separately; that toolchain is not required for the current 90x35 desktop simulator.
+ESP32-firmware gebruikt nu **PlatformIO met het Arduino-framework** in `firmware/esp32` (geen aparte ESP-IDF/CMake-applicatie). De 90×35- en 160×64-desktopsimulator blijven JavaFX + native CMake. De ESP32-build is apart uit te voeren met `pio run -d firmware/esp32`. Zie [ESP32-firmware](../firmware/esp32/README.md) voor de gecompileerde gedeelde C-bronnen.

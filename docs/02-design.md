@@ -28,7 +28,7 @@ The libraries should only share a third component when genuinely generic code ap
 - **Host runtime (C):** adapts desktop process framing to one display library and emits logical frames.
 - **JavaFX 21:** starts native host processes, supplies development controls and paints returned logical pixels. It owns no display protocol or font behavior.
 - **HUB75 hardware adapter (future):** maps the 160×64 logical framebuffer to five physical panels, scan order and multiplexing.
-- **ESP32 / ESP-IDF (future):** platform adapter / hardware driver only. A narrow C bridge may hide a C++ HUB75 driver if needed.
+- **ESP32 / Arduino (current):** PlatformIO firmware with a narrow C interface around the C++ HUB75 DMA driver; the shared native C renderer remains platform-neutral.
 
 ## Process boundary
 
